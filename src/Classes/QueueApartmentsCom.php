@@ -111,7 +111,7 @@ class QueueApartmentsCom
                     Redis::init()->rpush('tasks', $task);
                 }
             } catch (Exception $e) {
-                echo 'Error' . PHP_EOL;
+                echo 'Error Msg:' . $e->getMessage() . "\nCode:" . $request['http_code'] . ' - ' . $link . PHP_EOL;
                 file_put_contents(LOG_DIR . '/parse-problem.log', '[' . date('Y-m-d H:i:s') . '] Msg:' . $e->getMessage() . "\nCode:" . $request['http_code'] . ' - ' . $link . PHP_EOL, FILE_APPEND);
             }
 
