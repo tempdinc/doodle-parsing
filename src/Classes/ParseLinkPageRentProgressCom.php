@@ -80,7 +80,7 @@ class ParseLinkPageRentProgressCom
         $allAmenities = isset($content->find('section.amenities-list')[0]) ?
             $content->find('section.amenities-list')[0]->find('div.amenity') : '';
         if ($allAmenities) {
-            $amenitiesList = $this->amenitiesBlock($allAmenities[1]->find('div.amenity'));
+            $amenitiesList = $this->amenitiesBlock($allAmenities);
             $listAmenities = [];
             for ($i = 0; $i < count($allAmenities); $i++) {
                 $amenity = $allAmenities[$i];
