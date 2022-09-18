@@ -80,6 +80,7 @@ class ParseLinkPageRentProgressCom
         $allAmenities = isset($content->find('section.amenities-list')[0]) ?
             $content->find('section.amenities-list')[0]->find('div.amenity') : '';
         if ($allAmenities) {
+            $amenitiesList = $this->amenitiesBlock($allAmenities[1]->find('div.amenity'));
             $listAmenities = [];
             for ($i = 0; $i < count($allAmenities); $i++) {
                 $amenity = $allAmenities[$i];
@@ -101,7 +102,7 @@ class ParseLinkPageRentProgressCom
         }
 
         $allAmenitiesText = (!empty($listAmenities)) ? implode(' | ', $listAmenities) : '';
-        $description = $description . ' | ' . $allAmenitiesText;
+        // $description = $description . ' | ' . $allAmenitiesText;
 
         //move-in-description
         $homeStatus = isset($content->find('div.basic-carousel')[0]->find('div.move-in-description')[0]) ?
@@ -121,6 +122,7 @@ class ParseLinkPageRentProgressCom
             'state_cd' => $state,
             'zip5_cd' => $zip,
             'property_info' => $description,
+            'on_premise_services' => $amenitiesList,
             // 'home_status' => $homeStatus,
             'link' => $this->task['link'],
             'longitude' => $this->task['location']['lng'],
@@ -190,4 +192,25 @@ class ParseLinkPageRentProgressCom
 
         return $text;
     }
+
+    /**
+     * Parsing amenities block
+     *
+     * @param  Document $specGroups
+     * @return json
+     */
+    protected function amenitiesBlock($specGroups)
+    {
+        $amenitiesList = [];
+        foreach ($specGroups as $group) {
+            $title = isset($group->find('h3.amenities-title')[0]) ?
+                $this->clearText($group->find('h3.amenities-title')[0]->text()) : '';
+            $amenities = $group->find('li');
+            foreach ($amenities as $amenity) {
+                $amenitiesList[$title][] = $this->clearText($amenity->text());
+            }
+        }
+
+        return json_encode($amenitiesList, JSON_PRETTY_PRINT);
+    }    
 }

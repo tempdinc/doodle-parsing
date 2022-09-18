@@ -91,9 +91,9 @@ error_reporting(E_ALL);
    $retval = mysqli_query( $sql, $conn );
    
    if (mysqli_query($conn, $sql)) {
-      echo "Table `property` created successfully | ";
+      echo "Table `properties` created successfully | ";
    } else {
-      echo "Error creating table `property`: " . mysqli_error($conn) . PHP_EOL;
+      echo "Error creating table `properties`: " . mysqli_error($conn) . PHP_EOL;
    }
 
    $sql = 'CREATE TABLE `availability` (
