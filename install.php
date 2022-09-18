@@ -22,7 +22,7 @@ error_reporting(E_ALL);
    // Create database
    $sql = "CREATE DATABASE parsing";
    if (mysqli_query($conn, $sql)) {
-      echo "Database created successfully";
+      echo "Database `parsing` created successfully | ";
    } else {
       echo "Error creating database: " . mysqli_error($conn) . PHP_EOL;
    }
@@ -84,18 +84,16 @@ error_reporting(E_ALL);
       PRIMARY KEY (id)
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci';
 
-   if(mysqli_select_db($conn,'parsing')) {
-      echo "Database SELECTED SUCCESSFULLY" . PHP_EOL;
-   } else {
+   if(!mysqli_select_db($conn,'parsing')) {
       echo "Database NOT SELECTED" . PHP_EOL;
    }
 
    $retval = mysqli_query( $sql, $conn );
    
    if (mysqli_query($conn, $sql)) {
-      echo "Table property created successfully" . PHP_EOL;
+      echo "Table `property` created successfully | ";
    } else {
-      echo "Error creating table property: " . mysqli_error($conn) . PHP_EOL;
+      echo "Error creating table `property`: " . mysqli_error($conn) . PHP_EOL;
    }
 
    $sql = 'CREATE TABLE `availability` (
@@ -112,18 +110,16 @@ error_reporting(E_ALL);
       PRIMARY KEY (id)
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;';
 
-   if(mysqli_select_db($conn,'parsing')) {
-      echo "Database SELECTED SUCCESSFULLY" . PHP_EOL;
-   } else {
+   if(!mysqli_select_db($conn,'parsing')) {
       echo "Database NOT SELECTED" . PHP_EOL;
    }
 
    $retval = mysqli_query( $sql, $conn );
    
    if (mysqli_query($conn, $sql)) {
-      echo "Table availability created successfully" . PHP_EOL;
+      echo "Table `availability` created successfully" . PHP_EOL;
    } else {
-      echo "Error creating table availability: " . mysqli_error($conn) . PHP_EOL;
+      echo "Error creating table `availability`: " . mysqli_error($conn) . PHP_EOL;
    }
 
    mysqli_close($conn);
