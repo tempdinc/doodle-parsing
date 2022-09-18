@@ -28,7 +28,8 @@ error_reporting(E_ALL);
    }
  
    $sql = 'CREATE TABLE `properties` (
-      `id` bigint NOT NULL,
+      `id` bigint NOT NULL AUTO_INCREMENT,
+      `post_id` int DEFAULT NULL,
       `address` varchar(256) DEFAULT NULL,
       `type` varchar(32) DEFAULT NULL,
       `lease_length` varchar(256) DEFAULT NULL,
@@ -80,7 +81,7 @@ error_reporting(E_ALL);
       `is_deleted` tinyint(1) NOT NULL DEFAULT "0",
       `last_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
       `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      `post_id` int DEFAULT NULL
+      PRIMARY KEY (id)
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci';
 
    if(mysqli_select_db($conn,'parsing')) {
@@ -94,11 +95,11 @@ error_reporting(E_ALL);
    if (mysqli_query($conn, $sql)) {
       echo "Table property created successfully" . PHP_EOL;
    } else {
-      echo "Error creating table: " . mysqli_error($conn) . PHP_EOL;
+      echo "Error creating table property: " . mysqli_error($conn) . PHP_EOL;
    }
 
    $sql = 'CREATE TABLE `availability` (
-      `id` bigint NOT NULL,
+      `id` bigint NOT NULL AUTO_INCREMENT,
       `property_id` bigint NOT NULL,
       `bedroom_cnt` varchar(32) DEFAULT NULL,
       `bathroom_cnt` varchar(32) DEFAULT NULL,
@@ -107,7 +108,8 @@ error_reporting(E_ALL);
       `lease_length` varchar(32) DEFAULT NULL,
       `status` varchar(32) DEFAULT NULL,
       `image_urls` text,
-      `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+      `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (id)
     ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;';
 
    if(mysqli_select_db($conn,'parsing')) {
@@ -119,9 +121,9 @@ error_reporting(E_ALL);
    $retval = mysqli_query( $sql, $conn );
    
    if (mysqli_query($conn, $sql)) {
-      echo "Table property created successfully" . PHP_EOL;
+      echo "Table availability created successfully" . PHP_EOL;
    } else {
-      echo "Error creating table: " . mysqli_error($conn) . PHP_EOL;
+      echo "Error creating table availability: " . mysqli_error($conn) . PHP_EOL;
    }
 
    mysqli_close($conn);
