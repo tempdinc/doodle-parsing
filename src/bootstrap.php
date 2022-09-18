@@ -7,7 +7,7 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 require_once __DIR__.'/../vendor/autoload.php';
 
 define('ROOT_DIR', __DIR__);
-define('LOG_DIR', ROOT_DIR.'/logs');
+define('LOG_DIR', ROOT_DIR.'/log');
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
