@@ -68,7 +68,7 @@ class Redis
         try {
             return $this->redis->brpop($list, $index)[1];
         } catch (Exception $e) {
-            echo 'Redis brpop exception: ',  $e->getMessage(), PHP_EOL;
+            // echo 'Redis brpop exception: ',  $e->getMessage(), PHP_EOL;
         }
     }
 }

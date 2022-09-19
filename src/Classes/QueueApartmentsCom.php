@@ -38,10 +38,23 @@ class QueueApartmentsCom
      */    
     public function startApartmentsCom()
     {
+        global $counter_tasks;
+        global $counter_errors;
+
         while (!$this->stop) {
             $this->checkPid();
             $task = json_decode(Redis::init()->brpop('tasks'), true);
-            if ($task && $task['method'] == 'get_links')  echo 'Queue start task ' . $task['link'] . PHP_EOL;
+            
+            if ($task && $task['method'] == 'get_links') {
+                // echo $task['method'];
+            } else {
+                // echo $task['method'];
+                // if($task['method'] == 'parse') $new_counter = $taskCounter->increment();
+            }
+              
+            $requestCounter = new Counter();
+            $counter_tasks = $requestCounter->incrementTask($counter_tasks); // Counting requests
+
             if (count($this->pid) < $this->limit && $task) {
                 // get link
                 $link = $task['link'];
@@ -53,7 +66,7 @@ class QueueApartmentsCom
                 sleep(1);
             } elseif (!$task) {
                 // we does not have tasks, and have free proccess, so parsing completed
-                echo "COMPLETED PARSING Apartments.com!" . PHP_EOL;
+                // echo "COMPLETED PARSING Apartments.com!" . PHP_EOL;
                 $this->stop = true;
             }
         }
@@ -108,19 +121,24 @@ class QueueApartmentsCom
                     $crawler = new DataCrawlerApartmentsCom();
                     $crawler->parse($content, $link, $method, $by);
                 } else {
+                    // $counter_errors = $requestCounter->incrementError(); // Counting errors
                     Redis::init()->rpush('tasks', $task);
                 }
             } catch (Exception $e) {
+                // $counter_errors = $requestCounter->incrementError(); // Counting errors
                 echo 'Error Msg:' . $e->getMessage() . "\nCode:" . $request['http_code'] . ' - ' . $link . PHP_EOL;
                 file_put_contents(LOG_DIR . '/parse-problem.log', '[' . date('Y-m-d H:i:s') . '] Msg:' . $e->getMessage() . "\nCode:" . $request['http_code'] . ' - ' . $link . PHP_EOL, FILE_APPEND);
             }
 
             return true;
         } elseif (404 !== $request['http_code']) {
+            // $counter_errors = $requestCounter->incrementError(); // Counting errors
             // back link if not 404
             Redis::init()->rpush('tasks', $task);
 
             return false;
+        } else {
+            // $counter_errors = $requestCounter->incrementError(); // Counting errors
         }
 
         if ($method === 'update') {

@@ -1,8 +1,12 @@
 <?php
 
+$counter_tasks = 0;
+$counter_errors = 0;
+
 use App\Classes\MySQL;
 use App\Classes\Redis;
 use App\Classes\QueueApartmentsCom as Queue;
+use App\Classes\Counter;
 
 require_once __DIR__ . '/bootstrap.php';
 
@@ -16,15 +20,17 @@ pcntl_signal(SIGINT, 'signalHandler'); // Interrupted (Ctrl-C is pressed)
 // save parent pid
 file_put_contents('parentPid.out', getmypid());
 
-echo "Apartments.com - ";
+$start_date = date("Y-m-d H:i:s");
+
+echo "$start_date - Apartments.com - ";
 
 if (isset($argv[1]) && $argv[1] === 'init') {
-    echo "Init.." . PHP_EOL;
+    echo "Init.. ";
 
     $redis = Redis::init();
     $redis->flushall();
 
-    $citiesDB = file_get_contents(__DIR__ . '/cities.json');
+    $citiesDB = file_get_contents(__DIR__ . '/cities-xs.json');
     $citiesDB = json_decode($citiesDB, true);
 
     /**
@@ -43,7 +49,7 @@ if (isset($argv[1]) && $argv[1] === 'init') {
         }
     }
 } elseif (isset($argv[1]) && 'update' === $argv[1]) {
-    echo "Update.." . PHP_EOL;
+    echo "Update.. ";
     $db = new MySQL('parsing','local');
     $redis = Redis::init();
     $redis->flushall();
@@ -64,12 +70,12 @@ if (isset($argv[1]) && $argv[1] === 'init') {
         $redis->rpush('tasks', $task);
     }
 } elseif (isset($argv[1]) && 'byZip' === $argv[1]) {
-    echo "Init by zip.." . PHP_EOL;
+    echo "Init by zip.. ";
 
     $redis = Redis::init();
     $redis->flushall();
 
-    $citiesDB = file_get_contents(__DIR__ . '/cities.json');
+    $citiesDB = file_get_contents(__DIR__ . '/cities-xs.json');
     $citiesDB = json_decode($citiesDB, true);
 
     /**
@@ -90,10 +96,12 @@ if (isset($argv[1]) && $argv[1] === 'init') {
     }
 }
 
-echo "Start.." . PHP_EOL;
-
 $queue = new Queue();
 $queue->startApartmentsCom();
+
+$end_date = date("Y-m-d H:i:s");
+
+echo "--->>> $end_date - End.. Links processed: " . $counter_tasks . " \033[31mErrors received: " . $counter_errors . "\033[0m" . PHP_EOL;
 
 function signalHandler($signal)
 {

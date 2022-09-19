@@ -33,17 +33,18 @@ class StormProxy
         curl_setopt($ch, CURLOPT_PROXY, env('PROXY', ''));
 
         $response = curl_exec($ch);
-        // print curl_error($ch);
-        // echo PHP_EOL;
-        // get info about request
         $info = curl_getinfo($ch);
         curl_close($ch);
 
         // print_r($response);
         if ($info['http_code'] == 200) {
-            echo $info['http_code'];
+            // echo $info['http_code'];
+            /*
+            $newnewnew = new Counter();
+            $counter = $newnewnew->incrementTask();
+            */
         } else {
-            echo "\033[31m" . $info['http_code'] . "\033[0m";
+            echo " \033[31m" . $info['http_code'] . "\033[0m ";
         }
 
         return [
