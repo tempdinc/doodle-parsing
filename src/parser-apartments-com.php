@@ -30,7 +30,7 @@ if (isset($argv[1]) && $argv[1] === 'init') {
     $redis = Redis::init();
     $redis->flushall();
 
-    $citiesDB = file_get_contents(__DIR__ . '/cities-xs.json');
+    $citiesDB = file_get_contents(__DIR__ . '/cities.json');
     $citiesDB = json_decode($citiesDB, true);
 
     /**

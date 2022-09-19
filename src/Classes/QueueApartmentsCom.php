@@ -53,7 +53,7 @@ class QueueApartmentsCom
             }
               
             $requestCounter = new Counter();
-            $counter_tasks = $requestCounter->incrementTask($counter_tasks); // Counting requests
+            $requestCounter->incrementTask(); // Counting requests
 
             if (count($this->pid) < $this->limit && $task) {
                 // get link
