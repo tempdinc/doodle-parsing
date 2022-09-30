@@ -17,39 +17,33 @@ pcntl_signal(SIGTERM, 'signalHandler'); // Termination ('kill' was called)
 pcntl_signal(SIGHUP, 'signalHandler'); // Terminal log-out
 pcntl_signal(SIGINT, 'signalHandler'); // Interrupted (Ctrl-C is pressed)
 
+// Clear log files
+$f = fopen(LOG_DIR . '/apartments-com-data-crawler.log', 'w');
+fclose($f);
+$f = fopen(LOG_DIR . '/parse-problem.log', 'w');
+fclose($f);
+$f = fopen(LOG_DIR . '/404links.log', 'w');
+fclose($f);
+
 // save parent pid
 file_put_contents('parentPid.out', getmypid());
 
-$start_date = date("Y-m-d H:i:s");
+echo date("Y-m-d H:i:s") . " Apartments.com - ";
+file_put_contents(LOG_DIR . '/apartments-com.log', '[' . date('Y-m-d H:i:s') . '] Apartments.com - ', FILE_APPEND);
 
-echo "$start_date - Apartments.com - ";
+$filter = '';
 
-if (isset($argv[1]) && $argv[1] === 'init') {
-    echo "Init.. ";
+if (isset($argv[1]) && $argv[1] === 'short-term') {
+    $filter = 'short-term/';
+}
 
-    $redis = Redis::init();
-    $redis->flushall();
+if (isset($argv[2]) && $argv[2] === 'short-term') {
+    $filter = 'short-term/';
+}
 
-    $citiesDB = file_get_contents(__DIR__ . '/cities.json');
-    $citiesDB = json_decode($citiesDB, true);
-
-    /**
-     * paste first links in queue
-     * and now we can get links for parsing...
-     */
-    foreach ($citiesDB as $states) {
-        foreach ($states as $code => $citiesArray) {
-            foreach ($citiesArray as $city) {
-                $city = str_replace(' ', '-', strtolower($city));
-                $code = strtolower($code);
-                $base_link = 'https://www.apartments.com/' . urlencode($city . '-' . $code) . '/';
-                $task = '{"link":"' . $base_link . '", "method":"get_links"}';
-                $redis->rpush('tasks', $task);
-            }
-        }
-    }
-} elseif (isset($argv[1]) && 'update' === $argv[1]) {
+if (isset($argv[1]) && 'update' === $argv[1]) {
     echo "Update.. ";
+    file_put_contents(LOG_DIR . '/apartments-com.log', 'Update.. ', FILE_APPEND);
     $db = new MySQL('parsing','local');
     $redis = Redis::init();
     $redis->flushall();
@@ -71,7 +65,7 @@ if (isset($argv[1]) && $argv[1] === 'init') {
     }
 } elseif (isset($argv[1]) && 'byZip' === $argv[1]) {
     echo "Init by zip.. ";
-
+    file_put_contents(LOG_DIR . '/apartments-com.log', 'Init by zip.. ', FILE_APPEND);
     $redis = Redis::init();
     $redis->flushall();
 
@@ -87,9 +81,33 @@ if (isset($argv[1]) && $argv[1] === 'init') {
             foreach ($citiesArray as $city) {
                 $city = str_replace(' ', '-', strtolower($city));
                 $code = strtolower($code);
-                $base_link = 'https://www.apartments.com/' . urlencode($city . '-' . $code) . '/';
+                $base_link = 'https://www.apartments.com/' . urlencode($city . '-' . $code) . '/' . $filter;
                 $task = '{"link":"' . $base_link . '", "method":"get_links", "by":"zip"}';
                 // echo 'Parser: ' . $task . PHP_EOL;
+                $redis->rpush('tasks', $task);
+            }
+        }
+    }
+} else {
+    echo "Init.. ";
+    file_put_contents(LOG_DIR . '/apartments-com.log', 'Init.. ', FILE_APPEND);
+    $redis = Redis::init();
+    $redis->flushall();
+
+    $citiesDB = file_get_contents(__DIR__ . '/cities.json');
+    $citiesDB = json_decode($citiesDB, true);
+
+    /**
+     * paste first links in queue
+     * and now we can get links for parsing...
+     */
+    foreach ($citiesDB as $states) {
+        foreach ($states as $code => $citiesArray) {
+            foreach ($citiesArray as $city) {
+                $city = str_replace(' ', '-', strtolower($city));
+                $code = strtolower($code);
+                $base_link = 'https://www.apartments.com/' . urlencode($city . '-' . $code) . '/' . $filter;
+                $task = '{"link":"' . $base_link . '", "method":"get_links"}';
                 $redis->rpush('tasks', $task);
             }
         }
@@ -99,9 +117,12 @@ if (isset($argv[1]) && $argv[1] === 'init') {
 $queue = new Queue();
 $queue->startApartmentsCom();
 
-$end_date = date("Y-m-d H:i:s");
+$parse_counter = lines(LOG_DIR . '/apartments-com-data-crawler.log');
+$parse_problem_counter = lines(LOG_DIR . '/parse-problem.log');
+$parse_404_counter = lines(LOG_DIR . '/404links.log');
 
-echo "--->>> $end_date - End.. Links processed: " . $counter_tasks . " \033[31mErrors received: " . $counter_errors . "\033[0m" . PHP_EOL;
+echo ">>> " . date("Y-m-d H:i:s") ." - End.. Links processed:" . $parse_counter . " \033[31mParse problems received:" . $parse_problem_counter . "\033[0m" . " \033[34mError 404 received:" . $parse_404_counter . "\033[0m" . PHP_EOL;
+file_put_contents(LOG_DIR . '/apartments-com.log', '>>> [' . date('Y-m-d H:i:s') . '] - End.. Links processed:' . $parse_counter . ' Parse problems received:' . $parse_problem_counter . ' Error 404 received:' . $parse_404_counter  . PHP_EOL, FILE_APPEND);
 
 function signalHandler($signal)
 {
@@ -109,3 +130,12 @@ function signalHandler($signal)
     unset($queue);
     exit;
 }
+
+// Count files lines
+function lines($file) { 
+    if(!file_exists($file)) return 0;
+
+    $file_arr = file($file); 
+    $lines = count($file_arr); 
+    return $lines; 
+} 

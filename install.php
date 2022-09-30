@@ -101,10 +101,10 @@ error_reporting(E_ALL);
       `property_id` bigint NOT NULL,
       `bedroom_cnt` varchar(32) DEFAULT NULL,
       `bathroom_cnt` varchar(32) DEFAULT NULL,
-      `listing_price` varchar(32) DEFAULT NULL,
+      `listing_price` varchar(64) DEFAULT NULL,
       `home_size_sq_ft` varchar(32) DEFAULT NULL,
-      `lease_length` varchar(32) DEFAULT NULL,
-      `status` varchar(32) DEFAULT NULL,
+      `lease_length` varchar(64) DEFAULT NULL,
+      `status` varchar(64) DEFAULT NULL,
       `image_urls` text,
       `date_added` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (id)

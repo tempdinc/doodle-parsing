@@ -11,6 +11,7 @@ class DataCrawlerApartmentsCom
     public function parse($document, $uri, $method, $by = null)
     {
         if ($document != '') {
+            file_put_contents(LOG_DIR . '/apartments-com-data-crawler.log', '[' . date('Y-m-d H:i:s') . '] ' . $uri . ' - ' . $method . PHP_EOL, FILE_APPEND);
             if ($method === 'get_links') {
                 if ($document->count('div.no-results') === 0 && $document->count('.noPlacards') === 0) {
                     $data = $document->find('article');
@@ -32,7 +33,6 @@ class DataCrawlerApartmentsCom
                             for ($i = 2; $i <= $pageCount; $i++) {
                                 $link = $uri . $i . '/';
                                 $task = '{"link":"' . $link . '", "method":"get_links", "by":"' . $by . '"}';
-                                // echo 'DataCrawler - get link - ' . $link . PHP_EOL;
                                 Redis::init()->rpush('tasks', $task);
                             }
                         }
@@ -143,44 +143,160 @@ class DataCrawlerApartmentsCom
                         $images = json_encode($images, JSON_PRETTY_PRINT);
                     }
                     // availability
-                    $availabilityTable = $document->find('tr.rentalGridRow');
                     $availability = [];
 
-                    for ($i = 0; $i < count($availabilityTable); $i++) {
-                        $tr = $availabilityTable[$i];
-                        $bedroomCnt = isset($tr->find('td.beds span.longText')[0]) ?
-                            $this->clearText($tr->find('td.beds span.longText')[0]->text()) : '';
+                    $availabilityInfo = $document->find('.availabilityInfo');
+                    // Single House availability
+                    if(isset($availabilityInfo) && !empty($availabilityInfo) && count($availabilityInfo) == 1) {
                         // bedroom count
-                        $bathroomCnt = isset($tr->find('td.baths span.longText')[0]) ?
-                            $this->clearText($tr->find('td.baths span.longText')[0]->text()) : '';
+                        $bedroomCnt = isset($document->find('.priceBedRangeInfoInnerContainer')[1]->find('.rentInfoDetail')[0]) ?
+                            $this->clearText($document->find('.priceBedRangeInfoInnerContainer')[1]->find('.rentInfoDetail')[0]->text()) : '';
+                        // bathroom count
+                        $bathroomCnt = isset($document->find('.priceBedRangeInfoInnerContainer')[2]->find('.rentInfoDetail')[0]) ?
+                            $this->clearText($document->find('.priceBedRangeInfoInnerContainer')[2]->find('.rentInfoDetail')[0]->text()) : '';
                         // listing price
-                        $listingPrice = isset($tr->find('td.rent')[0]) ?
-                            $this->clearText($tr->find('td.rent')[0]->text()) : '';
+                        $listingPrice = isset($document->find('.priceBedRangeInfoInnerContainer')[0]->find('.rentInfoDetail')[0]) ?
+                            $this->clearText($document->find('.priceBedRangeInfoInnerContainer')[0]->find('.rentInfoDetail')[0]->text()) : '';
                         // home size sq ft
-                        $sqft = isset($tr->find('td.sqft')[0]) ?
-                            $this->clearText($tr->find('td.sqft')[0]->text()) : '';
+                        $sqft = isset($document->find('.priceBedRangeInfoInnerContainer')[3]->find('.rentInfoDetail')[0]) ?
+                            $this->clearText($document->find('.priceBedRangeInfoInnerContainer')[3]->find('.rentInfoDetail')[0]->text()) : '';
                         // lease length
-                        $leaseLengthAvailability = isset($tr->find('td.leaseLength')[0]) ?
-                            $this->clearText($tr->find('td.leaseLength')[0]->text()) : '';
+                        // $leaseLengthAvailability = isset($tr->find('td.leaseLength')[0]) ? $this->clearText($tr->find('td.leaseLength')[0]->text()) : '';
                         // status
-                        $status = isset($tr->find('td.available')[0]) ?
-                            $this->clearText($tr->find('td.available')[0]->text()) : '';
+                        $status = $this->clearText($availabilityInfo[0]->text());
 
-                        $rentalId = $tr->attr('data-rentalkey');
-                        $rentalType = $tr->attr('data-rentaltype');
-
-                        $imgcrw = new ImageUnitCrawlerApartmentsCom;
-                        $images = $imgcrw->send($key, $rentalId, $rentalType);
+                        // $rentalId = $tr->attr('data-rentalkey');
+                        // $rentalType = $tr->attr('data-rentaltype');
 
                         array_push($availability, [
                             'bedroom_cnt' => $bedroomCnt,
                             'bathroom_cnt' => $bathroomCnt,
                             'listing_price' => $listingPrice,
                             'home_size_sq_ft' => $sqft,
-                            'lease_length' => $leaseLengthAvailability,
+                            'lease_length' => '',
                             'status' => $status,
-                            'image_urls' => $images
+                            'image_urls' => ''
                         ]);
+                    // Single House availability END
+                    } elseif ($document->find('#bedsFilterContainer')) {
+                        $section_all = $document->find('div.tab-section')[0];
+                        if(isset($section_all) && $section_all != '') {
+                            $pricingGridItems = $section_all->find('.pricingGridItem');
+                            for ($i = 0; $i < count($pricingGridItems); $i++) {
+                                $pricingGridItem = $pricingGridItems[$i];
+                                $detailsTextWrapper = $pricingGridItem->find('.detailsTextWrapper')[0];
+                                // echo ' detailsTextWrapper' . $pricingGridItem->find('.detailsTextWrapper')[0];
+                                $bedroomCnt = isset($detailsTextWrapper->find('span')[1]) ?
+                                    $this->clearText($detailsTextWrapper->find('span')[1]->text()) : '';
+                                // echo ' bedroomCnt - ' . $detailsTextWrapper->find('span')[1]->text();
+                                $bathroomCnt = isset($detailsTextWrapper->find('span')[2]) ?
+                                    $this->clearText($detailsTextWrapper->find('span')[2]->text()) : '';
+                                $sqft = isset($detailsTextWrapper->find('span')[3]) ?
+                                    $this->clearText($detailsTextWrapper->find('span')[3]->text()) : '';      
+                                $listingPrice = isset($pricingGridItem->find('.rentLabel')[0]) ?
+                                    $this->clearText($pricingGridItem->find('.rentLabel')[0]->text()) : ''; 
+                                $status = isset($pricingGridItem->find('.availabilityInfo')[0]) ?
+                                    $this->clearText($pricingGridItem->find('.availabilityInfo')[0]->text()) : 'Not Available';                             
+                                $unitGridContainer = $pricingGridItem->find('.unitGridContainer')[0];
+                                if(isset($unitGridContainer) && $unitGridContainer !== null) {
+                                    $unitContainers = $unitGridContainer->find('.unitContainer');
+                                    foreach($unitContainers as $unitContainer) {
+                                        $pricingColumn = $unitContainer->find('.pricingColumn');
+                                        $listingPriceSpan = $pricingColumn[0]->find('span');
+                                        $listingPrice = (isset($listingPriceSpan) && $listingPriceSpan != null) ? $this->clearText($listingPriceSpan[1]->text()) : '';
+                                        $sqftColumn = $unitContainer->find('.sqftColumn');
+                                        $sqftSpan = $sqftColumn[0]->find('span');
+                                        $sqft = (isset($sqftSpan) && $sqftSpan != null) ? $this->clearText($sqftSpan[1]->text()) : '';   
+                                        $statusSpan = $unitContainer->find('.dateAvailable');
+                                        if(isset($statusSpan) && $statusSpan != null) {
+                                            $status = trim(str_replace('availibility','',$this->clearText($statusSpan[0]->text())));
+                                        }
+                                        
+                                        $rentalId = '';
+                                        $rentalType = '';
+                                        $images = '';                                        
+
+                                        $rentalId = $unitContainer->attr('data-rentalkey');
+                                        $rentalType = $unitContainer->attr('data-rentaltype');
+                
+                                        $imgcrw = new ImageUnitCrawlerApartmentsCom;
+                                        $images = $imgcrw->send($key, $rentalId, $rentalType);          
+                                        
+                                        array_push($availability, [
+                                            'bedroom_cnt' => $bedroomCnt,
+                                            'bathroom_cnt' => $bathroomCnt,
+                                            'listing_price' => $listingPrice,
+                                            'home_size_sq_ft' => $sqft,
+                                            'lease_length' => '',
+                                            'status' => $status,
+                                            'image_urls' => $images
+                                        ]);                                    
+                                    }
+                                } else {
+                                    $floorplanButton = $pricingGridItem->find('.floorplanButton')[0];
+                                    $rentalId = '';
+                                    $rentalType = '';
+                                    $images = '';
+
+                                    if(isset($floorplanButton) && $floorplanButton != null) {
+                                        $rentalId = $floorplanButton->attr('data-rentalkey');
+                                        $rentalType = $floorplanButton->attr('data-rentaltype');
+
+                                        $imgcrw = new ImageUnitCrawlerApartmentsCom;
+                                        $images = $imgcrw->send($key, $rentalId, $rentalType);   
+                                    }       
+
+                                    array_push($availability, [
+                                        'bedroom_cnt' => $bedroomCnt,
+                                        'bathroom_cnt' => $bathroomCnt,
+                                        'listing_price' => $listingPrice,
+                                        'home_size_sq_ft' => $sqft,
+                                        'lease_length' => '',
+                                        'status' => $status,
+                                        'image_urls' => $images
+                                    ]);                                     
+                                }
+                            }
+                        }
+                    } else {
+                        $availabilityTable = $document->find('tr.rentalGridRow');
+
+                        for ($i = 0; $i < count($availabilityTable); $i++) {
+                            $tr = $availabilityTable[$i];
+                            $bedroomCnt = isset($tr->find('td.beds span.longText')[0]) ?
+                                $this->clearText($tr->find('td.beds span.longText')[0]->text()) : '';
+                            // bedroom count
+                            $bathroomCnt = isset($tr->find('td.baths span.longText')[0]) ?
+                                $this->clearText($tr->find('td.baths span.longText')[0]->text()) : '';
+                            // listing price
+                            $listingPrice = isset($tr->find('td.rent')[0]) ?
+                                $this->clearText($tr->find('td.rent')[0]->text()) : '';
+                            // home size sq ft
+                            $sqft = isset($tr->find('td.sqft')[0]) ?
+                                $this->clearText($tr->find('td.sqft')[0]->text()) : '';
+                            // lease length
+                            $leaseLengthAvailability = isset($tr->find('td.leaseLength')[0]) ?
+                                $this->clearText($tr->find('td.leaseLength')[0]->text()) : '';
+                            // status
+                            $status = isset($tr->find('td.available')[0]) ?
+                                $this->clearText($tr->find('td.available')[0]->text()) : '';
+    
+                            $rentalId = $tr->attr('data-rentalkey');
+                            $rentalType = $tr->attr('data-rentaltype');
+    
+                            $imgcrw = new ImageUnitCrawlerApartmentsCom;
+                            $images = $imgcrw->send($key, $rentalId, $rentalType);
+    
+                            array_push($availability, [
+                                'bedroom_cnt' => $bedroomCnt,
+                                'bathroom_cnt' => $bathroomCnt,
+                                'listing_price' => $listingPrice,
+                                'home_size_sq_ft' => $sqft,
+                                'lease_length' => $leaseLengthAvailability,
+                                'status' => $status,
+                                'image_urls' => $images
+                            ]);
+                        }
                     }
                     // nearby colleges
                     $elem = $document->xpath("//th[contains(text(), 'Colleges')]/ancestor::table/tbody/tr") ?? [];
@@ -250,7 +366,7 @@ class DataCrawlerApartmentsCom
 
                     $zipDB = file_get_contents(__DIR__ . '/../zipcodes.json');
                     $zipDB = json_decode($zipDB, true);
-                    if ($by = 'zip') {
+                    if ($by == 'zip') {
                         if (in_array($zip5Code, $zipDB)) {
                             // paste properties
                             $query = $db->pdo->prepare("INSERT INTO `properties` (
