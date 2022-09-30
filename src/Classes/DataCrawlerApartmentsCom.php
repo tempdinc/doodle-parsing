@@ -380,9 +380,9 @@ class DataCrawlerApartmentsCom
                                 `longitude`,
                                 `listing_last_updated`,
                                 `property_info`,
-                                `on_premise_services`,
+                                `on_premise_services`, /* amenitiesList - Community */
                                 `student_features`,
-                                `on_premise_features`,
+                                `on_premise_features`, /* appartmentFeatures - Apartment */
                                 `contact_person`,
                                 `building_desc`,
                                 `walk_score`,

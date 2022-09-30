@@ -1,5 +1,6 @@
 /src/.env
 /vendor/
 /composer.lock
+/src/.xlsx
 /src/log/.log
 /parentPid.out
