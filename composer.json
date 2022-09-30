@@ -10,7 +10,8 @@
     "campo/random-user-agent": "^1.3",
     "ext-pcntl": "*",
     "ext-curl": "*",
-    "ext-posix": "*"
+    "ext-posix": "*",
+    "phpoffice/phpspreadsheet": "^1.23"
   },
   "autoload": {
     "psr-4": {
