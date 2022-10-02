@@ -94,7 +94,7 @@ if (isset($argv[1]) && 'update' === $argv[1]) {
     $redis = Redis::init();
     $redis->flushall();
 
-    $citiesDB = file_get_contents(__DIR__ . '/cities.json');
+    $citiesDB = file_get_contents(__DIR__ . '/cities-xs.json');
     $citiesDB = json_decode($citiesDB, true);
 
     /**

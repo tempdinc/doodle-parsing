@@ -34,7 +34,7 @@ class ParseLinkPageRentProgressCom
     public function parse()
     {
         $content = new Document($this->content);
-
+        $type = 'House';
         //Info block
         $property_info_block_ul = isset($content->find('div.property-info-block-container')[0]) ?
             $content->find('div.property-info-block-container')[0]->find('ul')[0]->find('li') : '';
@@ -77,11 +77,12 @@ class ParseLinkPageRentProgressCom
         }
         $images = array_diff($images, ['', null, false]);
         //Amenities
-        $allAmenities = isset($content->find('section.amenities-list')[0]) ?
-            $content->find('section.amenities-list')[0]->find('div.amenity') : '';
+        $allAmenities = isset($content->find('section.amenities-list')[0]) ? $content->find('section.amenities-list')[0]->find('div.amenity') : '';
         if ($allAmenities) {
             $amenitiesList = $this->amenitiesBlock($allAmenities);
+            $amenitiesCommunityList = $this->amenitiesCommunityBlock($allAmenities);
             $listAmenities = [];
+            $listCommunityAmenities = [];
             for ($i = 0; $i < count($allAmenities); $i++) {
                 $amenity = $allAmenities[$i];
 
@@ -97,7 +98,11 @@ class ParseLinkPageRentProgressCom
                     'amenities' => $amenities
                 ]);
                 */
-                array_push($listAmenities, $title . ': ' . implode(', ', $amenities));
+                if($title == 'Community') {
+                    array_push($listCommunityAmenities, $title . ': ' . implode(', ', $amenities));
+                } else {
+                    array_push($listAmenities, $title . ': ' . implode(', ', $amenities));
+                }
             }
         }
 
@@ -117,12 +122,14 @@ class ParseLinkPageRentProgressCom
             // 'sqft' => $sqft,
             // 'status' => $status,
             'address' => $fullAddress,
+            'type' => $type,
             'addr_line_1' => $street,
             'city' => $city,
             'state_cd' => $state,
             'zip5_cd' => $zip,
             'property_info' => $description,
-            'on_premise_services' => $amenitiesList,
+            'on_premise_services' => $amenitiesCommunityList,
+            'on_premise_features' => $amenitiesList,
             // 'home_status' => $homeStatus,
             'link' => $this->task['link'],
             'longitude' => $this->task['location']['lng'],
@@ -146,34 +153,19 @@ class ParseLinkPageRentProgressCom
                 `bathroom_cnt`,
                 `listing_price`,
                 `home_size_sq_ft`,
-                `status`
-            ) VALUES (?, ?, ?, ?, ?, ?)");
+                `status`,
+                `image_urls`
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $query->execute([
                 $propId,
                 $beds,
                 $bath,
                 $price,
                 $sqft,
-                $status
+                $status,
+                json_encode($images)
             ]);
         }
-        // Adding a record into amenities
-        /*
-        if ($listAmenities) {
-            foreach ($listAmenities as $amenity) {
-                $db->insert('amenities', [
-                    'rent_id' => $idRental[0],
-                    'title' => $amenity['title'],
-                    'amenities' => json_encode($amenity['amenities'])
-                ]);
-            }
-        } else {
-            $db->insert('amenities', [
-                'rent_id' => $idRental[0]
-            ]);
-        }
-        */
-        // echo 'SUCCESS: ' . $idRental[1] . ' ID: ' . $idRental[0] . PHP_EOL;
 
         return true;
     }
@@ -206,11 +198,35 @@ class ParseLinkPageRentProgressCom
             $title = isset($group->find('h3.amenities-title')[0]) ?
                 $this->clearText($group->find('h3.amenities-title')[0]->text()) : '';
             $amenities = $group->find('li');
-            foreach ($amenities as $amenity) {
-                $amenitiesList[$title][] = $this->clearText($amenity->text());
+            if($title != 'Community') {
+                foreach ($amenities as $amenity) {
+                    $amenitiesList[$title][] = $this->clearText($amenity->text());
+                }
             }
         }
 
         return json_encode($amenitiesList, JSON_PRETTY_PRINT);
     }    
+    /**
+     * Parsing community amenities block
+     *
+     * @param  Document $specGroups
+     * @return json
+     */
+    protected function amenitiesCommunityBlock($specGroups)
+    {
+        $amenitiesList = [];
+        foreach ($specGroups as $group) {
+            $title = isset($group->find('h3.amenities-title')[0]) ?
+                $this->clearText($group->find('h3.amenities-title')[0]->text()) : '';
+            $amenities = $group->find('li');
+            if($title == 'Community') {
+                foreach ($amenities as $amenity) {
+                    $amenitiesList[$title][] = $this->clearText($amenity->text());
+                }
+            }
+        }
+
+        return json_encode($amenitiesList, JSON_PRETTY_PRINT);
+    }      
 }

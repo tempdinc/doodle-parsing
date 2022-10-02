@@ -9,6 +9,8 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 require_once __DIR__ . '/bootstrap.php';
 
+$add_to_wp = false;
+
 //Query our MySQL table
 $parsing_db = new MySQL('parsing', 'local');
 
@@ -60,6 +62,7 @@ foreach($rows as $row) {
     }
 }
 $community_amenities = array_unique($community_amenities,SORT_STRING);
+$community_amenities = array_diff($community_amenities,$apartment_amenities);
 sort($community_amenities);
 
 $spreadsheet = new Spreadsheet();
@@ -75,34 +78,38 @@ foreach($community_amenities as $amenity) {
 $writer = new Xlsx($spreadsheet);
 $writer->save('export_community_amenities.xlsx');
 
-//Query our MySQL table
-$wp_db = new MySQL('wp', 'local');
+if($add_to_wp) {
 
-foreach($apartment_amenities as $amenity) {
-    $query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_terms` WHERE `name` = ? LIMIT 1");
-    $query->execute([$amenity]);
-    $isDuplicate = $query->fetchColumn();
-    // $amenity_slug = str_replace(' ', '_', trim(mb_strtolower($amenity)));
-    if (!$isDuplicate) {    
-        $amenity_slug = str_replace(' ', '_', preg_replace("/[^a-z\s]/iu","_",trim(mb_strtolower($amenity))));
-        $query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_terms` WHERE `slug` = ? LIMIT 1");
-        $query->execute([$amenity_slug]);
-        $isDuplicate = $query->fetchColumn();   
-    } 
+    //Query our MySQL table
+    $wp_db = new MySQL('wp', 'local');
 
-    if (!$isDuplicate) {    
-        $query = $wp_db->pdo->prepare("INSERT INTO `wp_terms` (`name`,`slug`) VALUES (?,?)");
-        $query->execute([$amenity,$amenity_slug]);
+    foreach($apartment_amenities as $amenity) {
+        $query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_terms` WHERE `name` = ? LIMIT 1");
+        $query->execute([$amenity]);
+        $isDuplicate = $query->fetchColumn();
+        // $amenity_slug = str_replace(' ', '_', trim(mb_strtolower($amenity)));
+        if (!$isDuplicate) {    
+            $amenity_slug = str_replace(' ', '_', preg_replace("/[^a-z\s]/iu","_",trim(mb_strtolower($amenity))));
+            $query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_terms` WHERE `slug` = ? LIMIT 1");
+            $query->execute([$amenity_slug]);
+            $isDuplicate = $query->fetchColumn();   
+        } 
 
-        $query = $wp_db->pdo->prepare("SELECT `term_id` FROM `wp_terms` WHERE `slug` = ? LIMIT 1");
-        $query->execute([$amenity_slug]);
-        $prop = $query->fetch();
-        if($prop->term_id) {
-            $taxonomy = 'rz_amenities';
-            $description = 'added by script!';
-            $query = $wp_db->pdo->prepare("INSERT INTO `wp_term_taxonomy` (`term_id`,`taxonomy`,`description`) VALUES (?,?,?)");
-            $query->execute([$prop->term_id,$taxonomy,$description]);
-            $prop = $query->fetch();        
+        if (!$isDuplicate) {    
+            $query = $wp_db->pdo->prepare("INSERT INTO `wp_terms` (`name`,`slug`) VALUES (?,?)");
+            $query->execute([$amenity,$amenity_slug]);
+
+            $query = $wp_db->pdo->prepare("SELECT `term_id` FROM `wp_terms` WHERE `slug` = ? LIMIT 1");
+            $query->execute([$amenity_slug]);
+            $prop = $query->fetch();
+            if($prop->term_id) {
+                $taxonomy = 'rz_amenities';
+                $description = 'added by script!';
+                $query = $wp_db->pdo->prepare("INSERT INTO `wp_term_taxonomy` (`term_id`,`taxonomy`,`description`) VALUES (?,?,?)");
+                $query->execute([$prop->term_id,$taxonomy,$description]);
+                $prop = $query->fetch();        
+            }
         }
     }
+    
 }

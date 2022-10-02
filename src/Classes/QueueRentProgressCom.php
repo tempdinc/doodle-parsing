@@ -55,7 +55,7 @@ class QueueRentProgressCom
                 Redis::init()->rpush('tasks', json_encode($task));
                 sleep(1);
             } elseif (!$task) {
-                echo 'COMPLETED PARSING RentProgress.com!' . PHP_EOL;
+                // echo 'COMPLETED PARSING RentProgress.com!' . PHP_EOL;
                 $this->stop = true;
             }
         }
@@ -108,8 +108,9 @@ class QueueRentProgressCom
     protected function parse($task)
     {
         $request = StormProxy::send($task['link'], 'rentprogress.com');
-        // echo 'http_code - ' . $request['http_code'] . PHP_EOL;
         if ($request['http_code'] === 200) {
+            $method = ($task['class'] == '\App\Classes\ParseLinkPageRentProgressCom') ? 'parse' : 'get_links';
+            file_put_contents(LOG_DIR . '/rentprogress-com-data-crawler.log', '[' . date('Y-m-d H:i:s') . '] ' . $task['link'] . ' - ' . $method . PHP_EOL, FILE_APPEND);
             if (!$request['response']) {
                 Redis::init()->rpush('tasks', json_encode([
                     'link' => $task['link'],
@@ -128,6 +129,7 @@ class QueueRentProgressCom
 
             return true;
         } elseif ($request['http_code'] === 403 || $request['http_code'] === 0) {
+            file_put_contents(LOG_DIR . '/parse-problem.log', '[' . date('Y-m-d H:i:s') . '] Msg:' . $e->getMessage() . "\nCode:" . $request['http_code'] . ' - ' . $task['link'] . PHP_EOL, FILE_APPEND);
             Redis::init()->rpush('tasks', json_encode([
                 'link' => $task['link'],
                 'class' => $task['class'],
@@ -135,6 +137,10 @@ class QueueRentProgressCom
             ]));
 
             return false;
+        } elseif ($request['http_code'] === 404) {
+            file_put_contents(LOG_DIR . '/404links.log', '[' . date('Y-m-d H:i:s') . '] Msg:' . $e->getMessage() . "\nCode:" . $request['http_code'] . ' - ' . $task['link'] . PHP_EOL, FILE_APPEND);
+        } else {
+            file_put_contents(LOG_DIR . '/parse-problem.log', '[' . date('Y-m-d H:i:s') . '] Msg:' . $e->getMessage() . "\nCode:" . $request['http_code'] . ' - ' . $task['link'] . PHP_EOL, FILE_APPEND);
         }
 
         // If response is != 200, pushing the task again
