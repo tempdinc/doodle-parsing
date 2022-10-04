@@ -21,7 +21,7 @@ class MySQL
     public function __construct(string $base, string $host)
     {
         if ($base == 'wp') {
-            $dbname = env('MYSQL_WPDB', 'wp_tempdbookindev');
+            $dbname = env('MYSQL_WPDB', 'wp_tempd');
         } else {
             $dbname = env('MYSQL_DBNAME', 'parsing');
         }
@@ -133,6 +133,21 @@ class MySQL
     }
 
     /**
+     * List all rz_amenities
+     *
+     * @param  int $id
+     * @param  string $table
+     */
+    public function listRzAmenities()
+    {
+        $query = $this->pdo->prepare(
+            "SELECT * FROM `wp_term_taxonomy` wtt LEFT JOIN `wp_terms` wt ON wtt.term_id = wt.term_id WHERE wtt.taxonomy = 'rz_amenities'"
+        );
+        $query->execute();
+        return $query->fetchAll();
+    }
+
+    /**
      * Removing Amenities with records update
      *
      * @param  int $id
@@ -146,7 +161,7 @@ class MySQL
             $query = $this->pdo->prepare("DELETE FROM $table WHERE id=?");
             $query->execute([$id->id]);
         }
-    }
+    }    
 
     /**
      * Removing availability with records update
@@ -196,7 +211,7 @@ class MySQL
     {
         try {
             $query = $this->pdo->prepare(
-                "SELECT * FROM $table WHERE is_deleted = 0 AND post_id is NULL"
+                "SELECT * FROM $table WHERE (is_deleted = 0 AND post_id is NULL) OR (is_deleted is NULL AND post_id is NULL)"
             );
             $query->execute();
             return $query->fetchAll();
@@ -211,7 +226,7 @@ class MySQL
      * @param  string $property_id
      * @return array
      */
-    public function getAvailability($property_id)
+    public function getAllAvailability($property_id)
     {
         try {
             $query = $this->pdo->prepare(
@@ -223,6 +238,44 @@ class MySQL
             die($ex->getMessage());
         }
     }
+
+    /**
+     * Getting all records from availability by property_id
+     *
+     * @param  string $property_id
+     * @return array
+     */
+    public function getAvailabilityProperty($property_id)
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT * FROM `availability` WHERE (property_id = ? AND status = 'Available Now' AND is_deleted is NULL AND post_id is NULL) OR (property_id = ? AND status = 'Move In Ready' AND is_deleted is NULL AND post_id is NULL) OR (property_id = ? AND status = 'Move-In Ready' AND is_deleted is NULL AND post_id is NULL) OR (property_id = ? AND status = 'Now' AND is_deleted is NULL AND post_id is NULL)"
+            );
+            $query->execute([$property_id,$property_id,$property_id,$property_id]);
+            return $query->fetchAll();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }     
+
+    /**
+     * Getting all records from availability by property_id
+     *
+     * @param  string $property_id
+     * @return array
+     */
+    public function getAvailability()
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT a.id AS av_id, a.post_id AS av_post_id, a.is_deleted AS av_is_deleted, a.property_id AS av_property_id, a.bedroom_cnt AS av_bedroom_cnt, a.bathroom_cnt as av_bathroom_cnt, a.listing_price AS av_listing_price, a.home_size_sq_ft AS av_home_size_sq_ft, a.lease_length AS av_lease_length, a.status AS av_status, a.image_urls AS av_image_urls, a.date_added AS a_date_added, p.* FROM `availability` a LEFT JOIN `properties` p ON a.property_id = p.id WHERE (a.status = 'Available Now' AND a.is_deleted is NULL AND a.post_id is NULL) OR (a.status = 'Move In Ready' AND a.is_deleted is NULL AND a.post_id is NULL) OR (a.status = 'Move-In Ready' AND a.is_deleted is NULL AND a.post_id is NULL) OR (a.status = 'Now' AND a.is_deleted is NULL AND a.post_id is NULL)"
+            );
+            $query->execute();
+            return $query->fetchAll();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }    
 
     /**
      * Searching for the records by ID

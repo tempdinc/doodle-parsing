@@ -127,7 +127,7 @@ class ParseLinkPageRentProgressCom
             'city' => $city,
             'state_cd' => $state,
             'zip5_cd' => $zip,
-            'property_info' => $description,
+            'building_desc' => $description,
             'on_premise_services' => $amenitiesCommunityList,
             'on_premise_features' => $amenitiesList,
             // 'home_status' => $homeStatus,

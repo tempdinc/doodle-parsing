@@ -93,8 +93,11 @@ class DataCrawlerApartmentsCom
                     // contact person
                     $contactPerson = isset($document->find('div.agentFullName')[0]) ? trim($document->find('div.agentFullName')[0]->text()) : '';
                     // building description
-                    $buildingDesc = isset($document->find('section.descriptionSection')[0]) ?
-                        $this->clearText($document->find('section.descriptionSection')[0]->text()) : '';
+                    $descriptionSection = $document->find('section.descriptionSection')[0];
+                    if(isset($descriptionSection) && $descriptionSection !='') {
+                        $buildingDesc = isset($descriptionSection->find('.propertyBlurbContent')[0]) ?
+                            $this->clearText($descriptionSection->find('.propertyBlurbContent')[0]->text()) : '';
+                    }
                     // walk score
                     $walkScore = isset($document->find('div.walkScore div.score')[0]) ?
                         $this->clearText($document->find('div.walkScore div.score')[0]->text()) : '';

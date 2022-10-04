@@ -9,7 +9,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 require_once __DIR__ . '/bootstrap.php';
 
-$add_to_wp = false;
+$add_to_wp = true;
 
 //Query our MySQL table
 $parsing_db = new MySQL('parsing', 'local');
@@ -89,10 +89,17 @@ if($add_to_wp) {
         $isDuplicate = $query->fetchColumn();
         // $amenity_slug = str_replace(' ', '_', trim(mb_strtolower($amenity)));
         if (!$isDuplicate) {    
-            $amenity_slug = str_replace(' ', '_', preg_replace("/[^a-z\s]/iu","_",trim(mb_strtolower($amenity))));
-            $query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_terms` WHERE `slug` = ? LIMIT 1");
-            $query->execute([$amenity_slug]);
-            $isDuplicate = $query->fetchColumn();   
+            // echo $amenity . PHP_EOL;
+            $amenity_slug = str_replace(' ', '_', preg_replace("/[^0-9a-z]/","_",trim(mb_strtolower($amenity))));
+            if(mb_substr($amenity_slug,-1) == '_') {
+                $amenity_slug = mb_substr($amenity_slug,0,-1);
+            }
+            // echo $amenity_slug . PHP_EOL;
+            $slugDuplicate = checkSlug($amenity_slug);
+            while($slugDuplicate) {
+                $amenity_slug = $amenity_slug . '1';
+                $slugDuplicate = checkSlug($amenity_slug);
+            }
         } 
 
         if (!$isDuplicate) {    
@@ -112,4 +119,13 @@ if($add_to_wp) {
         }
     }
     
+}
+
+function checkSlug($slug_string)
+{
+    echo $slug_string . PHP_EOL;
+    $wp_db = new MySQL('wp', 'local');
+    $query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_terms` WHERE `slug` = ? LIMIT 1");
+    $query->execute([$slug_string]);
+    return $query->fetchColumn();   
 }
