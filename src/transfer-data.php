@@ -241,7 +241,7 @@ foreach ($all_availability as $availability) {
             $orig_filename = substr(str_replace($orig_fileextension,'',$orig_full_filename),0,-1);
             echo ' | ' . $orig_filename;
             $filename_path = __DIR__ . '/images/' . $orig_filename . '.' . $orig_fileextension;
-            $is_file_exist = file_exists($filename);
+            $is_file_exist = file_exists($filename_path);
             $filename_counter = 1;
             while($is_file_exist) {
                 $orig_filename = $orig_filename . $filename_counter;
