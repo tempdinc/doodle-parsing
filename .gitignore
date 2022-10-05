@@ -2,6 +2,7 @@
 /vendor/
 /composer.lock
 /src/.xlsx
-/src/log/.log
+/src/log/
 /parentPid.out
+/src/parentPid.out
 /src/images/
