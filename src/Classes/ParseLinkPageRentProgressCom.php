@@ -116,11 +116,6 @@ class ParseLinkPageRentProgressCom
         $db = new MySQL('parsing','local');
 
         $data = [
-            // 'price' => $price,
-            // 'beds' => $beds,
-            // 'bath' => $bath,
-            // 'sqft' => $sqft,
-            // 'status' => $status,
             'address' => $fullAddress,
             'type' => $type,
             'addr_line_1' => $street,
@@ -130,11 +125,9 @@ class ParseLinkPageRentProgressCom
             'building_desc' => $description,
             'on_premise_services' => $amenitiesCommunityList,
             'on_premise_features' => $amenitiesList,
-            // 'home_status' => $homeStatus,
             'link' => $this->task['link'],
             'longitude' => $this->task['location']['lng'],
-            'latitude' => $this->task['location']['lat'],
-            'image_urls' => json_encode($images)
+            'latitude' => $this->task['location']['lat']
         ];
 
         // Updating or creating the record in properties
