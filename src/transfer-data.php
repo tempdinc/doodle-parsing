@@ -111,12 +111,14 @@ foreach ($all_availability as $availability) {
     // Apartment amenities
     $apartment_amenities = [];
     $decoded_premise_services = json_decode($availability->on_premise_features);
+    /*
     foreach($decoded_premise_services as $key=>$value) {
         foreach($value as $data) {
             $term_id = array_search($data, $apartment_amenities_list);
-            $apartment_amenities['rz_amenities'] = $term_id;
+            $apartment_amenities += ['rz_amenities' => $term_id];
         }
     }
+    */
     // echo ' property_id - ' . $availability->id . ' - ';
     // $all_availability = $parsing_db->getAvailability($availability->id);
     // echo ' all_availability - ' . count($all_availability) . ' | ';
@@ -252,6 +254,17 @@ foreach ($all_availability as $availability) {
             foreach ($full_property_meta as $key => $value) {
                 $query = $wp_db->pdo->prepare("INSERT INTO `wp_postmeta` (`post_id`,`meta_key`,`meta_value`) VALUES (?, ?, ?)");
                 $query->execute([$wp_post_id, $key, $value]);
+            }
+            if(!empty($decoded_premise_services)) {
+                foreach($decoded_premise_services as $key=>$value) {
+                    foreach($value as $data) {
+                        $term_id = array_search($data, $apartment_amenities_list);
+                        if($term_id) {
+                            $query = $wp_db->pdo->prepare("INSERT INTO `wp_postmeta` (`post_id`,`meta_key`,`meta_value`) VALUES (?, ?, ?)");
+                            $query->execute([$wp_post_id, 'rz_amenities', $term_id]);                        
+                        }
+                    }
+                }            
             }
         }
         $query = $parsing_db->pdo->prepare("UPDATE `availability` SET `post_id` = ? WHERE `id` = ?");
