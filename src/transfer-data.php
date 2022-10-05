@@ -239,7 +239,7 @@ foreach ($all_availability as $availability) {
             'rz_reservation_length_max'=>'0',
             'rz_reservation_length_min'=>'0',
             'rz_security_deposit'=>'',
-            'rz_sqft'=>'',
+            'rz_sqft'=>$sqft,
             'rz_state'=>$availability->state_cd,
             'rz_status'=>'Now',
             'rz_street_line_1'=>$np_rz_location__address_line1,
