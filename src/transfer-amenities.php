@@ -111,7 +111,7 @@ if($add_to_wp) {
             $prop = $query->fetch();
             if($prop->term_id) {
                 $taxonomy = 'rz_amenities';
-                $description = 'added by script!';
+                $description = '';
                 $query = $wp_db->pdo->prepare("INSERT INTO `wp_term_taxonomy` (`term_id`,`taxonomy`,`description`) VALUES (?,?,?)");
                 $query->execute([$prop->term_id,$taxonomy,$description]);
                 $prop = $query->fetch();        

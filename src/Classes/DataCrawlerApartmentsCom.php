@@ -221,10 +221,22 @@ class DataCrawlerApartmentsCom
 
                                         $rentalId = $unitContainer->attr('data-rentalkey');
                                         $rentalType = $unitContainer->attr('data-rentaltype');
-                
+                                        /*
                                         $imgcrw = new ImageUnitCrawlerApartmentsCom;
                                         $images = $imgcrw->send($key, $rentalId, $rentalType);          
-                                        
+                                        */
+                                        //images url
+                                        $imagesLiArr = $document->find('section.carouselSection ul')[0]->find('li');
+                                        if ($imagesLiArr) {
+                                            $images = [];
+                                            foreach ($imagesLiArr as $li) {
+                                                $imgs = $li->find('img');
+                                                foreach ($imgs as $img) {
+                                                    $images[] = $img->getAttribute('src');
+                                                }
+                                            }
+                                            $images = json_encode($images, JSON_PRETTY_PRINT);
+                                        }                                        
                                         array_push($availability, [
                                             'bedroom_cnt' => $bedroomCnt,
                                             'bathroom_cnt' => $bathroomCnt,
@@ -240,7 +252,7 @@ class DataCrawlerApartmentsCom
                                     $rentalId = '';
                                     $rentalType = '';
                                     $images = '';
-
+                                    /*
                                     if(isset($floorplanButton) && $floorplanButton != null) {
                                         $rentalId = $floorplanButton->attr('data-rentalkey');
                                         $rentalType = $floorplanButton->attr('data-rentaltype');
@@ -248,7 +260,19 @@ class DataCrawlerApartmentsCom
                                         $imgcrw = new ImageUnitCrawlerApartmentsCom;
                                         $images = $imgcrw->send($key, $rentalId, $rentalType);   
                                     }       
-
+                                    */
+                                    //images url
+                                    $imagesLiArr = $document->find('section.carouselSection ul')[0]->find('li');
+                                    if ($imagesLiArr) {
+                                        $images = [];
+                                        foreach ($imagesLiArr as $li) {
+                                            $imgs = $li->find('img');
+                                            foreach ($imgs as $img) {
+                                                $images[] = $img->getAttribute('src');
+                                            }
+                                        }
+                                        $images = json_encode($images, JSON_PRETTY_PRINT);
+                                    }                                    
                                     array_push($availability, [
                                         'bedroom_cnt' => $bedroomCnt,
                                         'bathroom_cnt' => $bathroomCnt,
@@ -286,10 +310,22 @@ class DataCrawlerApartmentsCom
     
                             $rentalId = $tr->attr('data-rentalkey');
                             $rentalType = $tr->attr('data-rentaltype');
-    
+                            /*
                             $imgcrw = new ImageUnitCrawlerApartmentsCom;
                             $images = $imgcrw->send($key, $rentalId, $rentalType);
-    
+                            */
+                            //images url
+                            $imagesLiArr = $document->find('section.carouselSection ul')[0]->find('li');
+                            if ($imagesLiArr) {
+                                $images = [];
+                                foreach ($imagesLiArr as $li) {
+                                    $imgs = $li->find('img');
+                                    foreach ($imgs as $img) {
+                                        $images[] = $img->getAttribute('src');
+                                    }
+                                }
+                                $images = json_encode($images, JSON_PRETTY_PRINT);
+                            }                            
                             array_push($availability, [
                                 'bedroom_cnt' => $bedroomCnt,
                                 'bathroom_cnt' => $bathroomCnt,
