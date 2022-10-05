@@ -127,8 +127,13 @@ class DataCrawlerApartmentsCom
                     } elseif (count($amenitiesSection) == 1) { // if there is any one block
                         $section_amenitiesSection = $document->find('section.amenitiesSection')[0];
                         // var_dump($section_amenitiesSection);
-                        if ($section_amenitiesSection && $section_amenitiesSection->find('h2.sectionTitle')[0]->text() == 'Apartment Features') { //for block Apartment Features
-                            $appartmentFeatures = $this->amenitiesBlock($amenitiesSection[0]->find('div.specGroup'));
+                        if ($section_amenitiesSection) {
+                            $section_amenitiesSection_title = $section_amenitiesSection->find('h2.sectionTitle');
+                            if($section_amenitiesSection_title && $section_amenitiesSection_title[0]->text() == 'Apartment Features') { //for block Apartment Features
+                                $appartmentFeatures = $this->amenitiesBlock($amenitiesSection[0]->find('div.specGroup'));
+                            } else { //for block Community Amenities
+                                $amenitiesList = $this->amenitiesBlock($amenitiesSection[0]->find('div.specGroup'));
+                            }
                         } else { //for block Community Amenities
                             $amenitiesList = $this->amenitiesBlock($amenitiesSection[0]->find('div.specGroup'));
                         }

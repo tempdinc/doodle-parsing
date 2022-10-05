@@ -14,7 +14,7 @@ echo "Transfer parsed data to WP - ";
 
 // Start transfer
 echo date("Y-m-d H:i:s") . " Start transfer parsed data";
-file_put_contents(LOG_DIR . '/transfer-data.log', '[' . date('Y-m-d H:i:s') . ']  Start transfer parsed ', FILE_APPEND);
+file_put_contents(LOG_DIR . '/transfer-data.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ', FILE_APPEND);
 
 // Transfer-amenities
 $create_xlsx = false;
@@ -127,7 +127,7 @@ foreach($apartment_amenities as $amenity) {
     }
 }
 echo " \033[31mAdded amenities: " . $amenities_counter . "\033[0m";
-file_put_contents(LOG_DIR . '/transfer-data.log', ' | Added amenities: ' . $amenities_counter, FILE_APPEND);
+file_put_contents(LOG_DIR . '/transfer-data.log', ' Added amenities: ' . $amenities_counter, FILE_APPEND);
 // Transfer amenities END
 
 $meta_keys = [
@@ -215,7 +215,7 @@ foreach($apartment_amenities_rows as $apartment_amenity_row) {
 $parsing_db = new MySQL('parsing', 'local');
 $all_availability = $parsing_db->getAvailability();
 echo " \033[34mNew units - " . count($all_availability) . "\033[0m";
-file_put_contents(LOG_DIR . '/transfer-data.log', 'New units - ' . count($all_availability), FILE_APPEND);
+file_put_contents(LOG_DIR . '/transfer-data.log', ' | New units - ' . count($all_availability), FILE_APPEND);
 
 foreach ($all_availability as $availability) {
     // Apartment amenities
@@ -233,11 +233,32 @@ foreach ($all_availability as $availability) {
         foreach($decoded_image_urls as $key=>$value) {
             $re = '`^.*/`m';
             $subst = '';        
-            $filename = __DIR__ . '/images/' . preg_replace($re, $subst, parse_url($value, PHP_URL_PATH));
+            /* IMAGE NAME CHECKING */
+            $orig_full_filename = preg_replace($re, $subst, parse_url($value, PHP_URL_PATH));
+            echo ' | orig_full_filename - ' . $orig_full_filename;
+            $orig_fileextension = getExtension($orig_full_filename);
+            echo ' | orig_fileextension - ' . $orig_fileextension; 
+            $orig_filename = substr(str_replace($orig_fileextension,'',$orig_full_filename),0,-1);
+            echo ' | ' . $orig_filename;
+            $filename_path = __DIR__ . '/images/' . $orig_filename . '.' . $orig_fileextension;
+            $is_file_exist = file_exists($filename);
+            $filename_counter = 1;
+            while($is_file_exist) {
+                $orig_filename = $orig_filename . $filename_counter;
+                echo ' | ' . $orig_filename . PHP_EOL;
+                $filename_path = __DIR__ . '/images/' . $orig_filename . '.' . $orig_fileextension;
+                $is_file_exist = isFileExist($filename_path);
+                $filename_counter++;
+            }
+            /* IMAGE NAME CHECKING END */
             // echo $filename . PHP_EOL;
-            file_put_contents($filename, file_get_contents($value));
-            $wpImageId = (object)array('id' => (string)moveToWp($filename));
-            array_push($wpImageArray,$wpImageId);
+            // removeExif($filename_path);
+            file_put_contents($filename_path, file_get_contents($value));
+            $moveToWP = moveToWp($filename_path);
+            if($moveToWP) {
+                $wpImageId = (object)array('id' => (string)$moveToWP);
+                array_push($wpImageArray,$wpImageId);
+            }
         }
     }
     $rz_gallery = json_encode($wpImageArray);
@@ -425,39 +446,53 @@ function clear_description($string)
     // return mb_strtolower(str_replace($vowels, '-', $string));
 }
 
+function getExtension($filename) {
+    return substr(strrchr($filename, '.'), 1);
+}
+
+function isFileExist($filename) {
+    return file_exists($filename);
+}
+
+function removeExif($incoming_file) {
+    $img = new Imagick(realpath($incoming_file));
+    $profiles = $img->getImageProfiles("icc", true);
+    $img->stripImage();
+    if(!empty($profiles)) {
+       $img->profileImage("icc", $profiles['icc']);
+    }
+}
+
 function moveToWp ($image_url) {
     // $image_url = 'adress img';
-
-    $upload_dir = wp_upload_dir();
-    
-    $image_data = file_get_contents( $image_url );
-    
-    $filename = basename( $image_url );
-    
-    if ( wp_mkdir_p( $upload_dir['path'] ) ) {
-      $file = $upload_dir['path'] . '/' . $filename;
+    try {
+        $upload_dir = wp_upload_dir();
+        $image_data = file_get_contents( $image_url );
+        $filename = basename( $image_url );
+        if ( wp_mkdir_p( $upload_dir['path'] ) ) {
+        $file = $upload_dir['path'] . '/' . $filename;
+        }
+        else {
+        $file = $upload_dir['basedir'] . '/' . $filename;
+        }
+        file_put_contents( $file, $image_data );
+        $wp_filetype = wp_check_filetype( $filename, null );
+        $attachment = array(
+        'post_mime_type' => $wp_filetype['type'],
+        'post_title' => sanitize_file_name( $filename ),
+        'post_content' => '',
+        'post_status' => 'inherit'
+        );
+        $attach_id = wp_insert_attachment( $attachment, $file );
+        // echo 'attach_id - ' . $attach_id . PHP_EOL;
+        require_once( ABSPATH . 'wp-admin/includes/image.php' );
+        $attach_data = wp_generate_attachment_metadata( $attach_id, $file );
+        wp_update_attachment_metadata( $attach_id, $attach_data );
+        return $attach_id;
+    } catch(Exception $e) {
+        echo($e->getMessage());
+        return false;
     }
-    else {
-      $file = $upload_dir['basedir'] . '/' . $filename;
-    }
-    
-    file_put_contents( $file, $image_data );
-    
-    $wp_filetype = wp_check_filetype( $filename, null );
-    
-    $attachment = array(
-      'post_mime_type' => $wp_filetype['type'],
-      'post_title' => sanitize_file_name( $filename ),
-      'post_content' => '',
-      'post_status' => 'inherit'
-    );
-    
-    $attach_id = wp_insert_attachment( $attachment, $file );
-    // echo 'attach_id - ' . $attach_id . PHP_EOL;
-    require_once( ABSPATH . 'wp-admin/includes/image.php' );
-    $attach_data = wp_generate_attachment_metadata( $attach_id, $file );
-    wp_update_attachment_metadata( $attach_id, $attach_data );
-    return $attach_id;
 }
 
 function clearImages() {
@@ -468,8 +503,7 @@ function clearImages() {
     }
 }
 
-function checkSlug($slug_string)
-{
+function checkSlug($slug_string) {
     echo $slug_string . PHP_EOL;
     $wp_db = new MySQL('wp', 'local');
     $query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_terms` WHERE `slug` = ? LIMIT 1");
