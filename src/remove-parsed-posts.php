@@ -30,8 +30,8 @@ foreach ($all_availability as $availability) {
         $image_ids = json_decode($row->meta_value);
         foreach($image_ids as $image_id) {
             // echo $image_id->id . ' | ';
-            $deletion_result = deleteAttachmentWP($image_id->id);
-            echo $deletion_result;
+            deleteAttachmentWP($image_id->id);
+            // echo $deletion_result;
         }
         echo PHP_EOL;
     }
