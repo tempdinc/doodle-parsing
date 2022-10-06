@@ -248,18 +248,23 @@ foreach ($all_availability as $availability) {
                 $is_file_exist = isFileExist($filename_path);
                 $filename_counter++;
             }
-            file_put_contents($filename_path, file_get_contents($value));            
-            /* IMAGE NAME CHECKING END */
-            $unit_source = $availability->source;
-            if($unit_source == 'rentprogress.com') {
-                cropImage($filename_path,100,82);
-            }
-            // echo $filename . PHP_EOL;
-            // removeExif($filename_path);
-            $moveToWP = moveToWp($filename_path,$availability_address);
-            if($moveToWP) {
-                $wpImageId = (object)array('id' => (string)$moveToWP);
-                array_push($wpImageArray,$wpImageId);
+            $file_get = file_get_contents($value);
+            if($file_get !== false) {
+                file_put_contents($filename_path, $file_get);            
+                /* IMAGE NAME CHECKING END */
+                $unit_source = $availability->source;
+                if($unit_source == 'rentprogress.com') {
+                    cropImage($filename_path,100,82);
+                }
+                // echo $filename . PHP_EOL;
+                // removeExif($filename_path);
+                $moveToWP = moveToWp($filename_path,$availability_address);
+                if($moveToWP) {
+                    $wpImageId = (object)array('id' => (string)$moveToWP);
+                    array_push($wpImageArray,$wpImageId);
+                } else {
+                    file_put_contents(LOG_DIR . '/transfer-data.log', ' | Error transferring WP - ' . $filename_path, FILE_APPEND);
+                }
             } else {
                 file_put_contents(LOG_DIR . '/transfer-data.log', ' | Error transferring WP - ' . $filename_path, FILE_APPEND);
             }
