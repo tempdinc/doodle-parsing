@@ -31,6 +31,7 @@ error_reporting(E_ALL);
       `id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
       `is_deleted` tinyint(1) DEFAULT NULL,
       `link` varchar(256) DEFAULT NULL,
+      `source` varchar(256),
       `address` varchar(256) DEFAULT NULL,
       `type` varchar(32) DEFAULT NULL,
       `lease_length` varchar(256) DEFAULT NULL,
