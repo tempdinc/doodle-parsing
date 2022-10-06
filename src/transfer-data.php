@@ -10,8 +10,6 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 require_once __DIR__ . '/bootstrap.php';
 require_once '../../wp-load.php';
 
-echo "Transfer parsed data to WP - ";
-
 // Start transfer
 echo date("Y-m-d H:i:s") . " Start transfer parsed data";
 file_put_contents(LOG_DIR . '/transfer-data.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ', FILE_APPEND);

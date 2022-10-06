@@ -278,6 +278,25 @@ class MySQL
     }    
 
     /**
+     * Getting all records from availability by property_id
+     *
+     * @param  string $property_id
+     * @return array
+     */
+    public function getAvailabilityWithPost()
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT id, post_id, property_id FROM `availability` WHERE post_id is NOT NULL"
+            );
+            $query->execute();
+            return $query->fetchAll();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }     
+
+    /**
      * Searching for the records by ID
      *
      * @param  string $table
