@@ -22,7 +22,8 @@ file_put_contents(LOG_DIR . '/remove-data.log', ' | Units with post - ' . count(
 
 $wp_db = new MySQL('wp', 'local');
 foreach ($all_availability as $availability) {
-    echo 'post_id' . $availability->post_id . ' - ';
+    // echo 'post_id' . $availability->post_id . ' - ';
+    file_put_contents(LOG_DIR . '/remove-data.log', ' | Post - ' . $availability->post_id, FILE_APPEND);
     $query = $wp_db->pdo->prepare("SELECT `meta_value` FROM `wp_postmeta` WHERE `meta_key` = 'rz_gallery' AND `post_id` = ?");
     $query->execute([$availability->post_id]);
     $rows = $query->fetchAll();
