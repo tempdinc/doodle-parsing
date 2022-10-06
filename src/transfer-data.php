@@ -249,8 +249,8 @@ foreach ($all_availability as $availability) {
                 $filename_counter++;
             }
             /* IMAGE NAME CHECKING END */
-            $unit_link = $availability->source;
-            if($unit_link == 'rentprogress.com') {
+            $unit_source = $availability->source;
+            if($unit_source == 'rentprogress.com') {
                 cropImage($filename_path,100,82);
             }
             // echo $filename . PHP_EOL;
@@ -475,7 +475,7 @@ function cropImage($image,$crop_width,$crop_height) {
     $new_image_height = round($image_height * $crop_height * 0.01);
     $im2 = imagecrop($im, ['x' => 0, 'y' => 0, 'width' => $new_image_width, 'height' => $new_image_height]);
     if ($im2 !== FALSE) {
-        imagepng($im2, $image);
+        imagejpeg($im2, $image);
         imagedestroy($im2);
     }
     imagedestroy($im);
