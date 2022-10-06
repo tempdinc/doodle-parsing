@@ -251,10 +251,14 @@ foreach ($all_availability as $availability) {
                 $filename_counter++;
             }
             /* IMAGE NAME CHECKING END */
+            $unit_link = $availability->source;
+            if($unit_link == 'rentprogress.com') {
+                cropImage($filename_path,100,82);
+            }
             // echo $filename . PHP_EOL;
             // removeExif($filename_path);
             file_put_contents($filename_path, file_get_contents($value));
-            $moveToWP = moveToWp($filename_path);
+            $moveToWP = moveToWp($filename_path,$availability_address);
             if($moveToWP) {
                 $wpImageId = (object)array('id' => (string)$moveToWP);
                 array_push($wpImageArray,$wpImageId);
@@ -463,7 +467,21 @@ function removeExif($incoming_file) {
     }
 }
 
-function moveToWp ($image_url) {
+function cropImage($image,$crop_width,$crop_height) {
+    $im = imagecreatefromjpeg($image);
+    $image_width = imagesx($im);
+    $image_height = imagesy($im);
+    $new_image_width = round($image_width * $crop_width * 0.01);
+    $new_image_height = round($image_height * $crop_height * 0.01);
+    $im2 = imagecrop($im, ['x' => 0, 'y' => 0, 'width' => $new_image_width, 'height' => $new_image_height]);
+    if ($im2 !== FALSE) {
+        imagepng($im2, $image);
+        imagedestroy($im2);
+    }
+    imagedestroy($im);
+}
+
+function moveToWp ($image_url,$alt_text) {
     // $image_url = 'adress img';
     try {
         $upload_dir = wp_upload_dir();
@@ -488,6 +506,7 @@ function moveToWp ($image_url) {
         require_once( ABSPATH . 'wp-admin/includes/image.php' );
         $attach_data = wp_generate_attachment_metadata( $attach_id, $file );
         wp_update_attachment_metadata( $attach_id, $attach_data );
+        update_post_meta( $attach_id, '_wp_attachment_image_alt', $alt_text );
         return $attach_id;
     } catch(Exception $e) {
         echo($e->getMessage());

@@ -33,6 +33,7 @@ class ParseLinkPageRentProgressCom
      */
     public function parse()
     {
+        $source = 'rentprogress.com';
         $content = new Document($this->content);
         $type = 'House';
         //Info block
@@ -126,6 +127,7 @@ class ParseLinkPageRentProgressCom
             'on_premise_services' => $amenitiesCommunityList,
             'on_premise_features' => $amenitiesList,
             'link' => $this->task['link'],
+            'source' => $source,
             'longitude' => $this->task['location']['lng'],
             'latitude' => $this->task['location']['lat']
         ];

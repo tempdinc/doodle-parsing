@@ -10,6 +10,7 @@ class DataCrawlerApartmentsCom
 {
     public function parse($document, $uri, $method, $by = null)
     {
+        $source = 'apartments.com';
         if ($document != '') {
             file_put_contents(LOG_DIR . '/apartments-com-data-crawler.log', '[' . date('Y-m-d H:i:s') . '] ' . $uri . ' - ' . $method . PHP_EOL, FILE_APPEND);
             if ($method === 'get_links') {
@@ -432,6 +433,7 @@ class DataCrawlerApartmentsCom
                                 `walk_score`,
                                 `transit_score`,
                                 `link`,
+                                `source`,
                                 `city`,
                                 `zip5_cd`,
                                 `state_cd`,
@@ -446,7 +448,7 @@ class DataCrawlerApartmentsCom
                                 `expences`,
                                 `builiding_office_hours`,
                                 `date_added`
-                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                             $query->execute([
                                 $address,
                                 $type,
@@ -466,6 +468,7 @@ class DataCrawlerApartmentsCom
                                 $walkScore,
                                 $transitScore,
                                 $uri,
+                                $source,
                                 $city,
                                 $zip5Code,
                                 $state,
@@ -533,6 +536,7 @@ class DataCrawlerApartmentsCom
                             `walk_score`,
                             `transit_score`,
                             `link`,
+                            `source`,
                             `city`,
                             `zip5_cd`,
                             `state_cd`,
@@ -547,7 +551,7 @@ class DataCrawlerApartmentsCom
                             `expences`,
                             `builiding_office_hours`,
                             `date_added`
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                         $query->execute([
                             $address,
                             $type,
@@ -567,6 +571,7 @@ class DataCrawlerApartmentsCom
                             $walkScore,
                             $transitScore,
                             $uri,
+                            $source,
                             $city,
                             $zip5Code,
                             $state,

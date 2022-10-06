@@ -37,6 +37,9 @@ foreach ($all_availability as $availability) {
             $filename = __DIR__ . '/images/' . preg_replace($re, $subst, parse_url($value, PHP_URL_PATH));
             // echo $filename . PHP_EOL;
             file_put_contents($filename, file_get_contents($value));
+            echo $filename;
+            // $wpImageId = (object)array('id' => (string)moveToWp($filename));
+            cropImage($filename,100,82);
             $wpImageId = (object)array('id' => (string)moveToWp($filename));
             array_push($wpImageArray,$wpImageId);
             // echo file_put_contents($filename, file_get_contents($value));
@@ -45,6 +48,19 @@ foreach ($all_availability as $availability) {
     $rz_gallery = json_encode($wpImageArray);
 }
 
+function cropImage($image,$crop_width,$crop_height) {
+    $im = imagecreatefromjpeg($image);
+    $image_width = imagesx($im);
+    $image_height = imagesy($im);
+    $new_image_width = round($image_width * $crop_width * 0.01);
+    $new_image_height = round($image_height * $crop_height * 0.01);
+    $im2 = imagecrop($im, ['x' => 0, 'y' => 0, 'width' => $new_image_width, 'height' => $new_image_height]);
+    if ($im2 !== FALSE) {
+        imagepng($im2, $image);
+        imagedestroy($im2);
+    }
+    imagedestroy($im);
+}
 
 function moveToWp ($image_url) {
     // $image_url = 'adress img';
@@ -78,5 +94,6 @@ function moveToWp ($image_url) {
     require_once( ABSPATH . 'wp-admin/includes/image.php' );
     $attach_data = wp_generate_attachment_metadata( $attach_id, $file );
     wp_update_attachment_metadata( $attach_id, $attach_data );
+    // update_post_meta( $attach_id, '_wp_attachment_image_alt', $image_name );
     return $attach_id;
 }
