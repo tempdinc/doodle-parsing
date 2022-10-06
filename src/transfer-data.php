@@ -260,6 +260,8 @@ foreach ($all_availability as $availability) {
             if($moveToWP) {
                 $wpImageId = (object)array('id' => (string)$moveToWP);
                 array_push($wpImageArray,$wpImageId);
+            } else {
+                file_put_contents(LOG_DIR . '/transfer-data.log', ' | Error transferring WP - ' . $filename_path, FILE_APPEND);
             }
         }
     }
@@ -486,18 +488,18 @@ function moveToWp ($image_url,$alt_text) {
         $image_data = file_get_contents( $image_url );
         $filename = basename( $image_url );
         if ( wp_mkdir_p( $upload_dir['path'] ) ) {
-        $file = $upload_dir['path'] . '/' . $filename;
+            $file = $upload_dir['path'] . '/' . $filename;
         }
         else {
-        $file = $upload_dir['basedir'] . '/' . $filename;
+            $file = $upload_dir['basedir'] . '/' . $filename;
         }
         file_put_contents( $file, $image_data );
         $wp_filetype = wp_check_filetype( $filename, null );
         $attachment = array(
-        'post_mime_type' => $wp_filetype['type'],
-        'post_title' => sanitize_file_name( $filename ),
-        'post_content' => '',
-        'post_status' => 'inherit'
+            'post_mime_type' => $wp_filetype['type'],
+            'post_title' => sanitize_file_name( $filename ),
+            'post_content' => '',
+            'post_status' => 'inherit'
         );
         $attach_id = wp_insert_attachment( $attachment, $file );
         // echo 'attach_id - ' . $attach_id . PHP_EOL;
