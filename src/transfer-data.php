@@ -248,6 +248,7 @@ foreach ($all_availability as $availability) {
                 $is_file_exist = isFileExist($filename_path);
                 $filename_counter++;
             }
+            file_put_contents($filename_path, file_get_contents($value));            
             /* IMAGE NAME CHECKING END */
             $unit_source = $availability->source;
             if($unit_source == 'rentprogress.com') {
@@ -255,7 +256,6 @@ foreach ($all_availability as $availability) {
             }
             // echo $filename . PHP_EOL;
             // removeExif($filename_path);
-            file_put_contents($filename_path, file_get_contents($value));
             $moveToWP = moveToWp($filename_path,$availability_address);
             if($moveToWP) {
                 $wpImageId = (object)array('id' => (string)$moveToWP);
