@@ -129,7 +129,7 @@ class QueueRentProgressCom
 
             return true;
         } elseif ($request['http_code'] === 403 || $request['http_code'] === 0) {
-            file_put_contents(LOG_DIR . '/parse-problem.log', '[' . date('Y-m-d H:i:s') . '] Msg:' . $e->getMessage() . "\nCode:" . $request['http_code'] . ' - ' . $task['link'] . PHP_EOL, FILE_APPEND);
+            file_put_contents(LOG_DIR . '/parse-problem.log', '[' . date('Y-m-d H:i:s') . '] Code:' . $request['http_code'] . ' - ' . $task['link'] . PHP_EOL, FILE_APPEND);
             Redis::init()->rpush('tasks', json_encode([
                 'link' => $task['link'],
                 'class' => $task['class'],
@@ -138,9 +138,9 @@ class QueueRentProgressCom
 
             return false;
         } elseif ($request['http_code'] === 404) {
-            file_put_contents(LOG_DIR . '/404links.log', '[' . date('Y-m-d H:i:s') . '] Msg:' . $e->getMessage() . "\nCode:" . $request['http_code'] . ' - ' . $task['link'] . PHP_EOL, FILE_APPEND);
+            file_put_contents(LOG_DIR . '/404links.log', '[' . date('Y-m-d H:i:s') . '] Code:' . $request['http_code'] . ' - ' . $task['link'] . PHP_EOL, FILE_APPEND);
         } else {
-            file_put_contents(LOG_DIR . '/parse-problem.log', '[' . date('Y-m-d H:i:s') . '] Msg:' . $e->getMessage() . "\nCode:" . $request['http_code'] . ' - ' . $task['link'] . PHP_EOL, FILE_APPEND);
+            file_put_contents(LOG_DIR . '/parse-problem.log', '[' . date('Y-m-d H:i:s') . '] Code:' . $request['http_code'] . ' - ' . $task['link'] . PHP_EOL, FILE_APPEND);
         }
 
         // If response is != 200, pushing the task again
