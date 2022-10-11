@@ -34,6 +34,10 @@ class ParseUrlRentProgressCom
         $class = '\\App\\Classes\\ParseLinkPageRentProgressCom';
 
         foreach ($this->contents['mapResults'] as $content) {
+            // echo $content['pageUrl'] . PHP_EOL;
+            if (mb_substr($content['pageUrl'], 0, 1) == '/') {
+                $content['pageUrl'] = 'https://rentprogress.com' . $content['pageUrl'];
+            }
             Redis::init()->rpush('tasks', json_encode([
                 'link'      => $content['pageUrl'],
                 'class'     => $class,
