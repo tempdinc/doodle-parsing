@@ -8,6 +8,9 @@ class StormProxy
     {
         $ch = curl_init();
 
+        // echo $referer;
+        echo $url . PHP_EOL;
+
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_HEADER, false);
