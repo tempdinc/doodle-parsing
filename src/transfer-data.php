@@ -453,7 +453,7 @@ function replace_string($string)
 function clear_description($string)
 {
     $string = str_replace('.com', '-com', $string);
-    $search_strings = array('rentprogress', 'zillow', 'apartments-com', 'hotpads', 'contact', 'phone', '@', 'Progress', 'call', 'Application Coordinator', 'Managed By', 'Website', 'Email', 'email', 'Leasing Specialists');
+    $search_strings = array('rentprogress', 'zillow', 'apartments-com', 'hotpads', 'contact', 'phone', '@', 'Progress', 'call', 'Application Coordinator', 'Managed By', 'Website', 'Email', 'email', 'Leasing Specialists', 'credit', 'click');
     $array_strings = explode('.', $string);
     foreach ($array_strings as $key => $value) {
         foreach ($search_strings as $search_string) {
