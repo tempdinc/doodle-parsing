@@ -269,168 +269,174 @@ foreach ($all_availability as $availability) {
             }
         }
     }
+
+    // Checking for images of post
+    $is_gallery_empty = (count($wpImageArray) == 0) ? true : false;
     $rz_gallery = json_encode($wpImageArray);
     clearImages();
 
-    $date = date('Y-m-d H:i:s');
-    $gmdate = gmdate('Y-m-d H:i:s');
-    $unit_description = ($availability->building_desc !== NULL && $availability->building_desc != '') ? clear_description($availability->building_desc) : 'This home is priced to rent and won\'t be around for long. Apply now, while the current residents are preparing to move out.';
-    $query = $wp_db->pdo->prepare("INSERT INTO `wp_posts` (
-        `post_date`,
-        `post_date_gmt`,
-        `post_content`,
-        `post_title`,
-        `post_excerpt`,
-        `post_status`,
-        `comment_status`,
-        `ping_status`,
-        `post_password`,
-        `post_name`,
-        `to_ping`,
-        `pinged`,
-        `post_modified`,
-        `post_modified_gmt`,
-        `post_content_filtered`,
-        `post_parent`,
-        `guid`,
-        `menu_order`,
-        `post_type`,
-        `post_mime_type`,
-        `comment_count`
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $query->execute([
-        $date,
-        $gmdate,
-        $unit_description,
-        $availability_address,
-        $unit_description,
-        'draft',
-        'closed',
-        'closed',
-        '',
-        $availability_address_lc,
-        '',
-        '',
-        $date,
-        $gmdate,
-        '',
-        0,
-        'https://tempdbookindev.wpengine.com/listing/' . $availability_address_lc,
-        0,
-        'rz_listing',
-        '',
-        0
-    ]);
-    // Now insert beds / baths / sqft / price
-    $wp_post_id = $wp_db->pdo->lastInsertId();
+    // Add post if it has images
+    if (!$is_gallery_empty) {
+        $date = date('Y-m-d H:i:s');
+        $gmdate = gmdate('Y-m-d H:i:s');
+        $unit_description = ($availability->building_desc !== NULL && $availability->building_desc != '') ? clear_description($availability->building_desc) : 'This home is priced to rent and won\'t be around for long. Apply now, while the current residents are preparing to move out.';
+        $query = $wp_db->pdo->prepare("INSERT INTO `wp_posts` (
+            `post_date`,
+            `post_date_gmt`,
+            `post_content`,
+            `post_title`,
+            `post_excerpt`,
+            `post_status`,
+            `comment_status`,
+            `ping_status`,
+            `post_password`,
+            `post_name`,
+            `to_ping`,
+            `pinged`,
+            `post_modified`,
+            `post_modified_gmt`,
+            `post_content_filtered`,
+            `post_parent`,
+            `guid`,
+            `menu_order`,
+            `post_type`,
+            `post_mime_type`,
+            `comment_count`
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $query->execute([
+            $date,
+            $gmdate,
+            $unit_description,
+            $availability_address,
+            $unit_description,
+            'draft',
+            'closed',
+            'closed',
+            '',
+            $availability_address_lc,
+            '',
+            '',
+            $date,
+            $gmdate,
+            '',
+            0,
+            'https://tempdbookindev.wpengine.com/listing/' . $availability_address_lc,
+            0,
+            'rz_listing',
+            '',
+            0
+        ]);
+        // Now insert beds / baths / sqft / price
+        $wp_post_id = $wp_db->pdo->lastInsertId();
 
-    $new_property_meta = [];
-    $np_rz_location__address = $availability->city . ', ' . $availability->state_cd . ', US';
-    $np_rz_location__state_country = $availability->state_cd . ', US';
-    $np_rz_location__address_line1 = $availability->addr_line_2;
-    $np_rz_location__address_line2 = $availability->city . ', ' . $availability->state_cd . ' ' . $availability->zip5_cd;
-    $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $availability->av_bathroom_cnt)); // rz_bathrooms
-    $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $availability->av_bedroom_cnt)); // rz_bed
-    $sqft = trim(preg_replace("/[a-zA-Z]/", "", $availability->av_home_size_sq_ft)); // rz_sqft
-    $listing_price = clearPrice($availability->av_listing_price);
+        $new_property_meta = [];
+        $np_rz_location__address = $availability->city . ', ' . $availability->state_cd . ', US';
+        $np_rz_location__state_country = $availability->state_cd . ', US';
+        $np_rz_location__address_line1 = $availability->addr_line_2;
+        $np_rz_location__address_line2 = $availability->city . ', ' . $availability->state_cd . ' ' . $availability->zip5_cd;
+        $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $availability->av_bathroom_cnt)); // rz_bathrooms
+        $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $availability->av_bedroom_cnt)); // rz_bed
+        $sqft = trim(preg_replace("/[a-zA-Z]/", "", $availability->av_home_size_sq_ft)); // rz_sqft
+        $listing_price = clearPrice($availability->av_listing_price);
 
-    // Adding ranking
-    $rz_ranking = '0';
-    switch ($unit_source) {
-        case 'rentprogress.com':
-            $rz_ranking = '2';
-            break;
-        case 'apartments.com':
-            $rz_ranking = '1';
-            break;
-    }
-
-    // array_push($new_property_meta, $np_rz_location__address, $meta_keys_value[1], $meta_keys_value[2], $meta_keys_value[3], $availability->longitude, $availability->latitude, $meta_keys_value[6], $meta_keys_value[7], $meta_keys_value[8], $meta_keys_value[9], $meta_keys_value[10], $meta_keys_value[11], $meta_keys_value[12], $meta_keys_value[13], $meta_keys_value[14], $meta_keys_value[15], $meta_keys_value[16], $meta_keys_value[17], $meta_keys_value[18], $meta_keys_value[19], $meta_keys_value[20]);
-    $new_property_meta = [
-        '_edit_last' => '',
-        '_edit_lock' => '',
-        'inline_featured_image' => '0',
-        'post_content' => $unit_description,
-        'rz_addons' => '[]',
-        'rz_apartment_uri' => $availability->link,
-        'rz_bathrooms' => $bath_count,
-        'rz_bed' => $bed_count,
-        'rz_bedroom' => $bed_count,
-        'rz_booking_type' => 'Request booking',
-        'rz_checkin' => '',
-        'rz_checkout' => '',
-        'rz_city' => $availability->city,
-        'rz_extra_pricing' => '[]',
-        'rz_featured_benefit' => '',
-        'rz_furniture' => '',
-        'rz_gallery' => '',
-        'rz_guest_price' => '',
-        'rz_guests' => '',
-        'rz_house-rules-summary' => '',
-        'rz_instant' => '',
-        'rz_listing_category' => '',
-        'rz_listing_region' => '',
-        'rz_listing_type' => '25769',
-        'rz_location' => '',
-        'rz_location' => '',
-        'rz_location' => '',
-        'rz_location' => $availability->longitude,
-        'rz_location' => $availability->latitude,
-        'rz_location' => $np_rz_location__address,
-        'rz_location__address' => $np_rz_location__address,
-        'rz_location__geo_city' => '',
-        'rz_location__geo_city_alt' => '',
-        'rz_location__geo_country' => '',
-        'rz_location__lat' => $availability->latitude,
-        'rz_location__lng' => $availability->longitude,
-        'rz_long_term_month' => '',
-        'rz_long_term_week' => '',
-        'rz_neighborhood' => '',
-        'rz_post_address1' => $np_rz_location__address_line1,
-        'rz_post_address2' => $np_rz_location__address_line2,
-        'rz_price' => $listing_price,
-        'rz_price_seasonal' => '[]',
-        'rz_price_weekend' => '',
-        'rz_priority' => '0',
-        'rz_priority_custom' => '0',
-        'rz_priority_selection' => 'normal',
-        'rz_reservation_length_max' => '0',
-        'rz_reservation_length_min' => '0',
-        'rz_security_deposit' => '',
-        'rz_sqft' => $sqft,
-        'rz_state' => $availability->state_cd,
-        'rz_status' => 'Now',
-        'rz_street_line_1' => $np_rz_location__address_line1,
-        'rz_street_line_2' => $np_rz_location__address_line2,
-        'rz_the-space' => '',
-        'rz_things-to-know' => '',
-        'rz_verif' => '',
-        'rz_zip' => $availability->zip5_cd,
-        'rz_gallery' => $rz_gallery,
-        'rz_ranking' => $rz_ranking
-    ];
-    $full_property_meta =  array_merge($new_property_meta, $apartment_amenities);
-    if (isset($wp_post_id) && $wp_post_id != 0) {
-        foreach ($full_property_meta as $key => $value) {
-            $query = $wp_db->pdo->prepare("INSERT INTO `wp_postmeta` (`post_id`,`meta_key`,`meta_value`) VALUES (?, ?, ?)");
-            $query->execute([$wp_post_id, $key, $value]);
+        // Adding ranking
+        $rz_ranking = '0';
+        switch ($unit_source) {
+            case 'rentprogress.com':
+                $rz_ranking = '2';
+                break;
+            case 'apartments.com':
+                $rz_ranking = '1';
+                break;
         }
-        if (!empty($decoded_premise_services)) {
-            foreach ($decoded_premise_services as $key => $value) {
-                foreach ($value as $data) {
-                    $term_id = array_search($data, $apartment_amenities_list);
-                    if ($term_id) {
-                        $query = $wp_db->pdo->prepare("INSERT INTO `wp_postmeta` (`post_id`,`meta_key`,`meta_value`) VALUES (?, ?, ?)");
-                        $query->execute([$wp_post_id, 'rz_amenities', $term_id]);
+
+        $new_property_meta = [
+            '_edit_last' => '',
+            '_edit_lock' => '',
+            'inline_featured_image' => '0',
+            'post_content' => $unit_description,
+            'rz_addons' => '[]',
+            'rz_apartment_uri' => $availability->link,
+            'rz_bathrooms' => $bath_count,
+            'rz_bed' => $bed_count,
+            'rz_bedroom' => $bed_count,
+            'rz_booking_type' => 'Request booking',
+            'rz_checkin' => '',
+            'rz_checkout' => '',
+            'rz_city' => $availability->city,
+            'rz_extra_pricing' => '[]',
+            'rz_featured_benefit' => '',
+            'rz_furniture' => '',
+            'rz_guest_price' => '',
+            'rz_guests' => '',
+            'rz_house-rules-summary' => '',
+            'rz_instant' => '',
+            'rz_listing_category' => '',
+            'rz_listing_region' => '',
+            'rz_listing_type' => '25769',
+            'rz_location' => '',
+            'rz_location' => '',
+            'rz_location' => '',
+            'rz_location' => $availability->longitude,
+            'rz_location' => $availability->latitude,
+            'rz_location' => $np_rz_location__address,
+            'rz_location__address' => $np_rz_location__address,
+            'rz_location__geo_city' => '',
+            'rz_location__geo_city_alt' => '',
+            'rz_location__geo_country' => '',
+            'rz_location__lat' => $availability->latitude,
+            'rz_location__lng' => $availability->longitude,
+            'rz_long_term_month' => '',
+            'rz_long_term_week' => '',
+            'rz_neighborhood' => '',
+            'rz_post_address1' => $np_rz_location__address_line1,
+            'rz_post_address2' => $np_rz_location__address_line2,
+            'rz_price' => $listing_price,
+            'rz_price_seasonal' => '[]',
+            'rz_price_weekend' => '',
+            'rz_priority' => '0',
+            'rz_priority_custom' => '0',
+            'rz_priority_selection' => 'normal',
+            'rz_reservation_length_max' => '0',
+            'rz_reservation_length_min' => '0',
+            'rz_security_deposit' => '',
+            'rz_sqft' => $sqft,
+            'rz_state' => $availability->state_cd,
+            'rz_status' => 'Now',
+            'rz_street_line_1' => $np_rz_location__address_line1,
+            'rz_street_line_2' => $np_rz_location__address_line2,
+            'rz_the-space' => '',
+            'rz_things-to-know' => '',
+            'rz_verif' => '',
+            'rz_zip' => $availability->zip5_cd,
+            'rz_gallery' => $rz_gallery,
+            'rz_ranking' => $rz_ranking
+        ];
+        $full_property_meta =  array_merge($new_property_meta, $apartment_amenities);
+        if (isset($wp_post_id) && $wp_post_id != 0) {
+            foreach ($full_property_meta as $key => $value) {
+                $query = $wp_db->pdo->prepare("INSERT INTO `wp_postmeta` (`post_id`,`meta_key`,`meta_value`) VALUES (?, ?, ?)");
+                $query->execute([$wp_post_id, $key, $value]);
+            }
+            if (!empty($decoded_premise_services)) {
+                foreach ($decoded_premise_services as $key => $value) {
+                    foreach ($value as $data) {
+                        $term_id = array_search($data, $apartment_amenities_list);
+                        if ($term_id) {
+                            $query = $wp_db->pdo->prepare("INSERT INTO `wp_postmeta` (`post_id`,`meta_key`,`meta_value`) VALUES (?, ?, ?)");
+                            $query->execute([$wp_post_id, 'rz_amenities', $term_id]);
+                        }
                     }
                 }
             }
         }
+        $query = $parsing_db->pdo->prepare("UPDATE `availability` SET `post_id` = ? WHERE `id` = ?");
+        $query->execute([$wp_post_id, $availability->av_id]);
+        file_put_contents(LOG_DIR . '/wp_posts.log', $wp_post_id . ' | ', FILE_APPEND);
+        // echo 'Added post - ' . $wp_post_id . ' | ';
+    } else {
+        echo 'No images for post';
     }
-    $query = $parsing_db->pdo->prepare("UPDATE `availability` SET `post_id` = ? WHERE `id` = ?");
-    $query->execute([$wp_post_id, $availability->av_id]);
-    file_put_contents(LOG_DIR . '/wp_posts.log', $wp_post_id . ' | ', FILE_APPEND);
-    // echo 'Added post - ' . $wp_post_id . ' | ';
 }
 
 echo " >>> " . date("Y-m-d H:i:s") . " - End.." . PHP_EOL;
