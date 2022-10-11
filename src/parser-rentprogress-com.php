@@ -33,6 +33,14 @@ file_put_contents(LOG_DIR . '/rentprogress-com.log', '[' . date('Y-m-d H:i:s') .
 
 $filter = '';
 
+if (isset($argv[1]) && $argv[1] === 'moveinready') {
+    $filter = '.moveinready';
+}
+
+if (isset($argv[2]) && $argv[2] === 'moveinready') {
+    $filter = '.moveinready';
+}
+
 if (isset($argv[1]) && $argv[1] === 'update') { // Giving parser the task to check records relevance
     /*
     echo "Update.." . PHP_EOL;
@@ -54,7 +62,7 @@ if (isset($argv[1]) && $argv[1] === 'update') { // Giving parser the task to che
     */
     echo "Update.. ";
     file_put_contents(LOG_DIR . '/rentprogress-com.log', 'Update.. ', FILE_APPEND);
-    $db = new MySQL('parsing','local');
+    $db = new MySQL('parsing', 'local');
     $redis = Redis::init();
     $redis->flushall();
     $dateNow = date('Y-m-d H:i:s');
@@ -97,7 +105,8 @@ if (isset($argv[1]) && $argv[1] === 'update') { // Giving parser the task to che
             foreach ($citiesArray as $city) {
                 $city = str_replace(' ', '-', strtolower($city));
                 $code = strtolower($code);
-                $base_link = 'https://rentprogress.com/bin/progress-residential/property-search.market-' . urlencode($city . '-' . $code) . '.json';
+                $base_link = 'https://rentprogress.com/bin/progress-residential/property-search.market-' . urlencode($city . '-' . $code) . $filter . '.json';
+                echo $base_link;
                 $redis->rpush('tasks', json_encode([
                     'class' => $class,
                     'link'  => $base_link
@@ -114,7 +123,7 @@ $parse_counter = lines(LOG_DIR . '/rentprogress-com-data-crawler.log');
 $parse_problem_counter = lines(LOG_DIR . '/parse-problem.log');
 $parse_404_counter = lines(LOG_DIR . '/404links.log');
 
-echo ">>> " . date("Y-m-d H:i:s") ." - End.. Links processed:" . $parse_counter . " \033[31mParse problems received:" . $parse_problem_counter . "\033[0m" . " \033[34mError 404 received:" . $parse_404_counter . "\033[0m" . PHP_EOL;
+echo ">>> " . date("Y-m-d H:i:s") . " - End.. Links processed:" . $parse_counter . " \033[31mParse problems received:" . $parse_problem_counter . "\033[0m" . " \033[34mError 404 received:" . $parse_404_counter . "\033[0m" . PHP_EOL;
 file_put_contents(LOG_DIR . '/rentprogress-com.log', '>>> [' . date('Y-m-d H:i:s') . '] - End.. Links processed:' . $parse_counter . ' Parse problems received:' . $parse_problem_counter . ' Error 404 received:' . $parse_404_counter  . PHP_EOL, FILE_APPEND);
 
 // Stop signals handler
@@ -126,10 +135,11 @@ function signalHandler($signal)
 }
 
 // Count files lines
-function lines($file) { 
-    if(!file_exists($file)) return 0;
+function lines($file)
+{
+    if (!file_exists($file)) return 0;
 
-    $file_arr = file($file); 
-    $lines = count($file_arr); 
-    return $lines; 
-} 
+    $file_arr = file($file);
+    $lines = count($file_arr);
+    return $lines;
+}
