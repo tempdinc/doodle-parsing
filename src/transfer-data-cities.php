@@ -15,6 +15,9 @@ echo date("Y-m-d H:i:s") . " Start transfer parsed data";
 file_put_contents(LOG_DIR . '/transfer-data.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ', FILE_APPEND);
 
 $limit = '1000';
+if (isset($argv[1]) && $argv[1] === 'limit20') {
+    $limit = '20';
+}
 if (isset($argv[1]) && $argv[1] === 'limit50') {
     $limit = '50';
 }
