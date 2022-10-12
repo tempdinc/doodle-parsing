@@ -1,7 +1,6 @@
 [
     {
         "TX": [
-            "DALLAS",
             "HOUSTON"
         ],
         "CO": [
@@ -22,9 +21,6 @@
         ],
         "PA": [
             "PHILADELPHIA"
-        ],
-        "IL": [
-            "CHICAGO"
         ]
     }
 ]
