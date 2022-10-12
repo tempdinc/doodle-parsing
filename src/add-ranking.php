@@ -8,7 +8,7 @@ use App\Classes\MySQL;
 require_once __DIR__ . '/bootstrap.php';
 // require_once '../../wp-load.php';
 
-$rz_listing_type = '25769';
+$rz_listing_type = '380';
 $rz_ranking = '4';
 
 // Start transfer
