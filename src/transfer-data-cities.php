@@ -31,7 +31,7 @@ if (isset($argv[1]) && $argv[1] === 'limit500') {
 /**
  * create cities array
  */
-$citiesDB = file_get_contents(__DIR__ . '/cities.json');
+$citiesDB = file_get_contents(__DIR__ . '/cities-xs.json');
 $citiesDB = json_decode($citiesDB, true);
 $required_cities = [];
 foreach ($citiesDB as $states) {

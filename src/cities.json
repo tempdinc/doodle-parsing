@@ -1,13 +1,16 @@
 [
     {
         "TX": [
-            "DALLAS","AUSTIN","HOUSTON"
+            "DALLAS",
+            "AUSTIN",
+            "HOUSTON"
         ],
         "CO": [
             "DENVER"
         ],
         "CA": [
-            "SAN DIEGO","LOS ANGELES"
+            "SAN DIEGO",
+            "LOS ANGELES"
         ],
         "AZ": [
             "PHOENIX"
