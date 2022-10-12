@@ -14,6 +14,11 @@ require_once '../../wp-load.php';
 echo date("Y-m-d H:i:s") . " Start transfer parsed data";
 file_put_contents(LOG_DIR . '/transfer-data.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ', FILE_APPEND);
 
+$limit = '1000';
+if (isset($argv[1]) && $argv[1] === 'limit') {
+    $limit = '300';
+}
+
 /**
  * create cities array
  */
@@ -215,7 +220,7 @@ foreach ($apartment_amenities_rows as $apartment_amenity_row) {
 // Getting all parsed
 $parsing_db = new MySQL('parsing', 'local');
 foreach ($required_cities as $required_city) {
-    $all_availability = $parsing_db->getAvailabilityByCity($required_city);
+    $all_availability = $parsing_db->getAvailabilityByCity($required_city, $limit);
     echo " \033[34mNew units - " . count($all_availability) . "\033[0m";
     file_put_contents(LOG_DIR . '/transfer-data.log', ' | New units - ' . count($all_availability), FILE_APPEND);
 
