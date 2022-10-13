@@ -320,7 +320,7 @@ foreach ($all_availability as $availability) {
             $gmdate,
             '',
             0,
-            'https://tempdbookindev.wpengine.com/listing/' . $availability_address_lc,
+            'https://tempd.com/listing/' . $availability_address_lc,
             0,
             'rz_listing',
             '',
