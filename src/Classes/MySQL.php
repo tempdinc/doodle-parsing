@@ -335,6 +335,25 @@ class MySQL
     }    
 
     /**
+     * Getting all records from availability by property_id
+     *
+     * @param  string $property_id
+     * @return array
+     */
+    public function getPostsRZListing($listing_type)
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT wp.id, wt.meta_value FROM `wp_posts` wp LEFT JOIN `wp_postmeta` wt ON wp.id = wt.post_id WHERE wp.post_type = 'rz_listing' AND wt.meta_key = 'rz_listing_type' AND wt.meta_value = ?"
+            );
+            $query->execute([$listing_type]);
+            return $query->fetchAll();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }        
+
+    /**
      * Searching for the records by ID
      *
      * @param  string $table
