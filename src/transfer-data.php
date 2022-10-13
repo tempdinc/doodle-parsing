@@ -332,7 +332,7 @@ foreach ($all_availability as $availability) {
         $new_property_meta = [];
         $np_rz_location__address = $availability->city . ', ' . $availability->state_cd . ', US';
         $np_rz_location__state_country = $availability->state_cd . ', US';
-        $np_rz_location__address_line1 = $availability->addr_line_2;
+        $np_rz_location__address_line1 = (isset($availability->addr_line_1) && $availability->addr_line_1 !== NULL && $availability->addr_line_1 != '') ? $availability->addr_line_1 . ' - ' . $availability->addr_line_2 : $availability->addr_line_2;
         $np_rz_location__address_line2 = $availability->city . ', ' . $availability->state_cd . ' ' . $availability->zip5_cd;
         $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $availability->av_bathroom_cnt)); // rz_bathrooms
         $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $availability->av_bedroom_cnt)); // rz_bed

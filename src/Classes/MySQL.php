@@ -316,6 +316,25 @@ class MySQL
     }
 
     /**
+     * Getting all records from availability by property_id
+     *
+     * @param  string $property_id
+     * @return array
+     */
+    public function getAvailabilityWithPostWithProperty()
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT a.id AS av_id, a.post_id AS av_post_id, a.is_deleted AS av_is_deleted, a.property_id AS av_property_id, a.bedroom_cnt AS av_bedroom_cnt, a.bathroom_cnt as av_bathroom_cnt, a.listing_price AS av_listing_price, a.home_size_sq_ft AS av_home_size_sq_ft, a.lease_length AS av_lease_length, a.status AS av_status, a.image_urls AS av_image_urls, a.date_added AS a_date_added, p.* FROM `availability` a LEFT JOIN `properties` p ON a.property_id = p.id WHERE a.post_id is NOT NULL AND p.source = 'rentprogress.com'"
+            );
+            $query->execute();
+            return $query->fetchAll();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }    
+
+    /**
      * Searching for the records by ID
      *
      * @param  string $table

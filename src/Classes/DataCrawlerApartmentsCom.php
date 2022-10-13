@@ -40,7 +40,7 @@ class DataCrawlerApartmentsCom
                     }
                 }
             } elseif ($method === 'parse') {
-                $db = new MySQL('parsing','local');
+                $db = new MySQL('parsing', 'local');
                 $query = $db->pdo->prepare("SELECT count(*) FROM `properties` WHERE `link` = ? LIMIT 1");
                 $query->execute([$uri]);
                 $isDuplicate = $query->fetchColumn();
@@ -95,7 +95,7 @@ class DataCrawlerApartmentsCom
                     $contactPerson = isset($document->find('div.agentFullName')[0]) ? trim($document->find('div.agentFullName')[0]->text()) : '';
                     // building description
                     $descriptionSection = $document->find('section.descriptionSection')[0];
-                    if(isset($descriptionSection) && $descriptionSection !='') {
+                    if (isset($descriptionSection) && $descriptionSection != '') {
                         $buildingDesc = isset($descriptionSection->find('.propertyBlurbContent')[0]) ?
                             $this->clearText($descriptionSection->find('.propertyBlurbContent')[0]->text()) : '';
                     }
@@ -119,6 +119,10 @@ class DataCrawlerApartmentsCom
                         $this->clearText($document->find('div.propertyAddressContainer span.stateZipContainer')[0]->find('span')[2]->text()) : [];
                     $city = isset($document->find('div.propertyAddressContainer')[0]) ?
                         $this->clearText($document->find('div.propertyAddressContainer')[0]->find('span')[1]->text()) : [];
+                    $city_crumb = isset($document->find('span.crumb')[2]) ? $document->find('span.crumb')[2]->first('a')->attr('data-type') : '';
+                    if ($city_crumb == 'city') {
+                        $city = $this->clearText($document->find('span.crumb')[2]->first('a')->text());
+                    }
                     //on_promise_services and on_promise_features
                     $amenitiesSection = isset($document->find('section.amenitiesSection')[0]) ?
                         $document->find('section.amenitiesSection')[0]->find('div.spec') : [];
@@ -130,7 +134,7 @@ class DataCrawlerApartmentsCom
                         // var_dump($section_amenitiesSection);
                         if ($section_amenitiesSection) {
                             $section_amenitiesSection_title = $section_amenitiesSection->find('h2.sectionTitle');
-                            if($section_amenitiesSection_title && $section_amenitiesSection_title[0]->text() == 'Apartment Features') { //for block Apartment Features
+                            if ($section_amenitiesSection_title && $section_amenitiesSection_title[0]->text() == 'Apartment Features') { //for block Apartment Features
                                 $appartmentFeatures = $this->amenitiesBlock($amenitiesSection[0]->find('div.specGroup'));
                             } else { //for block Community Amenities
                                 $amenitiesList = $this->amenitiesBlock($amenitiesSection[0]->find('div.specGroup'));
@@ -156,7 +160,7 @@ class DataCrawlerApartmentsCom
 
                     $availabilityInfo = $document->find('.availabilityInfo');
                     // Single House availability
-                    if(isset($availabilityInfo) && !empty($availabilityInfo) && count($availabilityInfo) == 1) {
+                    if (isset($availabilityInfo) && !empty($availabilityInfo) && count($availabilityInfo) == 1) {
                         // bedroom count
                         $bedroomCnt = isset($document->find('.priceBedRangeInfoInnerContainer')[1]->find('.rentInfoDetail')[0]) ?
                             $this->clearText($document->find('.priceBedRangeInfoInnerContainer')[1]->find('.rentInfoDetail')[0]->text()) : '';
@@ -186,10 +190,10 @@ class DataCrawlerApartmentsCom
                             'status' => $status,
                             'image_urls' => ''
                         ]);
-                    // Single House availability END
+                        // Single House availability END
                     } elseif ($document->find('#bedsFilterContainer')) {
                         $section_all = $document->find('div.tab-section')[0];
-                        if(isset($section_all) && $section_all != '') {
+                        if (isset($section_all) && $section_all != '') {
                             $pricingGridItems = $section_all->find('.pricingGridItem');
                             for ($i = 0; $i < count($pricingGridItems); $i++) {
                                 $pricingGridItem = $pricingGridItems[$i];
@@ -201,29 +205,29 @@ class DataCrawlerApartmentsCom
                                 $bathroomCnt = isset($detailsTextWrapper->find('span')[2]) ?
                                     $this->clearText($detailsTextWrapper->find('span')[2]->text()) : '';
                                 $sqft = isset($detailsTextWrapper->find('span')[3]) ?
-                                    $this->clearText($detailsTextWrapper->find('span')[3]->text()) : '';      
+                                    $this->clearText($detailsTextWrapper->find('span')[3]->text()) : '';
                                 $listingPrice = isset($pricingGridItem->find('.rentLabel')[0]) ?
-                                    $this->clearText($pricingGridItem->find('.rentLabel')[0]->text()) : ''; 
+                                    $this->clearText($pricingGridItem->find('.rentLabel')[0]->text()) : '';
                                 $status = isset($pricingGridItem->find('.availabilityInfo')[0]) ?
-                                    $this->clearText($pricingGridItem->find('.availabilityInfo')[0]->text()) : 'Not Available';                             
+                                    $this->clearText($pricingGridItem->find('.availabilityInfo')[0]->text()) : 'Not Available';
                                 $unitGridContainer = $pricingGridItem->find('.unitGridContainer')[0];
-                                if(isset($unitGridContainer) && $unitGridContainer !== null) {
+                                if (isset($unitGridContainer) && $unitGridContainer !== null) {
                                     $unitContainers = $unitGridContainer->find('.unitContainer');
-                                    foreach($unitContainers as $unitContainer) {
+                                    foreach ($unitContainers as $unitContainer) {
                                         $pricingColumn = $unitContainer->find('.pricingColumn');
                                         $listingPriceSpan = $pricingColumn[0]->find('span');
                                         $listingPrice = (isset($listingPriceSpan) && $listingPriceSpan != null) ? $this->clearText($listingPriceSpan[1]->text()) : '';
                                         $sqftColumn = $unitContainer->find('.sqftColumn');
                                         $sqftSpan = $sqftColumn[0]->find('span');
-                                        $sqft = (isset($sqftSpan) && $sqftSpan != null) ? $this->clearText($sqftSpan[1]->text()) : '';   
+                                        $sqft = (isset($sqftSpan) && $sqftSpan != null) ? $this->clearText($sqftSpan[1]->text()) : '';
                                         $statusSpan = $unitContainer->find('.dateAvailable');
-                                        if(isset($statusSpan) && $statusSpan != null) {
-                                            $status = trim(str_replace('availibility','',$this->clearText($statusSpan[0]->text())));
+                                        if (isset($statusSpan) && $statusSpan != null) {
+                                            $status = trim(str_replace('availibility', '', $this->clearText($statusSpan[0]->text())));
                                         }
-                                        
+
                                         $rentalId = '';
                                         $rentalType = '';
-                                        $images = '';                                        
+                                        $images = '';
 
                                         $rentalId = $unitContainer->attr('data-rentalkey');
                                         $rentalType = $unitContainer->attr('data-rentaltype');
@@ -242,7 +246,7 @@ class DataCrawlerApartmentsCom
                                                 }
                                             }
                                             $images = json_encode($images, JSON_PRETTY_PRINT);
-                                        }                                        
+                                        }
                                         array_push($availability, [
                                             'bedroom_cnt' => $bedroomCnt,
                                             'bathroom_cnt' => $bathroomCnt,
@@ -251,7 +255,7 @@ class DataCrawlerApartmentsCom
                                             'lease_length' => '',
                                             'status' => $status,
                                             'image_urls' => $images
-                                        ]);                                    
+                                        ]);
                                     }
                                 } else {
                                     $floorplanButton = $pricingGridItem->find('.floorplanButton')[0];
@@ -278,7 +282,7 @@ class DataCrawlerApartmentsCom
                                             }
                                         }
                                         $images = json_encode($images, JSON_PRETTY_PRINT);
-                                    }                                    
+                                    }
                                     array_push($availability, [
                                         'bedroom_cnt' => $bedroomCnt,
                                         'bathroom_cnt' => $bathroomCnt,
@@ -287,7 +291,7 @@ class DataCrawlerApartmentsCom
                                         'lease_length' => '',
                                         'status' => $status,
                                         'image_urls' => $images
-                                    ]);                                     
+                                    ]);
                                 }
                             }
                         }
@@ -313,7 +317,7 @@ class DataCrawlerApartmentsCom
                             // status
                             $status = isset($tr->find('td.available')[0]) ?
                                 $this->clearText($tr->find('td.available')[0]->text()) : '';
-    
+
                             $rentalId = $tr->attr('data-rentalkey');
                             $rentalType = $tr->attr('data-rentaltype');
                             /*
@@ -331,7 +335,7 @@ class DataCrawlerApartmentsCom
                                     }
                                 }
                                 $images = json_encode($images, JSON_PRETTY_PRINT);
-                            }                            
+                            }
                             array_push($availability, [
                                 'bedroom_cnt' => $bedroomCnt,
                                 'bathroom_cnt' => $bathroomCnt,
@@ -621,14 +625,14 @@ class DataCrawlerApartmentsCom
                     }
                 }
             } elseif ($method === 'update') {
-                $db = new MySQL('parsing','local');
+                $db = new MySQL('parsing', 'local');
                 $date = date('Y-m-d H:i:s');
                 $query = $db->pdo->prepare("UPDATE `properties` SET `last_update` = ?, is_deleted = ? WHERE `link` = ?");
                 $query->execute([$date, 0, $uri]);
             }
         } else {
             if ($method === 'update') {
-                $db = new MySQL('parsing','local');
+                $db = new MySQL('parsing', 'local');
                 $date = date('Y-m-d H:i:s');
                 $query = $db->pdo->prepare("UPDATE `properties` SET `last_update` = ?, is_deleted = ? WHERE `link` = ?");
                 $query->execute([$date, 1, $uri]);

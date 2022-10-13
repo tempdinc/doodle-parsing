@@ -2,25 +2,6 @@
     {
         "TX": [
             "HOUSTON"
-        ],
-        "CO": [
-            "DENVER"
-        ],
-        "CA": [
-            "SAN DIEGO",
-            "LOS ANGELES"
-        ],
-        "AZ": [
-            "PHOENIX"
-        ],
-        "FL": [
-            "MIAMI"
-        ],
-        "GA": [
-            "ATLANTA"
-        ],
-        "PA": [
-            "PHILADELPHIA"
         ]
     }
 ]
