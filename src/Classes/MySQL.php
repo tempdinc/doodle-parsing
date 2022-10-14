@@ -226,11 +226,30 @@ class MySQL
      * @param  string $property_id
      * @return array
      */
-    public function getAllAvailability($property_id)
+    public function getAllUniquePropertyID()
     {
         try {
             $query = $this->pdo->prepare(
-                "SELECT * FROM `availability` WHERE property_id = ?"
+                "SELECT DISTINCT (property_id) FROM `availability` WHERE post_id IS NOT NULL"
+            );
+            $query->execute();
+            return $query->fetchAll();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }
+
+    /**
+     * Getting all records from availability by property_id
+     *
+     * @param  string $property_id
+     * @return array
+     */
+    public function getAllAvailabilityWithPostByProperty($property_id)
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT * FROM `availability` WHERE post_id IS NOT NULL AND property_id = ? ORDER BY id DESC"
             );
             $query->execute([$property_id]);
             return $query->fetchAll();
@@ -245,7 +264,7 @@ class MySQL
      * @param  string $property_id
      * @return array
      */
-    public function getAvailabilityProperty($property_id)
+    public function getAvailabilityNowByProperty($property_id)
     {
         try {
             $query = $this->pdo->prepare(
@@ -332,7 +351,7 @@ class MySQL
         } catch (\Exception $ex) {
             die($ex->getMessage());
         }
-    }    
+    }
 
     /**
      * Getting all records from availability by property_id
@@ -351,7 +370,7 @@ class MySQL
         } catch (\Exception $ex) {
             die($ex->getMessage());
         }
-    }        
+    }
 
     /**
      * Searching for the records by ID
