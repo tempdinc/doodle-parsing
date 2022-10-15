@@ -40,8 +40,8 @@ foreach ($unique_properties as $property) {
         }
         echo ' | ' . count($all_availability) . PHP_EOL;
     } else {
-        echo 'post_id' . $all_availability[0]->post_id . ' | property_id ' . $property->property_id . PHP_EOL;
-        $query = $parsing_db->pdo->prepare("UPDATE `properties` SET `post_id` = ? AND `image_urls` = ? WHERE `id` = ?");
+        echo "\033[34mpost_id" . $all_availability[0]->post_id . ' | property_id ' . $property->property_id . "\033[0m" . PHP_EOL;
+        $query = $parsing_db->pdo->prepare("UPDATE `properties` SET `post_id` = ?, `image_urls` = ? WHERE `id` = ?");
         $query->execute([$all_availability[0]->post_id, $all_availability[0]->image_urls, $property->property_id]);
     }
 }
