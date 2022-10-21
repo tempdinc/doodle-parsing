@@ -373,6 +373,42 @@ class MySQL
     }
 
     /**
+     * Getting all records from availability by property_id
+     *
+     * @param  string $property_id
+     * @return array
+     */
+    public function getAllPostsRZListing($limit_start,$limit)
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT wp.id FROM `wp_posts` wp WHERE wp.post_type = 'rz_listing' ORDER BY wp.id DESC LIMIT ?,?"
+            );
+            $query->execute([$limit_start,$limit]);
+            return $query->fetchAll();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }
+    /**
+     * Getting all meta value from wp_postmeta by post_id
+     *
+     * @param  string $post_id
+     * @return array
+     */
+    public function getAllMetaByPostByMetakey($post_id, $meta_key)
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT wp.meta_value FROM `wp_postmeta` wp WHERE wp.post_id = ? AND wp.meta_key = ?"
+            );
+            $query->execute([$post_id, $meta_key]);
+            return $query->fetchColumn();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }
+    /**
      * Searching for the records by ID
      *
      * @param  string $table
