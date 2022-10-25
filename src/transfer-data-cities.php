@@ -4,8 +4,8 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 use App\Classes\MySQL;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+// use PhpOffice\PhpSpreadsheet\Spreadsheet;
+// use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 require_once __DIR__ . '/bootstrap.php';
 require_once '../../wp-load.php';
@@ -68,7 +68,7 @@ foreach ($rows as $row) {
 }
 $apartment_amenities = array_unique($apartment_amenities, SORT_STRING);
 sort($apartment_amenities);
-
+/*
 if ($create_xlsx) {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
@@ -81,7 +81,7 @@ if ($create_xlsx) {
     $writer = new Xlsx($spreadsheet);
     $writer->save('export_apartment_amenities.xlsx');
 }
-
+*/
 
 // Community amenities
 $query = $parsing_db->pdo->prepare("SELECT `on_premise_services` FROM `properties` WHERE `on_premise_services` != ''");
@@ -101,7 +101,7 @@ foreach ($rows as $row) {
 $community_amenities = array_unique($community_amenities, SORT_STRING);
 $community_amenities = array_diff($community_amenities, $apartment_amenities);
 sort($community_amenities);
-
+/*
 if ($create_xlsx) {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
@@ -114,7 +114,7 @@ if ($create_xlsx) {
     $writer = new Xlsx($spreadsheet);
     $writer->save('export_community_amenities.xlsx');
 }
-
+*/
 $amenities_counter = 0;
 //Query our MySQL table
 $wp_db = new MySQL('wp', 'local');
