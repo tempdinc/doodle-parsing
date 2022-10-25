@@ -59,7 +59,8 @@ class DataCrawlerApartmentsCom
 
                     $longitude = isset($document->xpath('//meta[@property="place:location:longitude"]/@content')[0]) ? trim($document->xpath('//meta[@property="place:location:longitude"]/@content')[0]) : '';
                     // last updated
-                    $lastUpdated = isset($document->find('div.freshnessContainer')[0]) ? trim($document->find('div.freshnessContainer')[0]->text()) : '';
+                    $parsedLastUpdated = isset($document->find('div.freshnessContainer')[0]) ? trim($document->find('div.freshnessContainer')[0]->text()) : '';
+                    $lastUpdated = $this->convertDate($parsedLastUpdated);
                     // property info
                     $property = isset($document->find('div.uniqueFeatures li')[0]) ?
                         $document->find('div.uniqueFeatures li') : '';
@@ -703,5 +704,27 @@ class DataCrawlerApartmentsCom
         }
 
         return json_encode($amenitiesList, JSON_PRETTY_PRINT);
+    }
+
+    /**
+     * Parsing last updated
+     *
+     * @param  Document $specGroups
+     * @return date
+     */
+    protected function convertDate($lastUpdated)
+    {
+        $today = date("Y-m-d") . ' 00:00:00';
+        $return_date = $today;
+        if (stripos($lastUpdated, 'Day') !== false && stripos($lastUpdated, 'Today') === false) {
+            $number_days = preg_replace('/[^0-9]/', '', $lastUpdated);
+            $return_date = date("Y-m-d", strtotime('-' . $number_days . ' day')) . ' 00:00:00';
+        }
+        if (stripos($lastUpdated, 'Week') !== false) {
+            $number_days = preg_replace('/[^0-9]/', '', $lastUpdated);
+            $return_date = date("Y-m-d", strtotime('-' . $number_days . ' week')) . ' 00:00:00';
+        }
+
+        return $return_date;
     }
 }
