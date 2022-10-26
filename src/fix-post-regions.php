@@ -88,9 +88,34 @@ for ($i = 0; $i <= $pages; $i++) {
             echo ' | ' . $rz_full_regions[$key]['name'];
             file_put_contents(LOG_DIR . '/fix-post-regions.log', ' | ' . $city_name . ' | ' . $rz_full_regions[$key]['name'] . ' | ' . $rz_full_regions[$key]['term_id'] . PHP_EOL, FILE_APPEND);
             wp_set_post_terms($post->id, [$rz_full_regions[$key]['term_id']], 'rz_regions');
-            if (!update_post_meta($post->id, 'rz_listing_region', $rz_full_regions[$key]['slug'])) add_post_meta($post->id, 'rz_listing_region', $rz_full_regions[$key]['slug'], true);
+            $post_meta_result = addPostMeta($post->id, 'rz_listing_region', $rz_full_regions[$key]['slug'], true);
+            if ($post_meta_result) {
+                echo ' ok | ';
+            } else {
+                echo ' NOT OK | ';
+            }
+            // if (!update_post_meta($post->id, 'rz_listing_region', $rz_full_regions[$key]['slug'])) add_post_meta($post->id, 'rz_listing_region', $rz_full_regions[$key]['slug'], true);
         }
     }
 }
+
 echo " >>> " . date("Y-m-d H:i:s") . " - End.." . PHP_EOL;
 file_put_contents(LOG_DIR . '/fix-regions.log', ' >>> [' . date('Y-m-d H:i:s') . '] - End..' . PHP_EOL, FILE_APPEND);
+
+function addPostMeta($post_id, $post_meta, $value)
+{
+    echo $post_id . ' | ';
+    // return update_metadata('post',$post_id,$post_meta,$value);
+    // if (!update_post_meta($post_id, $post_meta, $value)) add_post_meta($post_id, $post_meta, $value, true);
+    $wp_db = new MySQL('wp', 'local');
+    $query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_postmeta` WHERE post_id = ? AND meta_key = ? LIMIT 1");
+    $query->execute([$post_id, $post_meta]);
+    $total_meta_key = $query->fetchColumn();
+    if ($total_meta_key > 0) {
+        $query = $wp_db->pdo->prepare("UPDATE `wp_postmeta` SET meta_value = ? WHERE post_id = ? AND meta_key = ?");
+        $query->execute([$value, $post_id, $post_meta]);
+    } else {
+        $query = $wp_db->pdo->prepare("INSERT INTO `wp_postmeta` (meta_value,post_id,meta_key) VALUES (?,?,?)");
+        $query->execute([$value, $post_id, $post_meta]);
+    }
+}
