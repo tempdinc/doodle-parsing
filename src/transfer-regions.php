@@ -18,17 +18,13 @@ $citiesDB = file_get_contents(__DIR__ . '/cities.json');
 $citiesDB = json_decode($citiesDB, true);
 $regions = [];
 
-/**
- * paste first links in queue
- * and now we can get links for parsing...
- */
 foreach ($citiesDB as $states) {
     foreach ($states as $code => $citiesArray) {
         foreach ($citiesArray as $city) {
             $city_new = str_replace(' ', '-', strtolower($city));
             $code_new = str_replace(' ', '-', strtolower($code));
-            $city_up = strtoupper($city_new);
-            $code_up = strtoupper($code_new);
+            $city_up = strtoupper($city);
+            $code_up = strtoupper($code);
             $regions[] = [
                 'name' => $city_up . ', ' . $code_up,
                 'slug' => $city_new . '-' . $code_new
@@ -36,8 +32,6 @@ foreach ($citiesDB as $states) {
         }
     }
 }
-
-var_dump($regions);
 
 foreach ($regions as $region) {
     $result = insertNewTerm($region['name'], $region['slug']);

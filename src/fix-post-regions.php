@@ -12,7 +12,7 @@ $f = fopen(LOG_DIR . '/fix-post-regions.log', 'w');
 fclose($f);
 // Start transfer
 echo date("Y-m-d H:i:s") . " Start fixing duplicates WP ";
-file_put_contents(LOG_DIR . '/fix-regions.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ', FILE_APPEND);
+file_put_contents(LOG_DIR . '/fix-post-regions.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ', FILE_APPEND);
 
 $terms = get_terms([
     'taxonomy' => 'rz_regions',
@@ -40,6 +40,7 @@ foreach ($regionsDB as $regionDB) {
         // var_dump($city_key);
         $rz_regions_key = array_search($region_key, array_column($rz_regions, 'name'));
         $term_id = $rz_regions[$rz_regions_key]['term_id'];
+        $term_name = $rz_regions[$rz_regions_key]['name'];
         $term_slug = $rz_regions[$rz_regions_key]['slug'];
         // var_dump($term_id);
         foreach ($region_cities as $region_city) {
@@ -49,9 +50,11 @@ foreach ($regionsDB as $regionDB) {
                 'name' => $region_city_up,
                 'slug' => $term_slug
             ];
+            file_put_contents(LOG_DIR . '/fix-post-regions.log', ' >>> [' . $term_id . '] - ' . $term_name . ' | ' . $region_city_up . ' | ' . $term_slug . PHP_EOL, FILE_APPEND);
         }
     }
 }
+// var_dump($rz_full_regions);
 // exit();
 
 $wp_db = new MySQL('wp', 'local');
@@ -88,11 +91,11 @@ for ($i = 0; $i <= $pages; $i++) {
             echo ' | ' . $rz_full_regions[$key]['name'];
             file_put_contents(LOG_DIR . '/fix-post-regions.log', ' | ' . $city_name . ' | ' . $rz_full_regions[$key]['name'] . ' | ' . $rz_full_regions[$key]['term_id'] . PHP_EOL, FILE_APPEND);
             wp_set_post_terms($post->id, [$rz_full_regions[$key]['term_id']], 'rz_regions');
-            $post_meta_result = addPostMeta($post->id, 'rz_listing_region', $rz_full_regions[$key]['slug'], true);
-            if ($post_meta_result) {
-                echo ' ok | ';
+            $postmeta_response = addPostMeta($post->id, 'rz_listing_region', $rz_full_regions[$key]['slug'], true);
+            if ($postmeta_response !== false) {
+                echo ' - OK ';
             } else {
-                echo ' NOT OK | ';
+                echo ' \033[34m - NOT OK\033[0m ';
             }
             // if (!update_post_meta($post->id, 'rz_listing_region', $rz_full_regions[$key]['slug'])) add_post_meta($post->id, 'rz_listing_region', $rz_full_regions[$key]['slug'], true);
         }
@@ -100,11 +103,10 @@ for ($i = 0; $i <= $pages; $i++) {
 }
 
 echo " >>> " . date("Y-m-d H:i:s") . " - End.." . PHP_EOL;
-file_put_contents(LOG_DIR . '/fix-regions.log', ' >>> [' . date('Y-m-d H:i:s') . '] - End..' . PHP_EOL, FILE_APPEND);
+file_put_contents(LOG_DIR . '/fix-post-regions.log', ' >>> [' . date('Y-m-d H:i:s') . '] - End..' . PHP_EOL, FILE_APPEND);
 
 function addPostMeta($post_id, $post_meta, $value)
 {
-    echo $post_id . ' | ';
     // return update_metadata('post',$post_id,$post_meta,$value);
     // if (!update_post_meta($post_id, $post_meta, $value)) add_post_meta($post_id, $post_meta, $value, true);
     $wp_db = new MySQL('wp', 'local');
@@ -113,9 +115,14 @@ function addPostMeta($post_id, $post_meta, $value)
     $total_meta_key = $query->fetchColumn();
     if ($total_meta_key > 0) {
         $query = $wp_db->pdo->prepare("UPDATE `wp_postmeta` SET meta_value = ? WHERE post_id = ? AND meta_key = ?");
-        $query->execute([$value, $post_id, $post_meta]);
+        $response = $query->execute([$value, $post_id, $post_meta]);
     } else {
         $query = $wp_db->pdo->prepare("INSERT INTO `wp_postmeta` (meta_value,post_id,meta_key) VALUES (?,?,?)");
-        $query->execute([$value, $post_id, $post_meta]);
+        $response = $query->execute([$value, $post_id, $post_meta]);
+    }
+    if ($response !== false) {
+        return true;
+    } else {
+        return false;
     }
 }
