@@ -4,8 +4,6 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 use App\Classes\MySQL;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 require_once __DIR__ . '/bootstrap.php';
 require_once '../../wp-load.php';
@@ -38,20 +36,6 @@ foreach ($rows as $row) {
 $apartment_amenities = array_unique($apartment_amenities, SORT_STRING);
 sort($apartment_amenities);
 
-if ($create_xlsx) {
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-    $counter = 0;
-    foreach ($apartment_amenities as $amenity) {
-        $counter++;
-        $cell = 'A' . $counter;
-        $sheet->setCellValue($cell, var_export($amenity, true));
-    }
-    $writer = new Xlsx($spreadsheet);
-    $writer->save('export_apartment_amenities.xlsx');
-}
-
-
 // Community amenities
 $query = $parsing_db->pdo->prepare("SELECT `on_premise_services` FROM `properties` WHERE `on_premise_services` != ''");
 $query->execute();
@@ -71,135 +55,25 @@ $community_amenities = array_unique($community_amenities, SORT_STRING);
 $community_amenities = array_diff($community_amenities, $apartment_amenities);
 sort($community_amenities);
 
-if ($create_xlsx) {
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-    $counter = 0;
-    foreach ($community_amenities as $amenity) {
-        $counter++;
-        $cell = 'A' . $counter;
-        $sheet->setCellValue($cell, var_export($amenity, true));
-    }
-    $writer = new Xlsx($spreadsheet);
-    $writer->save('export_community_amenities.xlsx');
-}
-
 $amenities_counter = 0;
 //Query our MySQL table
 $wp_db = new MySQL('wp', 'local');
 foreach ($apartment_amenities as $amenity) {
-    $query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_terms` WHERE `name` = ? LIMIT 1");
-    $query->execute([$amenity]);
-    $isDuplicate = $query->fetchColumn();
-    // $amenity_slug = str_replace(' ', '_', trim(mb_strtolower($amenity)));
-    if (!$isDuplicate) {
-        // echo $amenity . PHP_EOL;
-        $amenity_slug = str_replace(' ', '_', preg_replace("/[^0-9a-z]/", "_", trim(mb_strtolower($amenity))));
-        if (mb_substr($amenity_slug, -1) == '_') {
-            $amenity_slug = mb_substr($amenity_slug, 0, -1);
-        }
-        // echo $amenity_slug . PHP_EOL;
-        $slugDuplicate = checkSlug($amenity_slug);
-        while ($slugDuplicate) {
-            $amenity_slug = $amenity_slug . '1';
-            $slugDuplicate = checkSlug($amenity_slug);
-        }
-    }
-
-    if (!$isDuplicate) {
-        $query = $wp_db->pdo->prepare("INSERT INTO `wp_terms` (`name`,`slug`) VALUES (?,?)");
-        $query->execute([$amenity, $amenity_slug]);
-
-        $query = $wp_db->pdo->prepare("SELECT `term_id` FROM `wp_terms` WHERE `slug` = ? LIMIT 1");
-        $query->execute([$amenity_slug]);
-        $prop = $query->fetch();
-        if ($prop->term_id) {
-            $taxonomy = 'rz_amenities';
-            $description = '';
-            $query = $wp_db->pdo->prepare("INSERT INTO `wp_term_taxonomy` (`term_id`,`taxonomy`,`description`) VALUES (?,?,?)");
-            $query->execute([$prop->term_id, $taxonomy, $description]);
-            $prop = $query->fetch();
-        }
+    $insert_res = wp_insert_term($amenity, 'rz_amenities', array(
+        'parent'      => 0,
+    ));
+    if (is_wp_error($insert_res)) {
+        $response = $insert_res->get_error_message();
+    } else {
+        $response = $insert_res['term_id'];
         $amenities_counter++;
-        file_put_contents(LOG_DIR . '/amenities.log', $amenity . ' | ', FILE_APPEND);
     }
+    file_put_contents(LOG_DIR . '/amenities.log', $amenity . ' > ' . $response . ' | ', FILE_APPEND);
 }
 echo " \033[31mAdded amenities: " . $amenities_counter . "\033[0m";
 file_put_contents(LOG_DIR . '/transfer-data.log', ' Added amenities: ' . $amenities_counter, FILE_APPEND);
 // Transfer amenities END
-
-$meta_keys = [
-    '_edit_last' => '',
-    '_edit_lock' => '',
-    'inline_featured_image' => '0',
-    'post_content' => 'This home is priced to rent and won\'t be around for long. Apply now, while the current residents are preparing to move out.',
-    'rz_addons' => '[]',
-    'rz_apartment_uri' => '',
-    'rz_bathrooms' => '1',
-    'rz_bed' => '1',
-    'rz_bedroom' => '1',
-    'rz_booking_type' => 'Request booking',
-    'rz_checkin' => '',
-    'rz_checkout' => '',
-    'rz_city' => 'Fort Worth',
-    'rz_extra_pricing' => '[]',
-    'rz_featured_benefit' => '',
-    'rz_furniture' => '',
-    'rz_gallery' => '',
-    'rz_guest_price' => '',
-    'rz_guests' => '',
-    'rz_house-rules-summary' => '',
-    'rz_instant' => '',
-    'rz_listing_category' => '',
-    'rz_listing_region' => '',
-    'rz_listing_type' => '25769',
-    'rz_location' => '',
-    'rz_location' => '',
-    'rz_location' => '',
-    'rz_location' => '-95.712891',
-    'rz_location' => '37.09024',
-    'rz_location' => 'Fort Worth, TX, US',
-    'rz_location__address' => 'Fort Worth, TX, US',
-    'rz_location__geo_city' => '',
-    'rz_location__geo_city_alt' => '',
-    'rz_location__geo_country' => '',
-    'rz_location__lat' => '37.09024',
-    'rz_location__lng' => '-95.712891',
-    'rz_long_term_month' => '',
-    'rz_long_term_week' => '',
-    'rz_neighborhood' => '',
-    'rz_post_address1' => '',
-    'rz_post_address2' => '',
-    'rz_price' => '',
-    'rz_price_seasonal' => '[]',
-    'rz_price_weekend' => '',
-    'rz_priority' => '0',
-    'rz_priority_custom' => '0',
-    'rz_priority_selection' => 'normal',
-    'rz_reservation_length_max' => '0',
-    'rz_reservation_length_min' => '0',
-    'rz_security_deposit' => '',
-    'rz_sqft' => '',
-    'rz_state' => 'TX',
-    'rz_status' => '',
-    'rz_street_line_1' => '5848 Parkview Hills Ln',
-    'rz_street_line_2' => '',
-    'rz_the-space' => '',
-    'rz_things-to-know' => '',
-    'rz_verif' => '',
-    'rz_zip' => '76179'
-];
-/*
-//Fork settings
-pcntl_async_signals(true);
-
-pcntl_signal(SIGTERM, 'signalHandler'); // Termination ('kill' was called)
-pcntl_signal(SIGHUP, 'signalHandler'); // Terminal log-out
-pcntl_signal(SIGINT, 'signalHandler'); // Interrupted (Ctrl-C is pressed)
-
-// Saving parent pid
-file_put_contents('parentPid.out', getmypid());
-*/
+exit();
 
 // Getting all amenities
 $apartment_amenities_list = [];

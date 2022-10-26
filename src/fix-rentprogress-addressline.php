@@ -14,7 +14,7 @@ file_put_contents(LOG_DIR . '/fix-rentprogress.log', '[' . date('Y-m-d H:i:s') .
 
 // Getting all parsed
 $parsing_db = new MySQL('parsing', 'local');
-$all_availability = $parsing_db->getAvailabilityWithPostWithProperty();
+$all_availability = $parsing_db->getAvailabilityWithPostWithPropertySourceRentprogress();
 echo " \033[34mUnits with post - " . count($all_availability) . "\033[0m";
 file_put_contents(LOG_DIR . '/fix-rentprogress.log', ' | Units with post - ' . count($all_availability), FILE_APPEND);
 

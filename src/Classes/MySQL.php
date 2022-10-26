@@ -202,7 +202,7 @@ class MySQL
     }
 
     /**
-     * Getting all records by is_deleted = 0 AND post_id is NULL
+     * Getting all records by is_deleted = 0 AND post_id IS NULL
      *
      * @param  string $table
      * @return array
@@ -211,7 +211,7 @@ class MySQL
     {
         try {
             $query = $this->pdo->prepare(
-                "SELECT * FROM $table WHERE (is_deleted = 0 AND post_id is NULL) OR (is_deleted is NULL AND post_id is NULL)"
+                "SELECT * FROM $table WHERE (is_deleted = 0 AND post_id IS NULL) OR (is_deleted IS NULL AND post_id IS NULL)"
             );
             $query->execute();
             return $query->fetchAll();
@@ -221,9 +221,8 @@ class MySQL
     }
 
     /**
-     * Getting all records from availability by property_id
+     * Getting unique property_id from availability
      *
-     * @param  string $property_id
      * @return array
      */
     public function getAllUniquePropertyID()
@@ -240,7 +239,7 @@ class MySQL
     }
 
     /**
-     * Getting all records from availability by property_id
+     * Getting all records from availability with post_id IS NOT NULL by property_id
      *
      * @param  string $property_id
      * @return array
@@ -268,7 +267,7 @@ class MySQL
     {
         try {
             $query = $this->pdo->prepare(
-                "SELECT * FROM `availability` WHERE (property_id = ? AND status = 'Available Now' AND is_deleted is NULL AND post_id is NULL) OR (property_id = ? AND status = 'Move In Ready' AND is_deleted is NULL AND post_id is NULL) OR (property_id = ? AND status = 'Move-In Ready' AND is_deleted is NULL AND post_id is NULL) OR (property_id = ? AND status = 'Now' AND is_deleted is NULL AND post_id is NULL)"
+                "SELECT * FROM `availability` WHERE (property_id = ? AND status = 'Available Now' AND is_deleted IS NULL AND post_id IS NULL) OR (property_id = ? AND status = 'Move In Ready' AND is_deleted IS NULL AND post_id IS NULL) OR (property_id = ? AND status = 'Move-In Ready' AND is_deleted IS NULL AND post_id IS NULL) OR (property_id = ? AND status = 'Now' AND is_deleted IS NULL AND post_id IS NULL)"
             );
             $query->execute([$property_id, $property_id, $property_id, $property_id]);
             return $query->fetchAll();
@@ -278,16 +277,15 @@ class MySQL
     }
 
     /**
-     * Getting all records from availability by property_id
+     * Getting all records from availability LEFT JOIN properties with status Move In Ready & is_deleted IS NULL & post_id IS NULL & listing_price IS NOT NULL
      *
-     * @param  string $property_id
      * @return array
      */
     public function getAvailability()
     {
         try {
             $query = $this->pdo->prepare(
-                "SELECT a.id AS av_id, a.post_id AS av_post_id, a.is_deleted AS av_is_deleted, a.property_id AS av_property_id, a.bedroom_cnt AS av_bedroom_cnt, a.bathroom_cnt as av_bathroom_cnt, a.listing_price AS av_listing_price, a.home_size_sq_ft AS av_home_size_sq_ft, a.lease_length AS av_lease_length, a.status AS av_status, a.image_urls AS av_image_urls, a.date_added AS a_date_added, p.* FROM `availability` a LEFT JOIN `properties` p ON a.property_id = p.id WHERE (a.status = 'Available Now' AND a.is_deleted is NULL AND a.post_id is NULL AND a.listing_price is not NULL) OR (a.status = 'Move In Ready' AND a.is_deleted is NULL AND a.post_id is NULL AND a.listing_price is not NULL) OR (a.status = 'Move-In Ready' AND a.is_deleted is NULL AND a.post_id is NULL AND a.listing_price is not NULL) OR (a.status = 'Now' AND a.is_deleted is NULL AND a.post_id is NULL AND a.listing_price is not NULL)"
+                "SELECT a.id AS av_id, a.post_id AS av_post_id, a.is_deleted AS av_is_deleted, a.property_id AS av_property_id, a.bedroom_cnt AS av_bedroom_cnt, a.bathroom_cnt as av_bathroom_cnt, a.listing_price AS av_listing_price, a.home_size_sq_ft AS av_home_size_sq_ft, a.lease_length AS av_lease_length, a.status AS av_status, a.image_urls AS av_image_urls, a.date_added AS a_date_added, p.* FROM `availability` a LEFT JOIN `properties` p ON a.property_id = p.id WHERE (a.status = 'Available Now' AND a.is_deleted IS NULL AND a.post_id IS NULL AND a.listing_price IS NOT NULL) OR (a.status = 'Move In Ready' AND a.is_deleted IS NULL AND a.post_id IS NULL AND a.listing_price IS NOT NULL) OR (a.status = 'Move-In Ready' AND a.is_deleted IS NULL AND a.post_id IS NULL AND a.listing_price IS NOT NULL) OR (a.status = 'Now' AND a.is_deleted IS NULL AND a.post_id IS NULL AND a.listing_price IS NOT NULL)"
             );
             $query->execute();
             return $query->fetchAll();
@@ -297,7 +295,7 @@ class MySQL
     }
 
     /**
-     * Getting all records from availability by property_id
+     * Getting all records from availability LEFT JOIN properties with status Move In Ready & is_deleted IS NULL & post_id IS NULL & listing_price IS NOT NULL by city LIKE & Limit
      *
      * @param  string $property_id
      * @return array
@@ -316,16 +314,15 @@ class MySQL
     }
 
     /**
-     * Getting all records from availability by property_id
-     *
-     * @param  string $property_id
+     * Getting id, post_id, property_id from availability WHERE post_id IS NOT NULL
+     * 
      * @return array
      */
     public function getAvailabilityWithPost()
     {
         try {
             $query = $this->pdo->prepare(
-                "SELECT id, post_id, property_id FROM `availability` WHERE post_id is NOT NULL"
+                "SELECT id, post_id, property_id FROM `availability` WHERE post_id IS NOT NULL"
             );
             $query->execute();
             return $query->fetchAll();
@@ -335,16 +332,15 @@ class MySQL
     }
 
     /**
-     * Getting all records from availability by property_id
+     * Getting all records from availability LEFT JOIN properties WHERE post_id IS NOT NULL & source RentProgress.com
      *
-     * @param  string $property_id
      * @return array
      */
-    public function getAvailabilityWithPostWithProperty()
+    public function getAvailabilityWithPostWithPropertySourceRentprogress()
     {
         try {
             $query = $this->pdo->prepare(
-                "SELECT a.id AS av_id, a.post_id AS av_post_id, a.is_deleted AS av_is_deleted, a.property_id AS av_property_id, a.bedroom_cnt AS av_bedroom_cnt, a.bathroom_cnt as av_bathroom_cnt, a.listing_price AS av_listing_price, a.home_size_sq_ft AS av_home_size_sq_ft, a.lease_length AS av_lease_length, a.status AS av_status, a.image_urls AS av_image_urls, a.date_added AS a_date_added, p.* FROM `availability` a LEFT JOIN `properties` p ON a.property_id = p.id WHERE a.post_id is NOT NULL AND p.source = 'rentprogress.com'"
+                "SELECT a.id AS av_id, a.post_id AS av_post_id, a.is_deleted AS av_is_deleted, a.property_id AS av_property_id, a.bedroom_cnt AS av_bedroom_cnt, a.bathroom_cnt as av_bathroom_cnt, a.listing_price AS av_listing_price, a.home_size_sq_ft AS av_home_size_sq_ft, a.lease_length AS av_lease_length, a.status AS av_status, a.image_urls AS av_image_urls, a.date_added AS a_date_added, p.* FROM `availability` a LEFT JOIN `properties` p ON a.property_id = p.id WHERE a.post_id IS NOT NULL AND p.source = 'rentprogress.com'"
             );
             $query->execute();
             return $query->fetchAll();
@@ -354,9 +350,9 @@ class MySQL
     }
 
     /**
-     * Getting all records from availability by property_id
+     * Getting id FROM wp_posts LEFT JOIN meta_value FROM wp_postmeta WHERE wp.post_type = 'rz_listing' AND wt.meta_key = 'rz_listing_type' BY meta_value
      *
-     * @param  string $property_id
+     * @param  string $listing_type
      * @return array
      */
     public function getPostsRZListing($listing_type)
@@ -373,9 +369,10 @@ class MySQL
     }
 
     /**
-     * Getting all records from availability by property_id
+     * Getting id FROM wp_posts WHERE wp.post_type = 'rz_listing' BY LIMIT ?,?
      *
-     * @param  string $property_id
+     * @param  int $limit_start
+     * @param  int $limit
      * @return array
      */
     public function getAllPostsRZListing($limit_start,$limit)
@@ -391,9 +388,10 @@ class MySQL
         }
     }
     /**
-     * Getting all meta value from wp_postmeta by post_id
+     * Getting all meta value from wp_postmeta by post_id & meta_key
      *
      * @param  string $post_id
+     * @param  string $meta_key
      * @return array
      */
     public function getAllMetaByPostByMetakey($post_id, $meta_key)
@@ -409,7 +407,7 @@ class MySQL
         }
     }
     /**
-     * Searching for the records by ID
+     * Searching for the records by property_id
      *
      * @param  string $table
      * @param  int $id
