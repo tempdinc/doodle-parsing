@@ -196,7 +196,7 @@ class MySQL
     {
         try {
             $query = $this->pdo->prepare(
-                "SELECT * FROM $table WHERE is_deleted = 0 AND post_id is NULL"
+                "SELECT * FROM $table WHERE (is_deleted = 0 AND post_id is NULL) OR (is_deleted IS NULL AND post_id is NULL) ORDER BY id DESC"
             );
             $query->execute();
             return $query->fetchAll();
