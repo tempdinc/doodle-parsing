@@ -56,14 +56,12 @@ class DataCrawlerApartmentsCom
                     }
                     // latitude & longtitude
                     $latitude = isset($document->xpath('//meta[@property="place:location:latitude"]/@content')[0]) ? trim($document->xpath('//meta[@property="place:location:latitude"]/@content')[0]) : '';
-
                     $longitude = isset($document->xpath('//meta[@property="place:location:longitude"]/@content')[0]) ? trim($document->xpath('//meta[@property="place:location:longitude"]/@content')[0]) : '';
                     // last updated
                     $parsedLastUpdated = isset($document->find('div.freshnessContainer')[0]) ? trim($document->find('div.freshnessContainer')[0]->text()) : '';
                     $lastUpdated = $this->convertDate($parsedLastUpdated);
                     // property info
-                    $property = isset($document->find('div.uniqueFeatures li')[0]) ?
-                        $document->find('div.uniqueFeatures li') : '';
+                    $property = isset($document->find('div.uniqueFeatures li')[0]) ? $document->find('div.uniqueFeatures li') : '';
                     if ($property) {
                         $propertyInfo = [];
                         foreach ($property as $p) {
@@ -95,9 +93,12 @@ class DataCrawlerApartmentsCom
                     // contact person
                     $contactPerson = isset($document->find('div.agentFullName')[0]) ? trim($document->find('div.agentFullName')[0]->text()) : '';
                     // building description
+                    $buildingDesc = '';
                     $descriptionSection = $document->find('section.descriptionSection')[0];
                     if (isset($descriptionSection) && $descriptionSection != '') {
-                        $buildingDesc = isset($descriptionSection->find('.propertyBlurbContent')[0]) ?
+                        $buildingDesc = isset($descriptionSection->find('p')[0]) ?
+                            $this->clearText($descriptionSection->find('p')[0]->text()) : '';
+                        $buildingDesc .= isset($descriptionSection->find('.propertyBlurbContent')[0]) ?
                             $this->clearText($descriptionSection->find('.propertyBlurbContent')[0]->text()) : '';
                     }
                     // walk score
@@ -145,9 +146,9 @@ class DataCrawlerApartmentsCom
                         }
                     }
                     //images url
+                    $images = [];
                     $imagesLiArr = $document->find('section.carouselSection ul')[0]->find('li');
                     if ($imagesLiArr) {
-                        $images = [];
                         foreach ($imagesLiArr as $li) {
                             $imgs = $li->find('img');
                             foreach ($imgs as $img) {
@@ -158,7 +159,6 @@ class DataCrawlerApartmentsCom
                     }
                     // availability
                     $availability = [];
-
                     $availabilityInfo = $document->find('.availabilityInfo');
                     // Single House availability
                     if (isset($availabilityInfo) && !empty($availabilityInfo) && count($availabilityInfo) == 1) {
@@ -228,7 +228,6 @@ class DataCrawlerApartmentsCom
 
                                         $rentalId = '';
                                         $rentalType = '';
-                                        $images = '';
 
                                         $rentalId = $unitContainer->attr('data-rentalkey');
                                         $rentalType = $unitContainer->attr('data-rentaltype');
@@ -237,9 +236,9 @@ class DataCrawlerApartmentsCom
                                         $images = $imgcrw->send($key, $rentalId, $rentalType);          
                                         */
                                         //images url
+                                        $images = [];
                                         $imagesLiArr = $document->find('section.carouselSection ul')[0]->find('li');
                                         if ($imagesLiArr) {
-                                            $images = [];
                                             foreach ($imagesLiArr as $li) {
                                                 $imgs = $li->find('img');
                                                 foreach ($imgs as $img) {
@@ -262,7 +261,6 @@ class DataCrawlerApartmentsCom
                                     $floorplanButton = $pricingGridItem->find('.floorplanButton')[0];
                                     $rentalId = '';
                                     $rentalType = '';
-                                    $images = '';
                                     /*
                                     if(isset($floorplanButton) && $floorplanButton != null) {
                                         $rentalId = $floorplanButton->attr('data-rentalkey');
@@ -273,9 +271,9 @@ class DataCrawlerApartmentsCom
                                     }       
                                     */
                                     //images url
+                                    $images = [];
                                     $imagesLiArr = $document->find('section.carouselSection ul')[0]->find('li');
                                     if ($imagesLiArr) {
-                                        $images = [];
                                         foreach ($imagesLiArr as $li) {
                                             $imgs = $li->find('img');
                                             foreach ($imgs as $img) {
@@ -326,9 +324,9 @@ class DataCrawlerApartmentsCom
                             $images = $imgcrw->send($key, $rentalId, $rentalType);
                             */
                             //images url
+                            $images = [];
                             $imagesLiArr = $document->find('section.carouselSection ul')[0]->find('li');
                             if ($imagesLiArr) {
-                                $images = [];
                                 foreach ($imagesLiArr as $li) {
                                     $imgs = $li->find('img');
                                     foreach ($imgs as $img) {
@@ -430,6 +428,7 @@ class DataCrawlerApartmentsCom
                                 `longitude`,
                                 `listing_last_updated`,
                                 `property_info`,
+                                `image_urls`,
                                 `on_premise_services`, /* amenitiesList - Community */
                                 `student_features`,
                                 `on_premise_features`, /* appartmentFeatures - Apartment */
@@ -465,6 +464,7 @@ class DataCrawlerApartmentsCom
                                 $longitude,
                                 $lastUpdated,
                                 $propertyInfo,
+                                $images,
                                 $amenitiesList,
                                 $studentFeatures,
                                 $appartmentFeatures,

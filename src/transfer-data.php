@@ -12,9 +12,6 @@ require_once '../../wp-load.php';
 echo date("Y-m-d H:i:s") . " Start transfer parsed data";
 file_put_contents(LOG_DIR . '/transfer-data.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ', FILE_APPEND);
 
-// Transfer-amenities
-$create_xlsx = false;
-
 //Query our MySQL table
 $parsing_db = new MySQL('parsing', 'local');
 
