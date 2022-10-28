@@ -51,7 +51,7 @@ class QueueApartmentsCom
                 // echo $task['method'];
                 // if($task['method'] == 'parse') $new_counter = $taskCounter->increment();
             }
-              
+
             $requestCounter = new Counter();
             $requestCounter->incrementTask(); // Counting requests
 
@@ -109,7 +109,6 @@ class QueueApartmentsCom
     protected function parse($link, $method = 'parse', $by)
     {
         $request = StormProxy::send($link, 'www.apartments.com');
-        // echo 'http_code - ' . $request['http_code'] . PHP_EOL;
         $task = '{"link":"' . $link . '", "method":"' . $method . '", "by":"' . $by . '"}';
 
         if ($request['http_code'] === 200) {
@@ -117,28 +116,22 @@ class QueueApartmentsCom
                 // parse data
                 if (is_string($request['response']) && $request['response'] !== '') {
                     $content = new Document($request['response']);
-
                     $crawler = new DataCrawlerApartmentsCom();
                     $crawler->parse($content, $link, $method, $by);
                 } else {
-                    // $counter_errors = $requestCounter->incrementError(); // Counting errors
                     Redis::init()->rpush('tasks', $task);
                 }
             } catch (Exception $e) {
-                // $counter_errors = $requestCounter->incrementError(); // Counting errors
                 echo 'Error Msg:' . $e->getMessage() . "\nCode:" . $request['http_code'] . ' - ' . $link . PHP_EOL;
                 file_put_contents(LOG_DIR . '/parse-problem.log', '[' . date('Y-m-d H:i:s') . '] Msg:' . $e->getMessage() . "\nCode:" . $request['http_code'] . ' - ' . $link . PHP_EOL, FILE_APPEND);
             }
 
             return true;
         } elseif (404 !== $request['http_code']) {
-            // $counter_errors = $requestCounter->incrementError(); // Counting errors
             // back link if not 404
             Redis::init()->rpush('tasks', $task);
 
             return false;
-        } else {
-            // $counter_errors = $requestCounter->incrementError(); // Counting errors
         }
 
         if ($method === 'update') {
