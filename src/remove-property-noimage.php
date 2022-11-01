@@ -52,23 +52,29 @@ exit();
 
 $listing_type = '25769';
 $wp_db = new MySQL('wp', 'local');
-$posts = $wp_db->getPostsRZListing($listing_type);
-echo 'Total posts - ' . count($posts) . PHP_EOL;
-foreach ($posts as $post) {
-    file_put_contents(LOG_DIR . '/remove-property-noimage.log', ' [' . $post->id . ']  | ', FILE_APPEND);
-    $query = $parsing_db->pdo->prepare("SELECT * FROM `availability` WHERE `post_id` = ?");
-    $query->execute([$post->id]);
-    $availability = $query->fetchAll();
-    if ($availability == NULL) {
-        file_put_contents(LOG_DIR . '/remove-property-noimage.log', ' NO AVAILABILITY >>> [' . $post->id . ']  <<< NO AVAILABILITY ', FILE_APPEND);
-        echo " No availability for post id: \033[34m" . $post->id . "\033[0m" . ' | '  . PHP_EOL;
-        $post_data = [
-            'ID' => $post->id,
-            'post_status' => 'draft'
-        ];
-        wp_update_post($post_data);
-    } else {
-        echo " Post id: " . $post->id . " Availability id: " . $availability[0]->id . PHP_EOL;
+$total_posts = $wp_db->countPostsRZListing($listing_type);
+echo 'Total posts - ' . $total_posts . PHP_EOL;
+$pages = intdiv($total_posts, 100);
+echo 'Total pages - ' . $pages . PHP_EOL;
+for ($i = 0; $i <= $pages; $i++) {
+    $posts = $wp_db->getPostsRZListing($listing_type,$i * 100, 100);
+    echo 'Total posts - ' . count($posts) . PHP_EOL;
+    foreach ($posts as $post) {
+        file_put_contents(LOG_DIR . '/remove-property-noimage.log', ' [' . $post->id . ']  | ', FILE_APPEND);
+        $query = $parsing_db->pdo->prepare("SELECT * FROM `availability` WHERE `post_id` = ?");
+        $query->execute([$post->id]);
+        $availability = $query->fetchAll();
+        if ($availability == NULL) {
+            file_put_contents(LOG_DIR . '/remove-property-noimage.log', ' NO AVAILABILITY >>> [' . $post->id . ']  <<< NO AVAILABILITY ', FILE_APPEND);
+            echo " No availability for post id: \033[34m" . $post->id . "\033[0m" . ' | '  . PHP_EOL;
+            $post_data = [
+                'ID' => $post->id,
+                'post_status' => 'draft'
+            ];
+            wp_update_post($post_data);
+        } else {
+            echo " Post id: " . $post->id . " Availability id: " . $availability[0]->id . PHP_EOL;
+        }
     }
 }
 echo 'Total posts - ' . count($posts) . PHP_EOL;
