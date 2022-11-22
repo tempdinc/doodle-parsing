@@ -111,21 +111,22 @@ require_once 'bootstrap.php';
 require_once '../../wp-load.php';
 
 if (isset($_POST['quote_id']) && isset($_POST['quote_title']) && isset($_POST['quote_address'])) {
-   $quote = $wpdb->insert('quotes_table', array(
-      'quote_id' => $_POST['quote_id'],
-      'quote_title' => ((isset($_POST['quote_title'])) ? $_POST['quote_title'] : ''),
-      'quote_description' => ((isset($_POST['quote_description'])) ? $_POST['quote_description'] : ''),
-      'quote_address' => ((isset($_POST['quote_address'])) ? $_POST['quote_address'] : ''),
-      'quote_street' => ((isset($_POST['quote_street'])) ? $_POST['quote_street'] : ''),
-      'quote_city' => ((isset($_POST['quote_city'])) ? $_POST['quote_city'] : ''),
-      'quote_state' => ((isset($_POST['quote_state'])) ? $_POST['quote_state'] : ''),
-      'quote_zip' => ((isset($_POST['quote_zip'])) ? $_POST['quote_zip'] : ''),
-      'quote_baths' => ((isset($_POST['quote_baths'])) ? $_POST['quote_baths'] : ''),
-      'quote_beds' => ((isset($_POST['quote_beds'])) ? $_POST['quote_beds'] : ''),
-      'quote_sqft' => ((isset($_POST['quote_sqft'])) ? $_POST['quote_sqft'] : ''),
-      'quote_link' => ((isset($_POST['quote_link'])) ? $_POST['quote_link'] : '')
-   ));
-   $quote_id = $wpdb->insert_id;
+   $quote_id = $_POST['quote_id'];
+   $quote_title = ((isset($_POST['quote_title'])) ? $_POST['quote_title'] : '');
+   $quote_description = ((isset($_POST['quote_description'])) ? $_POST['quote_description'] : '');
+   $quote_address = ((isset($_POST['quote_address'])) ? $_POST['quote_address'] : '');
+   $quote_street = ((isset($_POST['quote_street'])) ? $_POST['quote_street'] : '');
+   $quote_city = ((isset($_POST['quote_city'])) ? $_POST['quote_city'] : '');
+   $quote_state = ((isset($_POST['quote_state'])) ? $_POST['quote_state'] : '');
+   $quote_zip = ((isset($_POST['quote_zip'])) ? $_POST['quote_zip'] : '');
+   $quote_baths = ((isset($_POST['quote_baths'])) ? $_POST['quote_baths'] : '');
+   $quote_beds = ((isset($_POST['quote_beds'])) ? $_POST['quote_beds'] : '');
+   $quote_sqft = ((isset($_POST['quote_sqft'])) ? $_POST['quote_sqft'] : '');
+   $quote_link = ((isset($_POST['quote_link'])) ? $_POST['quote_link'] : '');
+   file_put_contents(LOG_DIR . '/quote-add.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ' . PHP_EOL, FILE_APPEND);
+   file_put_contents(LOG_DIR . '/quote-add.log', $quote_id . ' > ' . $quote_title . ' > ' . $quote_description . ' > ', FILE_APPEND);
+   file_put_contents(LOG_DIR . '/quote-add.log', $quote_address . ' > ' . $quote_street . ' > ' . $quote_city . ' > ' . $quote_state . ' > ', FILE_APPEND);
+   file_put_contents(LOG_DIR . '/quote-add.log', $quote_zip . ' > ' . $quote_baths . ' > ' . $quote_beds . ' > ' . $quote_sqft . ' > ' . $quote_link . PHP_EOL, FILE_APPEND);
 } else {
    $response = ['status_code' => 400, 'message' => 'These fields are required: "quote_id","quote_title" and "quote_address"!'];
    echo json_encode($response);
@@ -136,7 +137,7 @@ exit();
 
 // Start transfer
 echo date("Y-m-d H:i:s") . " Start transfer parsed data";
-file_put_contents(LOG_DIR . '/transfer-data.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ', FILE_APPEND);
+file_put_contents(LOG_DIR . '/quote-add.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ', FILE_APPEND);
 
 //Query our MySQL table
 $parsing_db = new MySQL('parsing', 'local');
@@ -191,10 +192,10 @@ foreach ($apartment_amenities as $amenity) {
       $response = $insert_res['term_id'];
       $amenities_counter++;
    }
-   file_put_contents(LOG_DIR . '/amenities.log', $amenity . ' > ' . $response . ' | ', FILE_APPEND);
+   file_put_contents(LOG_DIR . '/quote-add.log', $amenity . ' > ' . $response . ' | ', FILE_APPEND);
 }
 echo " \033[31mAdded amenities: " . $amenities_counter . "\033[0m";
-file_put_contents(LOG_DIR . '/transfer-data.log', ' Added amenities: ' . $amenities_counter, FILE_APPEND);
+file_put_contents(LOG_DIR . '/quote-add.log', ' Added amenities: ' . $amenities_counter, FILE_APPEND);
 // Transfer amenities END
 exit();
 
@@ -210,7 +211,7 @@ foreach ($apartment_amenities_rows as $apartment_amenity_row) {
 $parsing_db = new MySQL('parsing', 'local');
 $all_availability = $parsing_db->getAvailability();
 echo " \033[34mNew units - " . count($all_availability) . "\033[0m";
-file_put_contents(LOG_DIR . '/transfer-data.log', ' | New units - ' . count($all_availability), FILE_APPEND);
+file_put_contents(LOG_DIR . '/quote-add.log', ' | New units - ' . count($all_availability), FILE_APPEND);
 
 foreach ($all_availability as $availability) {
    // Apartment amenities
@@ -259,10 +260,10 @@ foreach ($all_availability as $availability) {
                $wpImageId = (object)array('id' => (string)$moveToWP);
                array_push($wpImageArray, $wpImageId);
             } else {
-               file_put_contents(LOG_DIR . '/transfer-data.log', ' | Error transferring WP - ' . $filename_path, FILE_APPEND);
+               file_put_contents(LOG_DIR . '/quote-add.log', ' | Error transferring WP - ' . $filename_path, FILE_APPEND);
             }
          } else {
-            file_put_contents(LOG_DIR . '/transfer-data.log', ' | Error transferring WP - ' . $filename_path, FILE_APPEND);
+            file_put_contents(LOG_DIR . '/quote-add.log', ' | Error transferring WP - ' . $filename_path, FILE_APPEND);
          }
       }
    }
@@ -437,7 +438,7 @@ foreach ($all_availability as $availability) {
 }
 
 echo " >>> " . date("Y-m-d H:i:s") . " - End.." . PHP_EOL;
-file_put_contents(LOG_DIR . '/transfer-data.log', ' >>> [' . date('Y-m-d H:i:s') . '] - End..' . PHP_EOL, FILE_APPEND);
+file_put_contents(LOG_DIR . '/quote-add.log', ' >>> [' . date('Y-m-d H:i:s') . '] - End..' . PHP_EOL, FILE_APPEND);
 
 // Stop signals handler
 function signalHandler($signal)
