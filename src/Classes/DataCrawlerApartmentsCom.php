@@ -533,6 +533,7 @@ class DataCrawlerApartmentsCom
                             `longitude`,
                             `listing_last_updated`,
                             `property_info`,
+                            `image_urls`,
                             `on_premise_services`,
                             `student_features`,
                             `on_premise_features`,
@@ -556,7 +557,7 @@ class DataCrawlerApartmentsCom
                             `expences`,
                             `builiding_office_hours`,
                             `date_added`
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                         $query->execute([
                             $address,
                             $type,
@@ -568,6 +569,7 @@ class DataCrawlerApartmentsCom
                             $longitude,
                             $lastUpdated,
                             $propertyInfo,
+                            $images,
                             $amenitiesList,
                             $studentFeatures,
                             $appartmentFeatures,

@@ -202,18 +202,37 @@ class MySQL
     }
 
     /**
-     * Getting all records by is_deleted = 0 AND post_id IS NULL
+     * Getting count of all records WHERE is_deleted = 0 AND post_id IS NULL
      *
-     * @param  string $table
-     * @return array
+     * @return int
      */
-    public function getAllNewRecords($table)
+    public function countAllNewRecords()
     {
         try {
             $query = $this->pdo->prepare(
-                "SELECT * FROM $table WHERE (is_deleted = 0 AND post_id IS NULL) OR (is_deleted IS NULL AND post_id IS NULL)"
+                "SELECT count(*) FROM `properties` WHERE (is_deleted = 0 AND post_id IS NULL) OR (is_deleted IS NULL AND post_id IS NULL) LIMIT 1"
             );
-            $query->execute();
+            $query->execute([]);
+            return $query->fetchColumn();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }
+
+    /**
+     * Getting all records by is_deleted = 0 AND post_id IS NULL
+     *
+     * @param  int $limit_start
+     * @param  int $limit
+     * @return array
+     */
+    public function getAllNewRecords($limit_start, $limit)
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT * FROM `properties` WHERE (is_deleted = 0 AND post_id IS NULL) OR (is_deleted IS NULL AND post_id IS NULL) LIMIT ?,?"
+            );
+            $query->execute([$limit_start, $limit]);
             return $query->fetchAll();
         } catch (\Exception $ex) {
             die($ex->getMessage());
@@ -353,15 +372,36 @@ class MySQL
      * Getting id FROM wp_posts LEFT JOIN meta_value FROM wp_postmeta WHERE wp.post_type = 'rz_listing' AND wt.meta_key = 'rz_listing_type' BY meta_value
      *
      * @param  string $listing_type
-     * @return array
+     * @return int
      */
-    public function getPostsRZListing($listing_type)
+    public function countPostsRZListing($listing_type)
     {
         try {
             $query = $this->pdo->prepare(
-                "SELECT wp.id, wt.meta_value FROM `wp_posts` wp LEFT JOIN `wp_postmeta` wt ON wp.id = wt.post_id WHERE wp.post_type = 'rz_listing' AND wt.meta_key = 'rz_listing_type' AND wt.meta_value = ?"
+                "SELECT count(*) FROM `wp_posts` wp LEFT JOIN `wp_postmeta` wt ON wp.id = wt.post_id WHERE wp.post_type = 'rz_listing' AND wt.meta_key = 'rz_listing_type' AND wt.meta_value = ? LIMIT 1"
             );
             $query->execute([$listing_type]);
+            return $query->fetchColumn();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }
+
+    /**
+     * Getting id FROM wp_posts LEFT JOIN meta_value FROM wp_postmeta WHERE wp.post_type = 'rz_listing' AND wt.meta_key = 'rz_listing_type' BY meta_value LIMIT ?,?
+     *
+     * @param  string $listing_type
+     * @param  int $limit_start
+     * @param  int $limit 
+     * @return array
+     */
+    public function getPostsRZListing($listing_type, $limit_start, $limit)
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT wp.id, wt.meta_value FROM `wp_posts` wp LEFT JOIN `wp_postmeta` wt ON wp.id = wt.post_id WHERE wp.post_type = 'rz_listing' AND wt.meta_key = 'rz_listing_type' AND wt.meta_value = ? LIMIT ?,?"
+            );
+            $query->execute([$listing_type, $limit_start, $limit]);
             return $query->fetchAll();
         } catch (\Exception $ex) {
             die($ex->getMessage());
@@ -375,13 +415,13 @@ class MySQL
      * @param  int $limit
      * @return array
      */
-    public function getAllPostsRZListing($limit_start,$limit)
+    public function getAllPostsRZListing($limit_start, $limit)
     {
         try {
             $query = $this->pdo->prepare(
                 "SELECT wp.id FROM `wp_posts` wp WHERE wp.post_type = 'rz_listing' ORDER BY wp.id DESC LIMIT ?,?"
             );
-            $query->execute([$limit_start,$limit]);
+            $query->execute([$limit_start, $limit]);
             return $query->fetchAll();
         } catch (\Exception $ex) {
             die($ex->getMessage());
