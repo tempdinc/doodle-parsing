@@ -189,7 +189,7 @@ foreach ($regionsDB as $regionDB) {
             'name' => $region_city_up,
             'slug' => $term_slug
          ];
-         file_put_contents(LOG_DIR . '/quote-add.log', ' >>> [' . $term_id . '] - ' . $term_name . ' | ' . $region_city_up . ' | ' . $term_slug . PHP_EOL, FILE_APPEND);
+         // file_put_contents(LOG_DIR . '/quote-add.log', ' >>> [' . $term_id . '] - ' . $term_name . ' | ' . $region_city_up . ' | ' . $term_slug . PHP_EOL, FILE_APPEND);
       }
    }
 }
@@ -204,6 +204,7 @@ $unit_source = 'quote';
 
 $wpImageArray = [];
 $decoded_image_urls = json_decode($quote_images);
+file_put_contents(LOG_DIR . '/quote-add.log', ' | value - ' . $decoded_image_urls . PHP_EOL, FILE_APPEND);
 if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
    foreach ($decoded_image_urls as $key => $value) {
       file_put_contents(LOG_DIR . '/quote-add.log', ' | value - ' . $value . PHP_EOL, FILE_APPEND);
