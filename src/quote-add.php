@@ -210,7 +210,7 @@ file_put_contents(LOG_DIR . '/quote-add.log', ' | type of decoded_image_urls - '
 if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
    foreach ($decoded_image_urls as $key => $value) {
       // $value = json_decode($value);
-      file_put_contents(LOG_DIR . '/quote-add.log', ' | value - ' . $value . PHP_EOL, FILE_APPEND);
+      file_put_contents(LOG_DIR . '/quote-add.log', ' | value - ' . $value->name . ' | ' . $value->url . ' | ' . $value->extension . PHP_EOL, FILE_APPEND);
       $re = '`^.*/`m';
       $subst = '';
       // IMAGE NAME CHECKING
