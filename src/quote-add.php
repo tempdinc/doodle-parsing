@@ -326,11 +326,11 @@ if (!$is_gallery_empty) {
 
       $new_property_meta = [];
 
-      $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $all_availability[0]->bathroom_cnt)); // rz_bathrooms
-      $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $all_availability[0]->bedroom_cnt)); // rz_bed
-      $sqft = trim(preg_replace("/\D/", "", $availability->home_size_sq_ft)); // rz_sqft
+      $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $quote_baths)); // rz_bathrooms
+      $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $quote_beds)); // rz_bed
+      $sqft = trim(preg_replace("/\D/", "", $quote_sqft)); // rz_sqft
 
-      $listing_price = clearPrice($all_availability[0]->listing_price);
+      $listing_price = clearPrice(100);
 
       $new_property_meta = [
          'post_content' => $unit_description,
@@ -353,11 +353,6 @@ if (!$is_gallery_empty) {
             update_post_meta($main_post_insert_result, 'price_per_day', $price_per_day);
          }
       }
-
-      $query = $parsing_db->pdo->prepare("UPDATE `availability` SET post_id = ? WHERE id = ?");
-      $query->execute([$main_post_insert_result, $all_availability[0]->id]);
-      $query = $parsing_db->pdo->prepare("UPDATE `properties` SET post_id = ? WHERE id = ?");
-      $query->execute([$main_post_insert_result, $property->id]);
    }
 } else {
    echo 'No images for post';
