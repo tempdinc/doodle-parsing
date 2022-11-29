@@ -206,25 +206,6 @@ $wpImageArray = [];
 $decoded_image_urls = json_decode($quote_images);
 if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
    foreach ($decoded_image_urls as $key => $value) {
-      $re = '`^.*/`m';
-      $subst = '';
-      /* IMAGE NAME CHECKING */
-      $orig_full_filename = preg_replace($re, $subst, parse_url($value, PHP_URL_PATH));
-      // echo ' | orig_full_filename - ' . $orig_full_filename;
-      $orig_fileextension = getExtension($orig_full_filename);
-      // echo ' | orig_fileextension - ' . $orig_fileextension; 
-      $orig_filename = substr(str_replace($orig_fileextension, '', $orig_full_filename), 0, -1);
-      // echo ' | ' . $orig_filename;
-      $filename_path = __DIR__ . '/images/' . $orig_filename . '.' . $orig_fileextension;
-      $is_file_exist = file_exists($filename_path);
-      $filename_counter = 1;
-      while ($is_file_exist) {
-         $orig_filename = $orig_filename . $filename_counter;
-         // echo ' | ' . $orig_filename . PHP_EOL;
-         $filename_path = __DIR__ . '/images/' . $orig_filename . '.' . $orig_fileextension;
-         $is_file_exist = isFileExist($filename_path);
-         $filename_counter++;
-      }
       $file_get = file_get_contents($value);
       if ($file_get !== false) {
          file_put_contents($filename_path, $file_get);
