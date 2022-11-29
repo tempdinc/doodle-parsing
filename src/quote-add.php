@@ -208,6 +208,7 @@ $decoded_image_urls = $quote_images;
 file_put_contents(LOG_DIR . '/quote-add.log', ' | value - ' . $decoded_image_urls . PHP_EOL, FILE_APPEND);
 if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
    foreach ($decoded_image_urls as $key => $value) {
+      $value = json_decode($value);
       file_put_contents(LOG_DIR . '/quote-add.log', ' | value - ' . $value . PHP_EOL, FILE_APPEND);
       $re = '`^.*/`m';
       $subst = '';
