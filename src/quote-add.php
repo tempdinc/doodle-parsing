@@ -173,7 +173,7 @@ foreach ($terms as $term) {
 }
 
 $regionsDB = file_get_contents(__DIR__ . '/regions.json');
-$regionsDB = json_decode($regionsDB, true);
+$regionsDB = json_decode(json_decode('"' . $regionsDB . '"'));
 
 $rz_full_regions = [];
 foreach ($regionsDB as $regionDB) {
