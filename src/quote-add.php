@@ -232,6 +232,7 @@ if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
          if ($moveToWP) {
             $wpImageId = (object)array('id' => (string)$moveToWP);
             array_push($wpImageArray, $wpImageId);
+            file_put_contents(LOG_DIR . '/quote-add.log', ' | WP Image ID - ' . $wpImageId, FILE_APPEND);
          } else {
             file_put_contents(LOG_DIR . '/quote-add.log', ' | Error transferring WP - ' . $filename_path, FILE_APPEND);
          }
@@ -239,6 +240,7 @@ if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
          file_put_contents(LOG_DIR . '/quote-add.log', ' | Error transferring WP - ' . $filename_path, FILE_APPEND);
       }
    }
+   file_put_contents(LOG_DIR . '/quote-add.log', ' | WP Image ID - END' . PHP_EOL, FILE_APPEND);
 }
 
 // Checking for images of post
