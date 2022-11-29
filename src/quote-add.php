@@ -204,8 +204,6 @@ $unit_source = 'quote';
 
 $wpImageArray = [];
 $decoded_image_urls = json_decode(json_decode('"' . $quote_images . '"', true));
-// $decoded_image_urls = $quote_images;
-file_put_contents(LOG_DIR . '/quote-add.log', ' | type of quote_images - ' . gettype($quote_images) . PHP_EOL, FILE_APPEND);
 file_put_contents(LOG_DIR . '/quote-add.log', ' | type of decoded_image_urls - ' . $decoded_image_urls . PHP_EOL, FILE_APPEND);
 if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
    foreach ($decoded_image_urls as $key => $value) {
@@ -232,12 +230,14 @@ if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
       }
       $file_get = file_get_contents($value->url);
       if ($file_get !== false) {
+         file_put_contents(LOG_DIR . '/quote-add.log', ' | file_get not false' . PHP_EOL, FILE_APPEND);
          file_put_contents($filename_path, $file_get);
          /* IMAGE NAME CHECKING END */
          if ($unit_source == 'rentprogress.com') {
             cropImage($filename_path, 100, 82);
          }
          $moveToWP = moveToWp($filename_path, $availability_address);
+         file_put_contents(LOG_DIR . '/quote-add.log', ' | moveToWP not false' . PHP_EOL, FILE_APPEND);
          if ($moveToWP) {
             $wpImageId = (object)array('id' => (string)$moveToWP);
             array_push($wpImageArray, $wpImageId);
