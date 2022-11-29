@@ -246,114 +246,113 @@ $is_gallery_empty = (count($wpImageArray) == 0) ? true : false;
 $rz_gallery = json_encode($wpImageArray);
 clearImages();
 
-   // Создаем массив данных новой записи
-   $post_data = array(
-      'post_title'    => $quote_address,
-      'post_name'     => $quote_address,
-      'post_content'  => $quote_description,
-      'post_excerpt'  => $quote_description,
-      'post_status'   => 'draft',
-      'post_author'   => 62,
-      'post_type'     => 'rz_listing'
-   );
-   // Вставляем запись в базу данных
-   $main_post_insert_result = wp_insert_post($post_data);
-   if ($main_post_insert_result && $main_post_insert_result != 0) {
-      wp_set_post_terms($main_post_insert_result, [$rz_region_id], 'rz_regions');
+// Создаем массив данных новой записи
+$post_data = array(
+   'post_title'    => $quote_address,
+   'post_name'     => $quote_address,
+   'post_content'  => $quote_description,
+   'post_excerpt'  => $quote_description,
+   'post_status'   => 'draft',
+   'post_author'   => 62,
+   'post_type'     => 'rz_listing'
+);
+// Вставляем запись в базу данных
+$main_post_insert_result = wp_insert_post($post_data);
+if ($main_post_insert_result && $main_post_insert_result != 0) {
+   wp_set_post_terms($main_post_insert_result, [$rz_region_id], 'rz_regions');
 
-      $new_property_meta = [
-            'post_content' => $quote_description,
-            'rz_apartment_uri' => $quote_link,
-            'rz_booking_type' => 'Request booking',
-            'rz_city' => $quote_city,
-            'rz_listing_type' => '25769',
-            'rz_location' => '',
-            'rz_location' => '',
-            'rz_location' => $np_rz_location__address,
-            'rz_location__address' => $np_rz_location__address,
-            'rz_location__lat' => '',
-            'rz_location__lng' => '',
-            'rz_post_address1' => $np_rz_location__address_line1,
-            'rz_post_address2' => $np_rz_location__address_line2,
-            'rz_priority' => '0',
-            'rz_priority_custom' => '0',
-            'rz_priority_selection' => 'normal',
-            'rz_reservation_length_max' => '0',
-            'rz_reservation_length_min' => '0',
-            'rz_state' => $quote_state,
-            'rz_status' => 'Now',
-            'rz_street_line_1' => $np_rz_location__address_line1,
-            'rz_street_line_2' => $np_rz_location__address_line2,
-            'rz_zip' => $quote_zip,
-            'rz_gallery' => $rz_gallery,
-            'rz_ranking' => $rz_ranking,
-            'rz_listing_region' => $region_slug
-      ];
-      foreach ($new_property_meta as $key => $value) {
-         add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
-      }
+   $new_property_meta = [
+         'post_content' => $quote_description,
+         'rz_apartment_uri' => $quote_link,
+         'rz_booking_type' => 'Request booking',
+         'rz_city' => $quote_city,
+         'rz_listing_type' => '25769',
+         'rz_location' => '',
+         'rz_location' => '',
+         'rz_location' => $np_rz_location__address,
+         'rz_location__address' => $np_rz_location__address,
+         'rz_location__lat' => '',
+         'rz_location__lng' => '',
+         'rz_post_address1' => $np_rz_location__address_line1,
+         'rz_post_address2' => $np_rz_location__address_line2,
+         'rz_priority' => '0',
+         'rz_priority_custom' => '0',
+         'rz_priority_selection' => 'normal',
+         'rz_reservation_length_max' => '0',
+         'rz_reservation_length_min' => '0',
+         'rz_state' => $quote_state,
+         'rz_status' => 'Now',
+         'rz_street_line_1' => $np_rz_location__address_line1,
+         'rz_street_line_2' => $np_rz_location__address_line2,
+         'rz_zip' => $quote_zip,
+         'rz_gallery' => $rz_gallery,
+         'rz_ranking' => $rz_ranking,
+         'rz_listing_region' => $region_slug
+   ];
+   foreach ($new_property_meta as $key => $value) {
+      add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
+   }
 
-      if (!empty($decoded_premise_services)) {
-            foreach ($decoded_premise_services as $key => $value) {
-               foreach ($value as $data) {
-                  $term_id = array_search($data, $apartment_amenities_list);
-                  if ($term_id) {
-                        add_post_meta($main_post_insert_result, 'rz_amenities', $term_id, true) or update_post_meta($main_post_insert_result, 'rz_amenities', $term_id);
-                  }
+   if (!empty($decoded_premise_services)) {
+         foreach ($decoded_premise_services as $key => $value) {
+            foreach ($value as $data) {
+               $term_id = array_search($data, $apartment_amenities_list);
+               if ($term_id) {
+                     add_post_meta($main_post_insert_result, 'rz_amenities', $term_id, true) or update_post_meta($main_post_insert_result, 'rz_amenities', $term_id);
                }
             }
-      }
+         }
    }
+}
 
-   // Add post if it has images
-   if (!$is_gallery_empty) {
-      $rz_unit_type = 'single';
-      $rz_search = 1;
-      $rz_multi_units = [];
+// Add post if it has images
+if (!$is_gallery_empty) {
+   $rz_unit_type = 'single';
+   $rz_search = 1;
+   $rz_multi_units = [];
 
-      echo ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL;
-      file_put_contents(LOG_DIR . '/quote-add.log', ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL, FILE_APPEND);
+   echo ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL;
+   file_put_contents(LOG_DIR . '/quote-add.log', ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL, FILE_APPEND);
 
-      if ($main_post_insert_result && $main_post_insert_result != 0) {
+   if ($main_post_insert_result && $main_post_insert_result != 0) {
 
-          $new_property_meta = [];
+         $new_property_meta = [];
 
-          $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $all_availability[0]->bathroom_cnt)); // rz_bathrooms
-          $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $all_availability[0]->bedroom_cnt)); // rz_bed
-          $sqft = trim(preg_replace("/\D/", "", $availability->home_size_sq_ft)); // rz_sqft
+         $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $all_availability[0]->bathroom_cnt)); // rz_bathrooms
+         $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $all_availability[0]->bedroom_cnt)); // rz_bed
+         $sqft = trim(preg_replace("/\D/", "", $availability->home_size_sq_ft)); // rz_sqft
 
-          $listing_price = clearPrice($all_availability[0]->listing_price);
+         $listing_price = clearPrice($all_availability[0]->listing_price);
 
-          $new_property_meta = [
-              'post_content' => $unit_description,
-              'rz_apartment_uri' => $property->link,
-              'rz_bathrooms' => $bath_count,
-              'rz_bed' => $bed_count,
-              'rz_bedroom' => $bed_count,
-              'rz_price' => $listing_price,
-              'rz_sqft' => $sqft,
-              'rz_unit_type' => $rz_unit_type,
-              'rz_search' => $rz_search,
-              'rz_multi_units' => $rz_multi_units
-          ];
-          foreach ($new_property_meta as $key => $value) {
-              add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
-          }
-          if ($listing_price != 0) {
-              $price_per_day = get_custom_price($main_post_insert_result);
-              if (!add_post_meta($main_post_insert_result, 'price_per_day', $price_per_day, true)) {
-                  update_post_meta($main_post_insert_result, 'price_per_day', $price_per_day);
-              }
-          }
+         $new_property_meta = [
+            'post_content' => $unit_description,
+            'rz_apartment_uri' => $property->link,
+            'rz_bathrooms' => $bath_count,
+            'rz_bed' => $bed_count,
+            'rz_bedroom' => $bed_count,
+            'rz_price' => $listing_price,
+            'rz_sqft' => $sqft,
+            'rz_unit_type' => $rz_unit_type,
+            'rz_search' => $rz_search,
+            'rz_multi_units' => $rz_multi_units
+         ];
+         foreach ($new_property_meta as $key => $value) {
+            add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
+         }
+         if ($listing_price != 0) {
+            $price_per_day = get_custom_price($main_post_insert_result);
+            if (!add_post_meta($main_post_insert_result, 'price_per_day', $price_per_day, true)) {
+               update_post_meta($main_post_insert_result, 'price_per_day', $price_per_day);
+            }
+         }
 
-          $query = $parsing_db->pdo->prepare("UPDATE `availability` SET post_id = ? WHERE id = ?");
-          $query->execute([$main_post_insert_result, $all_availability[0]->id]);
-          $query = $parsing_db->pdo->prepare("UPDATE `properties` SET post_id = ? WHERE id = ?");
-          $query->execute([$main_post_insert_result, $property->id]);
-      }
-   } else {
-      echo 'No images for post';
+         $query = $parsing_db->pdo->prepare("UPDATE `availability` SET post_id = ? WHERE id = ?");
+         $query->execute([$main_post_insert_result, $all_availability[0]->id]);
+         $query = $parsing_db->pdo->prepare("UPDATE `properties` SET post_id = ? WHERE id = ?");
+         $query->execute([$main_post_insert_result, $property->id]);
    }
+} else {
+   echo 'No images for post';
 }
 
 echo " >>> " . date("Y-m-d H:i:s") . " - End.." . PHP_EOL;
