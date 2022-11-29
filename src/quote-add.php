@@ -173,7 +173,7 @@ foreach ($terms as $term) {
 }
 
 $regionsDB = file_get_contents(__DIR__ . '/regions.json');
-$regionsDB = json_decode(json_decode('"' . $regionsDB . '"'));
+$regionsDB = json_decode($regionsDB, true);
 
 $rz_full_regions = [];
 foreach ($regionsDB as $regionDB) {
@@ -203,7 +203,7 @@ $availability_address_lc = replace_string($quote_address);
 $unit_source = 'quote';
 
 $wpImageArray = [];
-$decoded_image_urls = json_decode($quote_images, true);
+$decoded_image_urls = json_decode(json_decode('"' . $quote_images . '"'));
 // $decoded_image_urls = $quote_images;
 file_put_contents(LOG_DIR . '/quote-add.log', ' | type of quote_images - ' . gettype($quote_images) . PHP_EOL, FILE_APPEND);
 file_put_contents(LOG_DIR . '/quote-add.log', ' | type of decoded_image_urls - ' . gettype($decoded_image_urls) . PHP_EOL, FILE_APPEND);
