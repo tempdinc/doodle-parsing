@@ -239,7 +239,7 @@ if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
          $moveToWP = moveToWp($filename_path, $availability_address);
          file_put_contents(LOG_DIR . '/quote-add.log', ' | moveToWP done' . PHP_EOL, FILE_APPEND);
          if ($moveToWP) {
-            file_put_contents(LOG_DIR . '/quote-add.log', ' | moveToWP not false' . PHP_EOL, FILE_APPEND);
+            file_put_contents(LOG_DIR . '/quote-add.log', ' | moveToWP not false' . $moveToWP . PHP_EOL, FILE_APPEND);
             $wpImageId = (object)array('id' => (string)$moveToWP);
             file_put_contents(LOG_DIR . '/quote-add.log', ' | wpImageId ' . $wpImageId . PHP_EOL, FILE_APPEND);
             array_push($wpImageArray, $wpImageId);
