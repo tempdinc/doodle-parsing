@@ -230,20 +230,15 @@ if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
       }
       $file_get = file_get_contents($value->url);
       if ($file_get !== false) {
-         file_put_contents(LOG_DIR . '/quote-add.log', ' | file_get not false' . PHP_EOL, FILE_APPEND);
          file_put_contents($filename_path, $file_get);
          /* IMAGE NAME CHECKING END */
          if ($unit_source == 'rentprogress.com') {
             cropImage($filename_path, 100, 82);
          }
          $moveToWP = moveToWp($filename_path, $availability_address);
-         file_put_contents(LOG_DIR . '/quote-add.log', ' | moveToWP done' . PHP_EOL, FILE_APPEND);
          if ($moveToWP) {
-            file_put_contents(LOG_DIR . '/quote-add.log', ' | moveToWP not false' . $moveToWP . PHP_EOL, FILE_APPEND);
-            $wpImageId = $moveToWP;
-            file_put_contents(LOG_DIR . '/quote-add.log', ' | wpImageId ' . $wpImageId . PHP_EOL, FILE_APPEND);
-            array_push($wpImageArray, $wpImageId);
-            file_put_contents(LOG_DIR . '/quote-add.log', ' | WP Image ID - ' . $wpImageId, FILE_APPEND);
+            array_push($wpImageArray, $moveToWP);
+            file_put_contents(LOG_DIR . '/quote-add.log', ' | WP Image ID - ' . $moveToWP, FILE_APPEND);
          } else {
             file_put_contents(LOG_DIR . '/quote-add.log', ' | Error transferring WP - ' . $filename_path, FILE_APPEND);
          }
@@ -253,7 +248,7 @@ if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
    }
    file_put_contents(LOG_DIR . '/quote-add.log', ' | WP Image ID - END' . PHP_EOL, FILE_APPEND);
 }
-exit();
+// exit();
 // Checking for images of post
 $is_gallery_empty = (count($wpImageArray) == 0) ? true : false;
 $rz_gallery = json_encode($wpImageArray);
