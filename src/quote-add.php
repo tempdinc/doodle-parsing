@@ -237,9 +237,11 @@ if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
             cropImage($filename_path, 100, 82);
          }
          $moveToWP = moveToWp($filename_path, $availability_address);
-         file_put_contents(LOG_DIR . '/quote-add.log', ' | moveToWP not false' . PHP_EOL, FILE_APPEND);
+         file_put_contents(LOG_DIR . '/quote-add.log', ' | moveToWP done' . PHP_EOL, FILE_APPEND);
          if ($moveToWP) {
+            file_put_contents(LOG_DIR . '/quote-add.log', ' | moveToWP not false' . PHP_EOL, FILE_APPEND);
             $wpImageId = (object)array('id' => (string)$moveToWP);
+            file_put_contents(LOG_DIR . '/quote-add.log', ' | wpImageId ' . $wpImageId . PHP_EOL, FILE_APPEND);
             array_push($wpImageArray, $wpImageId);
             file_put_contents(LOG_DIR . '/quote-add.log', ' | WP Image ID - ' . $wpImageId, FILE_APPEND);
          } else {
