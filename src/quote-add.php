@@ -251,7 +251,7 @@ if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
    }
    file_put_contents(LOG_DIR . '/quote-add.log', ' | WP Image ID - END' . PHP_EOL, FILE_APPEND);
 }
-
+exit();
 // Checking for images of post
 $is_gallery_empty = (count($wpImageArray) == 0) ? true : false;
 $rz_gallery = json_encode($wpImageArray);
