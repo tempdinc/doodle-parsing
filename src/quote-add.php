@@ -230,7 +230,7 @@ if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
          $is_file_exist = isFileExist($filename_path);
          $filename_counter++;
       }
-      $file_get = file_get_contents($value);
+      $file_get = file_get_contents($value->url);
       if ($file_get !== false) {
          file_put_contents($filename_path, $file_get);
          /* IMAGE NAME CHECKING END */
