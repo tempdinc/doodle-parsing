@@ -292,8 +292,31 @@ foreach ($regionsDB as $regionDB) {
     }
 }
 
+// Checking for existing rz_listing_category multiunit
+$rz_category_terms = get_terms([
+    'taxonomy' => 'rz_listing_category',
+    'hide_empty' => false,
+]);
+
+$rz_listing_category = '0';
+foreach ($rz_category_terms as $rz_category_term) {
+    if ($rz_category_term->slug == 'multiunit') {
+        $rz_listing_category = $rz_category_term->term_id;
+    }
+}
+if ($rz_listing_category == '0') {
+    $insert_res = wp_insert_term('Apartment House', 'rz_listing_category', array(
+        'description' => '',
+        'parent'      => 0,
+        'slug'        => 'multiunit',
+    ));
+    $rz_listing_category = $insert_res['term_id'];
+}
+
 // Start transfer
 echo 'Start transfer properties to WP..' . PHP_EOL;
+
+file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | rz_listing_category WP - ' . $rz_listing_category . PHP_EOL, FILE_APPEND);
 
 // Getting all parsed
 $parsing_db = new MySQL('parsing', 'local');
@@ -489,14 +512,14 @@ for ($i = 0; $i <= $pages; $i++) {
                             $new_property_meta = [];
 
                             $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $availability->bathroom_cnt)); // rz_bathrooms
-                            if(intval($bath_count) != 0) $availability_baths[] = $bath_count;
+                            if (intval($bath_count) != 0) $availability_baths[] = $bath_count;
                             $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $availability->bedroom_cnt)); // rz_bed
-                            if(intval($bed_count) != 0) $availability_beds[] = $bed_count;
+                            if (intval($bed_count) != 0) $availability_beds[] = $bed_count;
                             $sqft = trim(preg_replace("/\D/", "", $availability->home_size_sq_ft)); // rz_sqft
-                            if(intval($sqft) != 0) $availability_sqft[] = $sqft;
+                            if (intval($sqft) != 0) $availability_sqft[] = $sqft;
 
                             $listing_price = clearPrice($availability->listing_price);
-                            if(intval($listing_price) != 0) $availability_prices[] = $listing_price;
+                            if (intval($listing_price) != 0) $availability_prices[] = $listing_price;
 
                             $new_property_meta = [
                                 'post_content' => $unit_description,
@@ -549,7 +572,7 @@ for ($i = 0; $i <= $pages; $i++) {
                             }
                             if ($listing_price != 0) {
                                 $price_per_day = get_custom_price($post_id);
-                                if(intval($price_per_day) != 0) $availability_prices_per_day[] = $price_per_day;
+                                if (intval($price_per_day) != 0) $availability_prices_per_day[] = $price_per_day;
                                 if (!add_post_meta($post_id, 'price_per_day', $price_per_day, true)) {
                                     update_post_meta($post_id, 'price_per_day', $price_per_day);
                                 }
@@ -589,7 +612,7 @@ for ($i = 0; $i <= $pages; $i++) {
                     'rz_unit_type' => $rz_unit_type,
                     'rz_search' => $rz_search,
                     'rz_multi_units' => json_encode($availability_posts, JSON_PRETTY_PRINT),
-                    'rz_listing_category' => '334'
+                    'rz_listing_category' => $rz_listing_category
                 ];
                 foreach ($new_property_meta as $key => $value) {
                     add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
