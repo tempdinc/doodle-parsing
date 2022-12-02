@@ -80,6 +80,41 @@ class MySQL
     }
 
     /**
+     * Count records
+     *
+     * @param  string $table
+     * @param  $param
+     * @return int
+     */
+    public function count($table, $params)
+    {
+        $set = '';
+        $x = 1;
+
+        foreach ($params as $param) {
+            $set .= "{$param['field']} " . $param['compare'] . " {$param['value']}";
+            if ($x < count($params)) {
+                $set .= ' AND ';
+            }
+            $x++;
+        }
+
+        $query = sprintf(
+            "SELECT COUNT(*) FROM %s WHERE %s",
+            $table,
+            $set
+        );
+        // echo $query;
+        try {
+            $statement = $this->pdo->prepare($query);
+            $statement->execute();
+            return $statement->fetchColumn();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }
+
+    /**
      * Updating the records
      *
      * @param  string $table

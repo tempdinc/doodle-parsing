@@ -1,7 +1,30 @@
 [
     {
         "TX": [
-            "HOUSTON"
+            "AUSTIN"
+        ],
+        "CO": [
+            "DENVER"
+        ],
+        "CA": [
+            "SAN DIEGO",
+            "LOS ANGELES"
+        ],
+        "AZ": [
+            "PHOENIX"
+        ],
+        "FL": [
+            "MIAMI",
+            "TAMPA"
+        ],
+        "GA": [
+            "ATLANTA"
+        ],
+        "IL": [
+            "CHICAGO"
+        ],
+        "PA": [
+            "PHILADELPHIA"
         ]
     }
 ]

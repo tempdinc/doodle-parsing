@@ -13,22 +13,31 @@ $f = fopen(LOG_DIR . '/new-transfer-data.log', 'w');
 fclose($f);
 $f = fopen(LOG_DIR . '/fix-post-regions.log', 'w');
 fclose($f);
-
 //Query our MySQL table
 $parsing_db = new MySQL('parsing', 'local');
 
 // Apartment amenities
-$query = $parsing_db->pdo->prepare("SELECT on_premise_features FROM `properties` WHERE on_premise_features != ''");
-$query->execute();
-$rows = $query->fetchAll();
 $apartment_amenities = [];
-foreach ($rows as $row) {
-    $on_premise_features = $row->on_premise_features;
-    $decoded_premise_services = json_decode($on_premise_features);
-    // var_dump($row);
-    foreach ($decoded_premise_services as $key => $value) {
-        foreach ($value as $data) {
-            array_push($apartment_amenities, $data);
+$total_rows = $parsing_db->count('properties', [['field' => "on_premise_features", 'compare' => "!=", 'value' => "''"]]);
+$pages = intdiv($total_rows, 100);
+echo 'Apartment amenities total pages - ' . $pages . PHP_EOL;
+for ($i = 0; $i <= $pages; $i++) {
+    echo 'page - ' . $i;
+    $start = $i * 100;
+    try {
+        $query = $parsing_db->pdo->prepare("SELECT `on_premise_features` FROM `properties` WHERE `on_premise_features` != '' LIMIT $start,100");
+        $query->execute();
+        $rows = $query->fetchAll();
+    } catch (\Exception $ex) {
+        die($ex->getMessage());
+    }
+    foreach ($rows as $row) {
+        $on_premise_features = $row->on_premise_features;
+        $decoded_premise_services = json_decode($on_premise_features);
+        foreach ($decoded_premise_services as $key => $value) {
+            foreach ($value as $data) {
+                array_push($apartment_amenities, $data);
+            }
         }
     }
 }
@@ -36,17 +45,28 @@ $apartment_amenities = array_unique($apartment_amenities, SORT_STRING);
 sort($apartment_amenities);
 
 // Community amenities
-$query = $parsing_db->pdo->prepare("SELECT on_premise_services FROM `properties` WHERE on_premise_services != ''");
-$query->execute();
-$rows = $query->fetchAll();
 $community_amenities = [];
-foreach ($rows as $row) {
-    $on_premise_services = $row->on_premise_services;
-    $decoded_premise_services = json_decode($on_premise_services);
-    // var_dump($row);
-    foreach ($decoded_premise_services as $key => $value) {
-        foreach ($value as $data) {
-            array_push($community_amenities, $data);
+$total_rows = $parsing_db->count('properties', [['field' => "on_premise_services", 'compare' => "!=", 'value' => "''"]]);
+$pages = intdiv($total_rows, 100);
+echo 'Community amenities total pages - ' . $pages . PHP_EOL;
+for ($i = 0; $i <= $pages; $i++) {
+    echo 'page - ' . $i;
+    $start = $i * 100;
+    try {
+        $query = $parsing_db->pdo->prepare("SELECT `on_premise_services` FROM `properties` WHERE `on_premise_features` != '' LIMIT $start,100");
+        $query->execute();
+        $rows = $query->fetchAll();
+    } catch (\Exception $ex) {
+        die($ex->getMessage());
+    }
+    foreach ($rows as $row) {
+        $on_premise_services = $row->on_premise_services;
+        $decoded_premise_services = json_decode($on_premise_services);
+        // var_dump($row);
+        foreach ($decoded_premise_services as $key => $value) {
+            foreach ($value as $data) {
+                array_push($community_amenities, $data);
+            }
         }
     }
 }
@@ -73,7 +93,7 @@ echo " \033[31mAdded amenities: " . $amenities_counter . "\033[0m";
 
 file_put_contents(LOG_DIR . '/new-transfer-data.log', ' Added amenities: ' . $amenities_counter, FILE_APPEND);
 // Transfer amenities END
-
+echo 'done2';
 // Getting all amenities
 $apartment_amenities_list = [];
 $wp_db = new MySQL('wp', 'local');
@@ -292,6 +312,114 @@ foreach ($regionsDB as $regionDB) {
     }
 }
 
+// NEW FULL REGIONS
+file_put_contents(LOG_DIR . '/get-regions.log', '[' . date('Y-m-d H:i:s') . '] Get regions - ', FILE_APPEND);
+// Clear log files
+$f = fopen(LOG_DIR . '/new-regions.json', 'w');
+fclose($f);
+
+echo "Init regions.. ";
+
+$old_regions = [];
+
+$regionsDB = file_get_contents(__DIR__ . '/regions.json');
+$regionsDB = json_decode($regionsDB, true);
+
+$full_regions = [];
+foreach ($regionsDB as $regionDB) {
+    foreach ($regionDB as $region_key => $region_cities) {
+        $temp_city = [];
+        foreach ($region_cities as $region_city) {
+            $region_city_slug = str_replace(' ', '-', preg_replace('/[^ a-z\d]/ui', '', strtolower($region_city)));
+            $temp_city[] = [
+                'city_name' => $region_city,
+                'city_slug' => $region_city_slug
+            ];
+        }
+        $full_regions[$region_key] = $temp_city;
+    }
+}
+file_put_contents('old-regions.json', json_encode($full_regions));
+
+$old_citiesDB = file_get_contents(__DIR__ . '/new-regions.json');
+$old_regions = json_decode($old_citiesDB, true);
+$old_regions_key = array_keys($old_regions);
+
+foreach ($full_regions as $full_region => $full_cities) {
+    $array_search = array_search($full_region, $old_regions_key);
+    if ($array_search !== false && $old_regions[$full_region] !== NULL) {
+        $old_regions[$full_region] = array_merge($old_regions[$full_region], $full_cities);
+        $old_regions[$full_region] = array_unique($old_regions[$full_region], SORT_REGULAR);
+        array_multisort(array_column($old_regions[$full_region], 'city_slug'), SORT_ASC, $old_regions[$full_region]);
+    } else {
+        $old_regions[$full_region] = $full_cities;
+    }
+}
+
+file_put_contents('old-regions.json', json_encode($old_regions));
+
+$citiesDB = file_get_contents(__DIR__ . '/cities.json');
+$citiesDB = json_decode($citiesDB, true);
+$counter = 0;
+$rz_full_regions = [];
+foreach ($citiesDB as $states) {
+    foreach ($states as $code => $citiesArray) {
+        foreach ($citiesArray as $city) {
+
+            $region = strtoupper($city) . ', ' . strtoupper($code);
+            $region_slug = str_replace(' ', '-', preg_replace('/[^ a-z\d]/ui', '', strtolower($region)));
+            echo $region_slug . ' | ';
+            $rz_regions_key = array_search($region_slug, array_column($rz_regions, 'slug'));
+            $term_id = $rz_regions[$rz_regions_key]['term_id'];
+            $term_name = $rz_regions[$rz_regions_key]['name'];
+            $term_slug = $rz_regions[$rz_regions_key]['slug'];
+
+            $key = array_search($region, $old_regions_key);
+
+            $city = str_replace(' ', '-', strtolower($city));
+            $code = strtolower($code);
+            $base_link = 'https://rentprogress.com/bin/progress-residential/property-search.market-' . urlencode($city . '-' . $code) . '.json';
+            // echo $base_link;
+            $marketDB = file_get_contents($base_link);
+            $marketDB = json_decode($marketDB, true);
+            $new_cities = [];
+            foreach ($marketDB as $markets) {
+                foreach ($markets as $market) {
+                    $new_city = $market['city'] . ', ' . $market['state'];
+                    $new_city_slug = str_replace(' ', '-', preg_replace('/[^ a-z\d]/ui', '', strtolower($new_city)));
+
+                    $region_city_up = strtoupper($new_city);
+                    $rz_full_regions[] = [
+                        'term_id'       => $term_id,
+                        'city_name'     => $region_city_up,
+                        'city_slug'     => $new_city_slug,
+                        'region_name'   => $region,
+                        'region_slug'   => $term_slug
+                    ];
+
+                    $new_cities[] = [
+                        'city_name' => $new_city,
+                        'city_slug' => $new_city_slug
+                    ];
+                    $counter++;
+                }
+            }
+
+            if ($key !== false && $old_regions[$region] !== NULL) {
+                $new_cities = array_merge($old_regions[$region], $new_cities);
+                $new_cities = array_unique($new_cities, SORT_REGULAR);
+                array_multisort(array_column($new_cities, 'city_slug'), SORT_ASC, $new_cities);
+            }
+            $old_regions[$region] = $new_cities;
+        }
+    }
+}
+
+file_put_contents('new-regions.json', json_encode($old_regions));
+file_put_contents(LOG_DIR . '/get-regions.log', ' total added cities - ' . $counter . PHP_EOL . ' END >>> ' . date('Y-m-d H:i:s'), FILE_APPEND);
+
+
+// NEW FULL REGIONS END
 // Checking for existing rz_listing_category multiunit
 $rz_category_terms = get_terms([
     'taxonomy' => 'rz_listing_category',
@@ -346,17 +474,24 @@ for ($i = 0; $i <= $pages; $i++) {
         $np_rz_location__address_line2 = $property->city . ', ' . $property->state_cd . ' ' . $property->zip5_cd;
 
         // region
+        $region_slug = '';
         $city_low = strtolower($property->city);
         $state_low = strtolower($property->state_cd);
-        $region_slug = str_replace(' ', '-', $city_low . ' ' . $state_low);
-        $key = array_search($region_slug, array_column($rz_full_regions, 'slug'));
-        $rz_region_id = $rz_full_regions[$key]['term_id'];
-        echo 'rz_region_id - ' . $rz_region_id;
-        $custom_tax = array(
-            'rz_regions' => array(
-                $rz_region_id
-            )
-        );
+        // $current_city_slug = str_replace(' ', '-', $city_low . ' ' . $state_low);
+        $current_city_slug = str_replace(' ', '-', preg_replace('/[^ a-z\d]/ui', '', $city_low . ' ' . $state_low));
+        $key = array_search($current_city_slug, array_column($rz_full_regions, 'city_slug'));
+        if ($key !== false) {
+            $rz_region_id = $rz_full_regions[$key]['term_id'];
+            $region_slug = $rz_full_regions[$key]['region_slug'];
+            echo 'rz_region_id - ' . $rz_region_id;
+            $custom_tax = array(
+                'rz_regions' => array(
+                    $rz_region_id
+                )
+            );
+        }
+        echo $current_city_slug . ' | ';
+        echo 'region_slug - ' . $region_slug;
 
         // Adding ranking
         $unit_source = $property->source;
@@ -425,400 +560,253 @@ for ($i = 0; $i <= $pages; $i++) {
         $rz_gallery = json_encode($wpImageArray);
         clearImages();
 
-        // Создаем массив данных новой записи
-        $post_data = array(
-            'post_title'    => $property_address,
-            'post_name'     => $property_address,
-            'post_content'  => $property_description,
-            'post_excerpt'  => $property_description,
-            'post_status'   => 'publish',
-            'post_author'   => 62,
-            'post_type'     => 'rz_listing'
-        );
-        // Вставляем запись в базу данных
-        $main_post_insert_result = wp_insert_post($post_data);
-        if ($main_post_insert_result && $main_post_insert_result != 0) {
-            wp_set_post_terms($main_post_insert_result, [$rz_region_id], 'rz_regions');
+        if(!$is_gallery_empty && $region_slug != '') {
+            // Создаем массив данных новой записи
+            $post_data = array(
+                'post_title'    => $property_address,
+                'post_name'     => $property_address,
+                'post_content'  => $property_description,
+                'post_excerpt'  => $property_description,
+                'post_status'   => 'publish',
+                'post_author'   => 62,
+                'post_type'     => 'rz_listing'
+            );
+            // Вставляем запись в базу данных
+            $main_post_insert_result = wp_insert_post($post_data);
+            if ($main_post_insert_result && $main_post_insert_result != 0) {
+                wp_set_post_terms($main_post_insert_result, [$rz_region_id], 'rz_regions');
 
-            $new_property_meta = [
-                'post_content' => $unit_description,
-                'rz_apartment_uri' => $property->link,
-                'rz_booking_type' => 'Request booking',
-                'rz_city' => $property->city,
-                'rz_listing_type' => '25769',
-                'rz_location' => $property->longitude,
-                'rz_location' => $property->latitude,
-                'rz_location' => $np_rz_location__address,
-                'rz_location__address' => $np_rz_location__address,
-                'rz_location__lat' => $property->latitude,
-                'rz_location__lng' => $property->longitude,
-                'rz_post_address1' => $np_rz_location__address_line1,
-                'rz_post_address2' => $np_rz_location__address_line2,
-                'rz_priority' => '0',
-                'rz_priority_custom' => '0',
-                'rz_priority_selection' => 'normal',
-                'rz_reservation_length_max' => '0',
-                'rz_reservation_length_min' => '0',
-                'rz_state' => $property->state_cd,
-                'rz_status' => 'Now',
-                'rz_street_line_1' => $np_rz_location__address_line1,
-                'rz_street_line_2' => $np_rz_location__address_line2,
-                'rz_zip' => $property->zip5_cd,
-                'rz_gallery' => $rz_gallery,
-                'rz_ranking' => $rz_ranking,
-                'rz_listing_region' => $region_slug
-            ];
-            foreach ($new_property_meta as $key => $value) {
-                add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
-            }
-
-            if (!empty($decoded_premise_services)) {
-                foreach ($decoded_premise_services as $key => $value) {
-                    foreach ($value as $data) {
-                        $term_id = array_search($data, $apartment_amenities_list);
-                        if ($term_id) {
-                            add_post_meta($main_post_insert_result, 'rz_amenities', $term_id, true) or update_post_meta($main_post_insert_result, 'rz_amenities', $term_id);
-                        }
-                    }
-                }
-            }
-        }
-
-        $all_availability = $parsing_db->getAvailabilityNowByProperty($property->id);
-        $availability_counter = count($all_availability);
-        echo ' | availability_counter - ' . $availability_counter;
-        if ($availability_counter > 0 && isset($all_availability[0]->listing_price) && !$is_gallery_empty) {
-            if ($availability_counter > 1) {
-                $availability_prices = [];
-                $availability_price_per_day = [];
-                $availability_beds = [];
-                $availability_baths = [];
-                $availability_sqft = [];
-                $availability_posts = [];
-                foreach ($all_availability as $availability) {
-                    if ($main_post_insert_result && $main_post_insert_result != 0) {
-                        $unit_post_insert_result = wp_insert_post($post_data);
-                        if ($unit_post_insert_result && $unit_post_insert_result != 0) {
-                            $post_id = $unit_post_insert_result;
-                            wp_set_post_terms($post_id, [$rz_region_id], 'rz_regions');
-
-                            $rz_unit_type = 'multisingle';
-                            $rz_search = 0;
-                            $availability_posts[] = $unit_post_insert_result;
-
-                            echo ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | unit_post_insert_result - ' . $unit_post_insert_result;
-                            file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | unit_post_insert_result - ' . $unit_post_insert_result . PHP_EOL, FILE_APPEND);
-
-                            $new_property_meta = [];
-
-                            $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $availability->bathroom_cnt)); // rz_bathrooms
-                            if (intval($bath_count) != 0) $availability_baths[] = $bath_count;
-                            $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $availability->bedroom_cnt)); // rz_bed
-                            if (intval($bed_count) != 0) $availability_beds[] = $bed_count;
-                            $sqft = trim(preg_replace("/\D/", "", $availability->home_size_sq_ft)); // rz_sqft
-                            if (intval($sqft) != 0) $availability_sqft[] = $sqft;
-
-                            $listing_price = clearPrice($availability->listing_price);
-                            if (intval($listing_price) != 0) $availability_prices[] = $listing_price;
-
-                            $new_property_meta = [
-                                'post_content' => $unit_description,
-                                'rz_apartment_uri' => $property->link,
-                                'rz_bathrooms' => $bath_count,
-                                'rz_bed' => $bed_count,
-                                'rz_bedroom' => $bed_count,
-                                'rz_booking_type' => 'Request booking',
-                                'rz_city' => $property->city,
-                                'rz_listing_type' => '25769',
-                                'rz_location' => $property->longitude,
-                                'rz_location' => $property->latitude,
-                                'rz_location' => $np_rz_location__address,
-                                'rz_location__address' => $np_rz_location__address,
-                                'rz_location__lat' => $property->latitude,
-                                'rz_location__lng' => $property->longitude,
-                                'rz_post_address1' => $np_rz_location__address_line1,
-                                'rz_post_address2' => $np_rz_location__address_line2,
-                                'rz_price' => $listing_price,
-                                'rz_priority' => '0',
-                                'rz_priority_custom' => '0',
-                                'rz_priority_selection' => 'normal',
-                                'rz_reservation_length_max' => '0',
-                                'rz_reservation_length_min' => '0',
-                                'rz_sqft' => $sqft,
-                                'rz_state' => $property->state_cd,
-                                'rz_status' => 'Now',
-                                'rz_street_line_1' => $np_rz_location__address_line1,
-                                'rz_street_line_2' => $np_rz_location__address_line2,
-                                'rz_zip' => $property->zip5_cd,
-                                'rz_gallery' => $rz_gallery,
-                                'rz_ranking' => $rz_ranking,
-                                'rz_listing_region' => $region_slug,
-                                'rz_unit_type' => $rz_unit_type,
-                                'rz_search' => $rz_search
-                            ];
-                            foreach ($new_property_meta as $key => $value) {
-                                add_post_meta($post_id, $key, $value, true) or update_post_meta($post_id, $key, $value);
-                            }
-
-                            if (!empty($decoded_premise_services)) {
-                                foreach ($decoded_premise_services as $key => $value) {
-                                    foreach ($value as $data) {
-                                        $term_id = array_search($data, $apartment_amenities_list);
-                                        if ($term_id) {
-                                            add_post_meta($post_id, 'rz_amenities', $term_id, true) or update_post_meta($post_id, 'rz_amenities', $term_id);
-                                        }
-                                    }
-                                }
-                            }
-                            if ($listing_price != 0) {
-                                $price_per_day = get_custom_price($post_id);
-                                if (intval($price_per_day) != 0) $availability_prices_per_day[] = $price_per_day;
-                                if (!add_post_meta($post_id, 'price_per_day', $price_per_day, true)) {
-                                    update_post_meta($post_id, 'price_per_day', $price_per_day);
-                                }
-                            }
-
-                            $query = $parsing_db->pdo->prepare("UPDATE `availability` SET post_id = ? WHERE id = ?");
-                            $query->execute([$post_id, $availability->id]);
-                        }
-                    }
-                }
-                $rz_unit_type = 'multi';
-                $rz_search = 1;
-                $max_price = max($availability_prices);
-                $min_price = min($availability_prices);
-                $availability_price = ($max_price == $min_price) ? $max_price : $min_price . '-' . $max_price;
-                $max_price_per_day = max($availability_prices_per_day);
-                $min_price_per_day = min($availability_prices_per_day);
-                $availability_price_per_day = ($max_price_per_day == $min_price_per_day) ? $max_price_per_day : $min_price_per_day . '-' . $max_price_per_day;
-                $max_bed = max($availability_beds);
-                $min_bed = min($availability_beds);
-                $availability_bed = ($max_bed == $min_bed) ? $max_bed : $min_bed . '-' . $max_bed;
-                $max_bath = max($availability_baths);
-                $min_bath = min($availability_baths);
-                $availability_bath = ($max_bath == $min_bath) ? $max_bath : $min_bath . '-' . $max_bath;
-                $max_sqft = max($availability_sqft);
-                $min_sqft = min($availability_sqft);
-                $availability_sqft = ($max_sqft == $min_sqft) ? $max_sqft : $min_sqft . '-' . $max_sqft;
                 $new_property_meta = [
                     'post_content' => $unit_description,
                     'rz_apartment_uri' => $property->link,
-                    'rz_price' => $availability_price,
-                    'price_per_day' => $availability_price_per_day,
-                    'rz_bathrooms' => $availability_bath,
-                    'rz_bed' => $availability_bed,
-                    'rz_bedroom' => $availability_bed,
-                    'rz_sqft' => $availability_sqft,
-                    'rz_unit_type' => $rz_unit_type,
-                    'rz_search' => $rz_search,
-                    'rz_multi_units' => json_encode($availability_posts, JSON_PRETTY_PRINT),
-                    'rz_listing_category' => $rz_listing_category
+                    'rz_booking_type' => 'Request booking',
+                    'rz_city' => $property->city,
+                    'rz_listing_type' => '25769',
+                    'rz_location' => $property->longitude,
+                    'rz_location' => $property->latitude,
+                    'rz_location' => $np_rz_location__address,
+                    'rz_location__address' => $np_rz_location__address,
+                    'rz_location__lat' => $property->latitude,
+                    'rz_location__lng' => $property->longitude,
+                    'rz_post_address1' => $np_rz_location__address_line1,
+                    'rz_post_address2' => $np_rz_location__address_line2,
+                    'rz_priority' => '0',
+                    'rz_priority_custom' => '0',
+                    'rz_priority_selection' => 'normal',
+                    'rz_reservation_length_max' => '0',
+                    'rz_reservation_length_min' => '0',
+                    'rz_state' => $property->state_cd,
+                    'rz_status' => 'Now',
+                    'rz_street_line_1' => $np_rz_location__address_line1,
+                    'rz_street_line_2' => $np_rz_location__address_line2,
+                    'rz_zip' => $property->zip5_cd,
+                    'rz_gallery' => $rz_gallery,
+                    'rz_ranking' => $rz_ranking,
+                    'rz_listing_region' => $region_slug
                 ];
                 foreach ($new_property_meta as $key => $value) {
                     add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
                 }
-                echo ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL;
-                file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL, FILE_APPEND);
-                $query = $parsing_db->pdo->prepare("UPDATE `properties` SET post_id = ? WHERE id = ?");
-                $query->execute([$main_post_insert_result, $property->id]);
-            } else {
-                $rz_unit_type = 'single';
-                $rz_search = 1;
-                $rz_multi_units = [];
 
-                echo ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL;
-                file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL, FILE_APPEND);
+                if (!empty($decoded_premise_services)) {
+                    foreach ($decoded_premise_services as $key => $value) {
+                        foreach ($value as $data) {
+                            $term_id = array_search($data, $apartment_amenities_list);
+                            if ($term_id) {
+                                add_post_meta($main_post_insert_result, 'rz_amenities', $term_id, true) or update_post_meta($main_post_insert_result, 'rz_amenities', $term_id);
+                            }
+                        }
+                    }
+                }
+            }
 
-                if ($main_post_insert_result && $main_post_insert_result != 0) {
+            $all_availability = $parsing_db->getAvailabilityNowByProperty($property->id);
+            $availability_counter = count($all_availability);
+            echo ' | availability_counter - ' . $availability_counter;
+            if ($availability_counter > 0 && isset($all_availability[0]->listing_price) && !$is_gallery_empty) {
+                if ($availability_counter > 1) {
+                    $availability_prices = [];
+                    $availability_price_per_day = [];
+                    $availability_beds = [];
+                    $availability_baths = [];
+                    $availability_sqft = [];
+                    $availability_posts = [];
+                    foreach ($all_availability as $availability) {
+                        if ($main_post_insert_result && $main_post_insert_result != 0) {
+                            $unit_post_insert_result = wp_insert_post($post_data);
+                            if ($unit_post_insert_result && $unit_post_insert_result != 0) {
+                                $post_id = $unit_post_insert_result;
+                                wp_set_post_terms($post_id, [$rz_region_id], 'rz_regions');
 
-                    $new_property_meta = [];
+                                $rz_unit_type = 'multisingle';
+                                $rz_search = 0;
+                                $availability_posts[] = $unit_post_insert_result;
 
-                    $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $all_availability[0]->bathroom_cnt)); // rz_bathrooms
-                    $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $all_availability[0]->bedroom_cnt)); // rz_bed
-                    $sqft = trim(preg_replace("/\D/", "", $availability->home_size_sq_ft)); // rz_sqft
+                                echo ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | unit_post_insert_result - ' . $unit_post_insert_result;
+                                file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | unit_post_insert_result - ' . $unit_post_insert_result . PHP_EOL, FILE_APPEND);
 
-                    $listing_price = clearPrice($all_availability[0]->listing_price);
+                                $new_property_meta = [];
 
+                                $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $availability->bathroom_cnt)); // rz_bathrooms
+                                if (intval($bath_count) != 0) $availability_baths[] = $bath_count;
+                                $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $availability->bedroom_cnt)); // rz_bed
+                                if (intval($bed_count) != 0) $availability_beds[] = $bed_count;
+                                $sqft = trim(preg_replace("/\D/", "", $availability->home_size_sq_ft)); // rz_sqft
+                                if (intval($sqft) != 0) $availability_sqft[] = $sqft;
+
+                                $listing_price = clearPrice($availability->listing_price);
+                                if (intval($listing_price) != 0) $availability_prices[] = $listing_price;
+
+                                $new_property_meta = [
+                                    'post_content' => $unit_description,
+                                    'rz_apartment_uri' => $property->link,
+                                    'rz_bathrooms' => $bath_count,
+                                    'rz_bed' => $bed_count,
+                                    'rz_bedroom' => $bed_count,
+                                    'rz_booking_type' => 'Request booking',
+                                    'rz_city' => $property->city,
+                                    'rz_listing_type' => '25769',
+                                    'rz_location' => $property->longitude,
+                                    'rz_location' => $property->latitude,
+                                    'rz_location' => $np_rz_location__address,
+                                    'rz_location__address' => $np_rz_location__address,
+                                    'rz_location__lat' => $property->latitude,
+                                    'rz_location__lng' => $property->longitude,
+                                    'rz_post_address1' => $np_rz_location__address_line1,
+                                    'rz_post_address2' => $np_rz_location__address_line2,
+                                    'rz_price' => $listing_price,
+                                    'rz_priority' => '0',
+                                    'rz_priority_custom' => '0',
+                                    'rz_priority_selection' => 'normal',
+                                    'rz_reservation_length_max' => '0',
+                                    'rz_reservation_length_min' => '0',
+                                    'rz_sqft' => $sqft,
+                                    'rz_state' => $property->state_cd,
+                                    'rz_status' => 'Now',
+                                    'rz_street_line_1' => $np_rz_location__address_line1,
+                                    'rz_street_line_2' => $np_rz_location__address_line2,
+                                    'rz_zip' => $property->zip5_cd,
+                                    'rz_gallery' => $rz_gallery,
+                                    'rz_ranking' => $rz_ranking,
+                                    'rz_listing_region' => $region_slug,
+                                    'rz_unit_type' => $rz_unit_type,
+                                    'rz_search' => $rz_search
+                                ];
+                                foreach ($new_property_meta as $key => $value) {
+                                    add_post_meta($post_id, $key, $value, true) or update_post_meta($post_id, $key, $value);
+                                }
+
+                                if (!empty($decoded_premise_services)) {
+                                    foreach ($decoded_premise_services as $key => $value) {
+                                        foreach ($value as $data) {
+                                            $term_id = array_search($data, $apartment_amenities_list);
+                                            if ($term_id) {
+                                                add_post_meta($post_id, 'rz_amenities', $term_id, true) or update_post_meta($post_id, 'rz_amenities', $term_id);
+                                            }
+                                        }
+                                    }
+                                }
+                                if ($listing_price != 0) {
+                                    $price_per_day = get_custom_price($post_id);
+                                    if (intval($price_per_day) != 0) $availability_prices_per_day[] = $price_per_day;
+                                    if (!add_post_meta($post_id, 'price_per_day', $price_per_day, true)) {
+                                        update_post_meta($post_id, 'price_per_day', $price_per_day);
+                                    }
+                                }
+
+                                $query = $parsing_db->pdo->prepare("UPDATE `availability` SET post_id = ? WHERE id = ?");
+                                $query->execute([$post_id, $availability->id]);
+                            }
+                        }
+                    }
+                    $rz_unit_type = 'multi';
+                    $rz_search = 1;
+                    $max_price = max($availability_prices);
+                    $min_price = min($availability_prices);
+                    $availability_price = ($max_price == $min_price) ? $max_price : $min_price . '-' . $max_price;
+                    $max_price_per_day = max($availability_prices_per_day);
+                    $min_price_per_day = min($availability_prices_per_day);
+                    $availability_price_per_day = ($max_price_per_day == $min_price_per_day) ? $max_price_per_day : $min_price_per_day . '-' . $max_price_per_day;
+                    $max_bed = max($availability_beds);
+                    $min_bed = min($availability_beds);
+                    $availability_bed = ($max_bed == $min_bed) ? $max_bed : $min_bed . '-' . $max_bed;
+                    $max_bath = max($availability_baths);
+                    $min_bath = min($availability_baths);
+                    $availability_bath = ($max_bath == $min_bath) ? $max_bath : $min_bath . '-' . $max_bath;
+                    $max_sqft = max($availability_sqft);
+                    $min_sqft = min($availability_sqft);
+                    $availability_sqft = ($max_sqft == $min_sqft) ? $max_sqft : $min_sqft . '-' . $max_sqft;
                     $new_property_meta = [
                         'post_content' => $unit_description,
                         'rz_apartment_uri' => $property->link,
-                        'rz_bathrooms' => $bath_count,
-                        'rz_bed' => $bed_count,
-                        'rz_bedroom' => $bed_count,
-                        'rz_price' => $listing_price,
-                        'rz_sqft' => $sqft,
+                        'rz_price' => $availability_price,
+                        'price_per_day' => $availability_price_per_day,
+                        'rz_bathrooms' => $availability_bath,
+                        'rz_bed' => $availability_bed,
+                        'rz_bedroom' => $availability_bed,
+                        'rz_sqft' => $availability_sqft,
                         'rz_unit_type' => $rz_unit_type,
                         'rz_search' => $rz_search,
-                        'rz_multi_units' => $rz_multi_units
+                        'rz_multi_units' => json_encode($availability_posts, JSON_PRETTY_PRINT),
+                        'rz_listing_category' => $rz_listing_category
                     ];
                     foreach ($new_property_meta as $key => $value) {
                         add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
                     }
-                    if ($listing_price != 0) {
-                        $price_per_day = get_custom_price($main_post_insert_result);
-                        if (!add_post_meta($main_post_insert_result, 'price_per_day', $price_per_day, true)) {
-                            update_post_meta($main_post_insert_result, 'price_per_day', $price_per_day);
-                        }
-                    }
-
-                    $query = $parsing_db->pdo->prepare("UPDATE `availability` SET post_id = ? WHERE id = ?");
-                    $query->execute([$main_post_insert_result, $all_availability[0]->id]);
+                    echo ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL;
+                    file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL, FILE_APPEND);
                     $query = $parsing_db->pdo->prepare("UPDATE `properties` SET post_id = ? WHERE id = ?");
                     $query->execute([$main_post_insert_result, $property->id]);
+                } else {
+                    $rz_unit_type = 'single';
+                    $rz_search = 1;
+                    $rz_multi_units = [];
+
+                    echo ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL;
+                    file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL, FILE_APPEND);
+
+                    if ($main_post_insert_result && $main_post_insert_result != 0) {
+
+                        $new_property_meta = [];
+
+                        $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $all_availability[0]->bathroom_cnt)); // rz_bathrooms
+                        $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $all_availability[0]->bedroom_cnt)); // rz_bed
+                        $sqft = trim(preg_replace("/\D/", "", $availability->home_size_sq_ft)); // rz_sqft
+
+                        $listing_price = clearPrice($all_availability[0]->listing_price);
+
+                        $new_property_meta = [
+                            'post_content' => $unit_description,
+                            'rz_apartment_uri' => $property->link,
+                            'rz_bathrooms' => $bath_count,
+                            'rz_bed' => $bed_count,
+                            'rz_bedroom' => $bed_count,
+                            'rz_price' => $listing_price,
+                            'rz_sqft' => $sqft,
+                            'rz_unit_type' => $rz_unit_type,
+                            'rz_search' => $rz_search,
+                            'rz_multi_units' => $rz_multi_units
+                        ];
+                        foreach ($new_property_meta as $key => $value) {
+                            add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
+                        }
+                        if ($listing_price != 0) {
+                            $price_per_day = get_custom_price($main_post_insert_result);
+                            if (!add_post_meta($main_post_insert_result, 'price_per_day', $price_per_day, true)) {
+                                update_post_meta($main_post_insert_result, 'price_per_day', $price_per_day);
+                            }
+                        }
+
+                        $query = $parsing_db->pdo->prepare("UPDATE `availability` SET post_id = ? WHERE id = ?");
+                        $query->execute([$main_post_insert_result, $all_availability[0]->id]);
+                        $query = $parsing_db->pdo->prepare("UPDATE `properties` SET post_id = ? WHERE id = ?");
+                        $query->execute([$main_post_insert_result, $property->id]);
+                    }
                 }
             }
         }
     }
 }
-/*
-    $wp_db = new MySQL('wp', 'local');
-    foreach ($all_availability as $availability) {
-        $query = $wp_db->pdo->prepare("INSERT INTO `wp_posts` (
-            `post_date`,
-            `post_date_gmt`,
-            `post_content`,
-            `post_title`,
-            `post_excerpt`,
-            `post_status`,
-            `comment_status`,
-            `ping_status`,
-            `post_password`,
-            `post_name`,
-            `to_ping`,
-            `pinged`,
-            `post_modified`,
-            `post_modified_gmt`,
-            `post_content_filtered`,
-            `post_parent`,
-            `guid`,
-            `menu_order`,
-            `post_type`,
-            `post_mime_type`,
-            `comment_count`
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $query->execute([
-            $date,
-            $gmdate,
-            $property_description,
-            $property_address,
-            $property_description,
-            'draft',
-            'closed',
-            'closed',
-            '',
-            $property_address_lc,
-            '',
-            '',
-            $date,
-            $gmdate,
-            '',
-            0,
-            'https://tempdbookindev.wpengine.com/listing/' . $property_address_lc,
-            0,
-            'rz_listing',
-            '',
-            0
-        ]);
-        // Now insert beds / baths / sqft / price
-        $wp_post_id = $wp_db->pdo->lastInsertId();
-        $new_property_meta = [];
-        $np_rz_location__address = $property->city . ', ' . $property->state_cd . ', US';
-        $np_rz_location__state_country = $property->state_cd . ', US';
-        $np_rz_location__address_line1 = $property->addr_line_2;
-        $np_rz_location__address_line2 = $property->city . ', ' . $property->state_cd . ' ' . $property->zip5_cd;
-        // array_push($new_property_meta, $np_rz_location__address, $meta_keys_value[1], $meta_keys_value[2], $meta_keys_value[3], $property->longitude, $property->latitude, $meta_keys_value[6], $meta_keys_value[7], $meta_keys_value[8], $meta_keys_value[9], $meta_keys_value[10], $meta_keys_value[11], $meta_keys_value[12], $meta_keys_value[13], $meta_keys_value[14], $meta_keys_value[15], $meta_keys_value[16], $meta_keys_value[17], $meta_keys_value[18], $meta_keys_value[19], $meta_keys_value[20]);
-        array_push(
-            $new_property_meta,
-            $property->link,            
-            '1',
-            '10',
-            'featured',
-            '0', // rz_priority_custom
-            '', // rz_instant
-            $availability->listing_price, // rz_price
-            '', // rz_price_weekend
-            '',
-            '',
-            '',
-            '[]',
-            '[]',
-            '[]',
-            '0',
-            '0',
-            $property->latitude, // rz_location__lat
-            $property->longitude, // rz_location__lng
-            '', // rz_booking_pending
-            '', // rz_booking_booked
-            '', // _edit_lock
-            '', // rz_guests
-            '', // rz_guest_price
-            '', // rz_location__address
-            '', // rz_location__geo_country
-            '', // rz_location__geo_city
-            '', // rz_location__geo_city_alt
-            '', // price_per_day
-            '0', // inline_featured_image
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            'Request booking', // rz_booking_type
-            $np_rz_location__address_line1, // rz_post_address1
-            $np_rz_location__address_line2, // rz_post_address2
-            $property->building_desc, // post_content
-            '', // rz_the-space
-            '87', // rz_listing_category
-            '',
-            '',
-            '[]', // rz_gallery
-            '',
-            $np_rz_location__address, // rz_location
-            $property->latitude, // rz_location
-            $property->longitude, // rz_location
-            'US', // rz_location
-            $np_rz_location__address, // rz_location
-            $np_rz_location__state_country, // rz_location
-            $np_rz_location__address_line1, // rz_street_line_1
-            $property->city, // rz_city
-            $property->state_cd, // rz_state
-            $property->zip5_cd, // rz_zip
-            trim(preg_replace("/[a-zA-Z]/", "", $availability->bedroom_cnt)), // rz_bed
-            trim(preg_replace("/[a-zA-Z]/", "", $availability->bedroom_cnt)), // rz_bedroom
-            trim(preg_replace("/[a-zA-Z]/", "", $availability->bathroom_cnt)), // rz_bathrooms
-            trim(preg_replace("/[a-zA-Z]/", "", $availability->home_size_sq_ft)), // rz_sqft
-            '', // rz_house-rules-summary
-            '', // rz_checkin
-            '', // rz_checkout
-            '', // rz_status
-            '', // rz_featured_benefit
-            '21233' // rz_listing_type
-        );
-        if (isset($wp_post_id) && $wp_post_id != 0) {
-            foreach ($meta_keys as $key => $value) {
-                $query = $wp_db->pdo->prepare("INSERT INTO `wp_postmeta` (`post_id`,`meta_key`,`meta_value`) VALUES (?, ?, ?)");
-                $query->execute([$wp_post_id, $value, $new_property_meta[$key]]);
-            }
-        }
-        $query = $parsing_db->pdo->prepare("UPDATE `properties` SET `post_id` = ? WHERE `id` = ?");
-        $query->execute([$wp_post_id, $property->id]);
-        echo 'Added post - ' . $wp_post_id . ' | ';
-        // exit();
-    }
-}
-*/
 echo 'End.............................................' . PHP_EOL;
 
 // Stop signals handler

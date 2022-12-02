@@ -1,9 +1,7 @@
 [
     {
         "TX": [
-            "DALLAS",
-            "AUSTIN",
-            "HOUSTON"
+            "AUSTIN"
         ],
         "CO": [
             "DENVER"
@@ -16,7 +14,8 @@
             "PHOENIX"
         ],
         "FL": [
-            "MIAMI"
+            "MIAMI",
+            "TAMPA"
         ],
         "GA": [
             "ATLANTA"

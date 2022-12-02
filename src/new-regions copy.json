@@ -1,0 +1,1710 @@
+{
+    "DALLAS, TX": [
+        {
+            "city_name": "Addison, TX",
+            "city_slug": "addison-tx"
+        },
+        {
+            "city_name": "Allen, TX",
+            "city_slug": "allen-tx"
+        },
+        {
+            "city_name": "Anna, TX",
+            "city_slug": "anna-tx"
+        },
+        {
+            "city_name": "Argyle, TX",
+            "city_slug": "argyle-tx"
+        },
+        {
+            "city_name": "Arlington, TX",
+            "city_slug": "arlington-tx"
+        },
+        {
+            "city_name": "Aubrey, TX",
+            "city_slug": "aubrey-tx"
+        },
+        {
+            "city_name": "Balch Springs, TX",
+            "city_slug": "balch-springs-tx"
+        },
+        {
+            "city_name": "Bedford, TX",
+            "city_slug": "bedford-tx"
+        },
+        {
+            "city_name": "Benbrook, TX",
+            "city_slug": "benbrook-tx"
+        },
+        {
+            "city_name": "Burleson, TX",
+            "city_slug": "burleson-tx"
+        },
+        {
+            "city_name": "Carrollton, TX",
+            "city_slug": "carrollton-tx"
+        },
+        {
+            "city_name": "Cedar Hill, TX",
+            "city_slug": "cedar-hill-tx"
+        },
+        {
+            "city_name": "Celina, TX",
+            "city_slug": "celina-tx"
+        },
+        {
+            "city_name": "Coppell, TX",
+            "city_slug": "coppell-tx"
+        },
+        {
+            "city_name": "Corinth, TX",
+            "city_slug": "corinth-tx"
+        },
+        {
+            "city_name": "Crossroads, TX",
+            "city_slug": "crossroads-tx"
+        },
+        {
+            "city_name": "Crowley, TX",
+            "city_slug": "crowley-tx"
+        },
+        {
+            "city_name": "Dallas, TX",
+            "city_slug": "dallas-tx"
+        },
+        {
+            "city_name": "Denton, TX",
+            "city_slug": "denton-tx"
+        },
+        {
+            "city_name": "DeSoto, TX",
+            "city_slug": "desoto-tx"
+        },
+        {
+            "city_name": "Desoto, TX",
+            "city_slug": "desoto-tx"
+        },
+        {
+            "city_name": "Duncanville, TX",
+            "city_slug": "duncanville-tx"
+        },
+        {
+            "city_name": "Farmers Branch, TX",
+            "city_slug": "farmers-branch-tx"
+        },
+        {
+            "city_name": "Fate, TX",
+            "city_slug": "fate-tx"
+        },
+        {
+            "city_name": "Ferris, TX",
+            "city_slug": "ferris-tx"
+        },
+        {
+            "city_name": "Forney, TX",
+            "city_slug": "forney-tx"
+        },
+        {
+            "city_name": "Fort Worth, TX",
+            "city_slug": "fort-worth-tx"
+        },
+        {
+            "city_name": "Frisco, TX",
+            "city_slug": "frisco-tx"
+        },
+        {
+            "city_name": "Garland, TX",
+            "city_slug": "garland-tx"
+        },
+        {
+            "city_name": "Glenn Heights, TX",
+            "city_slug": "glenn-heights-tx"
+        },
+        {
+            "city_name": "Grand Prairie, TX",
+            "city_slug": "grand-prairie-tx"
+        },
+        {
+            "city_name": "Grapevine, TX",
+            "city_slug": "grapevine-tx"
+        },
+        {
+            "city_name": "Haltom City, TX",
+            "city_slug": "haltom-city-tx"
+        },
+        {
+            "city_name": "Haslet, TX",
+            "city_slug": "haslet-tx"
+        },
+        {
+            "city_name": "Heartland, TX",
+            "city_slug": "heartland-tx"
+        },
+        {
+            "city_name": "Heath, TX",
+            "city_slug": "heath-tx"
+        },
+        {
+            "city_name": "Hurst, TX",
+            "city_slug": "hurst-tx"
+        },
+        {
+            "city_name": "Hutchins, TX",
+            "city_slug": "hutchins-tx"
+        },
+        {
+            "city_name": "Irving, TX",
+            "city_slug": "irving-tx"
+        },
+        {
+            "city_name": "Justin, TX",
+            "city_slug": "justin-tx"
+        },
+        {
+            "city_name": "Keller, TX",
+            "city_slug": "keller-tx"
+        },
+        {
+            "city_name": "Krum, TX",
+            "city_slug": "krum-tx"
+        },
+        {
+            "city_name": "Lake Worth, TX",
+            "city_slug": "lake-worth-tx"
+        },
+        {
+            "city_name": "Lancaster, TX",
+            "city_slug": "lancaster-tx"
+        },
+        {
+            "city_name": "Lavon, TX",
+            "city_slug": "lavon-tx"
+        },
+        {
+            "city_name": "Lewisville, TX",
+            "city_slug": "lewisville-tx"
+        },
+        {
+            "city_name": "Little Elm, TX",
+            "city_slug": "little-elm-tx"
+        },
+        {
+            "city_name": "Mansfield, TX",
+            "city_slug": "mansfield-tx"
+        },
+        {
+            "city_name": "McKinney, TX",
+            "city_slug": "mckinney-tx"
+        },
+        {
+            "city_name": "Melissa, TX",
+            "city_slug": "melissa-tx"
+        },
+        {
+            "city_name": "Mesquite, TX",
+            "city_slug": "mesquite-tx"
+        },
+        {
+            "city_name": "Midlothian, TX",
+            "city_slug": "midlothian-tx"
+        },
+        {
+            "city_name": "Newark, TX",
+            "city_slug": "newark-tx"
+        },
+        {
+            "city_name": "Plano, TX",
+            "city_slug": "plano-tx"
+        },
+        {
+            "city_name": "Princeton, TX",
+            "city_slug": "princeton-tx"
+        },
+        {
+            "city_name": "Providence Village, TX",
+            "city_slug": "providence-village-tx"
+        },
+        {
+            "city_name": "Red Oak, TX",
+            "city_slug": "red-oak-tx"
+        },
+        {
+            "city_name": "Rhome, TX",
+            "city_slug": "rhome-tx"
+        },
+        {
+            "city_name": "Richardson, TX",
+            "city_slug": "richardson-tx"
+        },
+        {
+            "city_name": "Roanoke, TX",
+            "city_slug": "roanoke-tx"
+        },
+        {
+            "city_name": "Rockwall, TX",
+            "city_slug": "rockwall-tx"
+        },
+        {
+            "city_name": "Rowlett, TX",
+            "city_slug": "rowlett-tx"
+        },
+        {
+            "city_name": "Royse City, TX",
+            "city_slug": "royse-city-tx"
+        },
+        {
+            "city_name": "Saginaw, TX",
+            "city_slug": "saginaw-tx"
+        },
+        {
+            "city_name": "Sanger, TX",
+            "city_slug": "sanger-tx"
+        },
+        {
+            "city_name": "Seagoville, TX",
+            "city_slug": "seagoville-tx"
+        },
+        {
+            "city_name": "The Colony, TX",
+            "city_slug": "the-colony-tx"
+        },
+        {
+            "city_name": "Watauga, TX",
+            "city_slug": "watauga-tx"
+        },
+        {
+            "city_name": "Waxahachie, TX",
+            "city_slug": "waxahachie-tx"
+        },
+        {
+            "city_name": "White Settlement, TX",
+            "city_slug": "white-settlement-tx"
+        },
+        {
+            "city_name": "Willow Park, TX",
+            "city_slug": "willow-park-tx"
+        }
+    ],
+    "AUSTIN, TX": [
+        {
+            "city_name": "Austin, TX",
+            "city_slug": "austin-tx"
+        },
+        {
+            "city_name": "Cedar Park, TX",
+            "city_slug": "cedar-park-tx"
+        },
+        {
+            "city_name": "Del Valle, TX",
+            "city_slug": "del-valle-tx"
+        },
+        {
+            "city_name": "Elgin, TX",
+            "city_slug": "elgin-tx"
+        },
+        {
+            "city_name": "Hutto, TX",
+            "city_slug": "hutto-tx"
+        },
+        {
+            "city_name": "Jarrell, TX",
+            "city_slug": "jarrell-tx"
+        },
+        {
+            "city_name": "Kyle, TX",
+            "city_slug": "kyle-tx"
+        },
+        {
+            "city_name": "Liberty Hill, TX",
+            "city_slug": "liberty-hill-tx"
+        },
+        {
+            "city_name": "Manor, TX",
+            "city_slug": "manor-tx"
+        },
+        {
+            "city_name": "Pflugerville, TX",
+            "city_slug": "pflugerville-tx"
+        },
+        {
+            "city_name": "Round Rock, TX",
+            "city_slug": "round-rock-tx"
+        },
+        {
+            "city_name": "San Marcos, TX",
+            "city_slug": "san-marcos-tx"
+        },
+        {
+            "city_name": "Troy, TX",
+            "city_slug": "troy-tx"
+        }
+    ],
+    "HOUSTON, TX": [
+        {
+            "city_name": "Bacliff, TX",
+            "city_slug": "bacliff-tx"
+        },
+        {
+            "city_name": "Baytown, TX",
+            "city_slug": "baytown-tx"
+        },
+        {
+            "city_name": "Brookshire, TX",
+            "city_slug": "brookshire-tx"
+        },
+        {
+            "city_name": "Cleveland, TX",
+            "city_slug": "cleveland-tx"
+        },
+        {
+            "city_name": "Conroe, TX",
+            "city_slug": "conroe-tx"
+        },
+        {
+            "city_name": "Crosby, TX",
+            "city_slug": "crosby-tx"
+        },
+        {
+            "city_name": "Cypress, TX",
+            "city_slug": "cypress-tx"
+        },
+        {
+            "city_name": "Dickinson, TX",
+            "city_slug": "dickinson-tx"
+        },
+        {
+            "city_name": "Fresno, TX",
+            "city_slug": "fresno-tx"
+        },
+        {
+            "city_name": "Friendswood, TX",
+            "city_slug": "friendswood-tx"
+        },
+        {
+            "city_name": "Fulshear, TX",
+            "city_slug": "fulshear-tx"
+        },
+        {
+            "city_name": "Harris, TX",
+            "city_slug": "harris-tx"
+        },
+        {
+            "city_name": "Houston, TX",
+            "city_slug": "houston-tx"
+        },
+        {
+            "city_name": "Humble, TX",
+            "city_slug": "humble-tx"
+        },
+        {
+            "city_name": "Katy, TX",
+            "city_slug": "katy-tx"
+        },
+        {
+            "city_name": "Kingwood, TX",
+            "city_slug": "kingwood-tx"
+        },
+        {
+            "city_name": "La Marque, TX",
+            "city_slug": "la-marque-tx"
+        },
+        {
+            "city_name": "La Porte, TX",
+            "city_slug": "la-porte-tx"
+        },
+        {
+            "city_name": "League City, TX",
+            "city_slug": "league-city-tx"
+        },
+        {
+            "city_name": "Magnolia, TX",
+            "city_slug": "magnolia-tx"
+        },
+        {
+            "city_name": "Missouri City, TX",
+            "city_slug": "missouri-city-tx"
+        },
+        {
+            "city_name": "Montgomery, TX",
+            "city_slug": "montgomery-tx"
+        },
+        {
+            "city_name": "New Caney, TX",
+            "city_slug": "new-caney-tx"
+        },
+        {
+            "city_name": "Pasadena, TX",
+            "city_slug": "pasadena-tx"
+        },
+        {
+            "city_name": "Pearland, TX",
+            "city_slug": "pearland-tx"
+        },
+        {
+            "city_name": "Pinehurst, TX",
+            "city_slug": "pinehurst-tx"
+        },
+        {
+            "city_name": "Porter, TX",
+            "city_slug": "porter-tx"
+        },
+        {
+            "city_name": "Richmond, TX",
+            "city_slug": "richmond-tx"
+        },
+        {
+            "city_name": "Rosenberg, TX",
+            "city_slug": "rosenberg-tx"
+        },
+        {
+            "city_name": "Rosharon, TX",
+            "city_slug": "rosharon-tx"
+        },
+        {
+            "city_name": "Seabrook, TX",
+            "city_slug": "seabrook-tx"
+        },
+        {
+            "city_name": "Spring, TX",
+            "city_slug": "spring-tx"
+        },
+        {
+            "city_name": "Stafford, TX",
+            "city_slug": "stafford-tx"
+        },
+        {
+            "city_name": "Sugar Land, TX",
+            "city_slug": "sugar-land-tx"
+        },
+        {
+            "city_name": "Texas City, TX",
+            "city_slug": "texas-city-tx"
+        },
+        {
+            "city_name": "Texas, TX",
+            "city_slug": "texas-tx"
+        },
+        {
+            "city_name": "Tomball, TX",
+            "city_slug": "tomball-tx"
+        },
+        {
+            "city_name": "Webster, TX",
+            "city_slug": "webster-tx"
+        },
+        {
+            "city_name": "Willis, TX",
+            "city_slug": "willis-tx"
+        }
+    ],
+    "DENVER, CO": [
+        {
+            "city_name": "Arvada, CO",
+            "city_slug": "arvada-co"
+        },
+        {
+            "city_name": "Aurora, CO",
+            "city_slug": "aurora-co"
+        },
+        {
+            "city_name": "Brighton, CO",
+            "city_slug": "brighton-co"
+        },
+        {
+            "city_name": "Castle Rock, CO",
+            "city_slug": "castle-rock-co"
+        },
+        {
+            "city_name": "Centennial, CO",
+            "city_slug": "centennial-co"
+        },
+        {
+            "city_name": "Colorado Springs, CO",
+            "city_slug": "colorado-springs-co"
+        },
+        {
+            "city_name": "Commerce City, CO",
+            "city_slug": "commerce-city-co"
+        },
+        {
+            "city_name": "Denver, CO",
+            "city_slug": "denver-co"
+        },
+        {
+            "city_name": "Edgewater, CO",
+            "city_slug": "edgewater-co"
+        },
+        {
+            "city_name": "Englewood, CO",
+            "city_slug": "englewood-co"
+        },
+        {
+            "city_name": "Fountain, CO",
+            "city_slug": "fountain-co"
+        },
+        {
+            "city_name": "Glendale, CO",
+            "city_slug": "glendale-co"
+        },
+        {
+            "city_name": "Greenwood Village, CO",
+            "city_slug": "greenwood-village-co"
+        },
+        {
+            "city_name": "Highlands Ranch, CO",
+            "city_slug": "highlands-ranch-co"
+        },
+        {
+            "city_name": "Lakewood, CO",
+            "city_slug": "lakewood-co"
+        },
+        {
+            "city_name": "Littleton, CO",
+            "city_slug": "littleton-co"
+        },
+        {
+            "city_name": "Parker, CO",
+            "city_slug": "parker-co"
+        },
+        {
+            "city_name": "Peyton, CO",
+            "city_slug": "peyton-co"
+        },
+        {
+            "city_name": "Sheridan, CO",
+            "city_slug": "sheridan-co"
+        },
+        {
+            "city_name": "Thornton, CO",
+            "city_slug": "thornton-co"
+        },
+        {
+            "city_name": "Wheat Ridge, CO",
+            "city_slug": "wheat-ridge-co"
+        }
+    ],
+    "SAN DIEGO, CA": [
+        {
+            "city_name": "Bonita, CA",
+            "city_slug": "bonita-ca"
+        },
+        {
+            "city_name": "Chula Vista, CA",
+            "city_slug": "chula-vista-ca"
+        },
+        {
+            "city_name": "Coronado, CA",
+            "city_slug": "coronado-ca"
+        },
+        {
+            "city_name": "Del Mar, CA",
+            "city_slug": "del-mar-ca"
+        },
+        {
+            "city_name": "El Cajon, CA",
+            "city_slug": "el-cajon-ca"
+        },
+        {
+            "city_name": "Imperial Beach, CA",
+            "city_slug": "imperial-beach-ca"
+        },
+        {
+            "city_name": "La Jolla, CA",
+            "city_slug": "la-jolla-ca"
+        },
+        {
+            "city_name": "La Mesa, CA",
+            "city_slug": "la-mesa-ca"
+        },
+        {
+            "city_name": "Lemon Grove, CA",
+            "city_slug": "lemon-grove-ca"
+        },
+        {
+            "city_name": "National City, CA",
+            "city_slug": "national-city-ca"
+        },
+        {
+            "city_name": "Poway, CA",
+            "city_slug": "poway-ca"
+        },
+        {
+            "city_name": "San Diego, CA",
+            "city_slug": "san-diego-ca"
+        },
+        {
+            "city_name": "Santee, CA",
+            "city_slug": "santee-ca"
+        },
+        {
+            "city_name": "Solana Beach, CA",
+            "city_slug": "solana-beach-ca"
+        }
+    ],
+    "LOS ANGELES, CA": [
+        {
+            "city_name": "Beverly Hills, CA",
+            "city_slug": "beverly-hills-ca"
+        },
+        {
+            "city_name": "Burbank, CA",
+            "city_slug": "burbank-ca"
+        },
+        {
+            "city_name": "Canoga Park, CA",
+            "city_slug": "canoga-park-ca"
+        },
+        {
+            "city_name": "Carson, CA",
+            "city_slug": "carson-ca"
+        },
+        {
+            "city_name": "Chatsworth, CA",
+            "city_slug": "chatsworth-ca"
+        },
+        {
+            "city_name": "Culver City, CA",
+            "city_slug": "culver-city-ca"
+        },
+        {
+            "city_name": "Encino, CA",
+            "city_slug": "encino-ca"
+        },
+        {
+            "city_name": "Gardena, CA",
+            "city_slug": "gardena-ca"
+        },
+        {
+            "city_name": "Glendale, CA",
+            "city_slug": "glendale-ca"
+        },
+        {
+            "city_name": "Granada Hills, CA",
+            "city_slug": "granada-hills-ca"
+        },
+        {
+            "city_name": "Hollywood, CA",
+            "city_slug": "hollywood-ca"
+        },
+        {
+            "city_name": "Inglewood, CA",
+            "city_slug": "inglewood-ca"
+        },
+        {
+            "city_name": "La Crescenta, CA",
+            "city_slug": "la-crescenta-ca"
+        },
+        {
+            "city_name": "Lake Balboa, CA",
+            "city_slug": "lake-balboa-ca"
+        },
+        {
+            "city_name": "Lincoln Heights, CA",
+            "city_slug": "lincoln-heights-ca"
+        },
+        {
+            "city_name": "Los Angeles, CA",
+            "city_slug": "los-angeles-ca"
+        },
+        {
+            "city_name": "Marina Del Rey, CA",
+            "city_slug": "marina-del-rey-ca"
+        },
+        {
+            "city_name": "North Hills, CA",
+            "city_slug": "north-hills-ca"
+        },
+        {
+            "city_name": "North Hollywood, CA",
+            "city_slug": "north-hollywood-ca"
+        },
+        {
+            "city_name": "Northridge, CA",
+            "city_slug": "northridge-ca"
+        },
+        {
+            "city_name": "Pacific Palisades, CA",
+            "city_slug": "pacific-palisades-ca"
+        },
+        {
+            "city_name": "Panorama City, CA",
+            "city_slug": "panorama-city-ca"
+        },
+        {
+            "city_name": "Playa Del Rey, CA",
+            "city_slug": "playa-del-rey-ca"
+        },
+        {
+            "city_name": "Playa Vista, CA",
+            "city_slug": "playa-vista-ca"
+        },
+        {
+            "city_name": "Porter Ranch, CA",
+            "city_slug": "porter-ranch-ca"
+        },
+        {
+            "city_name": "Reseda, CA",
+            "city_slug": "reseda-ca"
+        },
+        {
+            "city_name": "San Pedro, CA",
+            "city_slug": "san-pedro-ca"
+        },
+        {
+            "city_name": "Santa Monica, CA",
+            "city_slug": "santa-monica-ca"
+        },
+        {
+            "city_name": "Sherman Oaks, CA",
+            "city_slug": "sherman-oaks-ca"
+        },
+        {
+            "city_name": "Studio City, CA",
+            "city_slug": "studio-city-ca"
+        },
+        {
+            "city_name": "Sylmar, CA",
+            "city_slug": "sylmar-ca"
+        },
+        {
+            "city_name": "Tarzana, CA",
+            "city_slug": "tarzana-ca"
+        },
+        {
+            "city_name": "Toluca Lake, CA",
+            "city_slug": "toluca-lake-ca"
+        },
+        {
+            "city_name": "Torrance, CA",
+            "city_slug": "torrance-ca"
+        },
+        {
+            "city_name": "Valley Village, CA",
+            "city_slug": "valley-village-ca"
+        },
+        {
+            "city_name": "Van Nuys, CA",
+            "city_slug": "van-nuys-ca"
+        },
+        {
+            "city_name": "Venice, CA",
+            "city_slug": "venice-ca"
+        },
+        {
+            "city_name": "West Hollywood, CA",
+            "city_slug": "west-hollywood-ca"
+        },
+        {
+            "city_name": "Wilmington, CA",
+            "city_slug": "wilmington-ca"
+        },
+        {
+            "city_name": "Woodland Hills, CA",
+            "city_slug": "woodland-hills-ca"
+        }
+    ],
+    "PHOENIX, AZ": [
+        {
+            "city_name": "Anthem, AZ",
+            "city_slug": "anthem-az"
+        },
+        {
+            "city_name": "Apache Junction, AZ",
+            "city_slug": "apache-junction-az"
+        },
+        {
+            "city_name": "Avondale, AZ",
+            "city_slug": "avondale-az"
+        },
+        {
+            "city_name": "Buckeye, AZ",
+            "city_slug": "buckeye-az"
+        },
+        {
+            "city_name": "Cave Creek, AZ",
+            "city_slug": "cave-creek-az"
+        },
+        {
+            "city_name": "Chandler, AZ",
+            "city_slug": "chandler-az"
+        },
+        {
+            "city_name": "El Mirage, AZ",
+            "city_slug": "el-mirage-az"
+        },
+        {
+            "city_name": "Florence, AZ",
+            "city_slug": "florence-az"
+        },
+        {
+            "city_name": "Gilbert, AZ",
+            "city_slug": "gilbert-az"
+        },
+        {
+            "city_name": "Glendale, AZ",
+            "city_slug": "glendale-az"
+        },
+        {
+            "city_name": "Goodyear, AZ",
+            "city_slug": "goodyear-az"
+        },
+        {
+            "city_name": "Laveen, AZ",
+            "city_slug": "laveen-az"
+        },
+        {
+            "city_name": "Litchfield Park, AZ",
+            "city_slug": "litchfield-park-az"
+        },
+        {
+            "city_name": "Maricopa, AZ",
+            "city_slug": "maricopa-az"
+        },
+        {
+            "city_name": "Mesa, AZ",
+            "city_slug": "mesa-az"
+        },
+        {
+            "city_name": "Paradise Valley, AZ",
+            "city_slug": "paradise-valley-az"
+        },
+        {
+            "city_name": "Peoria, AZ",
+            "city_slug": "peoria-az"
+        },
+        {
+            "city_name": "Phoenix, AZ",
+            "city_slug": "phoenix-az"
+        },
+        {
+            "city_name": "Queen Creek, AZ",
+            "city_slug": "queen-creek-az"
+        },
+        {
+            "city_name": "San Tan Valley, AZ",
+            "city_slug": "san-tan-valley-az"
+        },
+        {
+            "city_name": "Scottsdale, AZ",
+            "city_slug": "scottsdale-az"
+        },
+        {
+            "city_name": "Sun City, AZ",
+            "city_slug": "sun-city-az"
+        },
+        {
+            "city_name": "Surprise, AZ",
+            "city_slug": "surprise-az"
+        },
+        {
+            "city_name": "Tempe, AZ",
+            "city_slug": "tempe-az"
+        },
+        {
+            "city_name": "Tolleson, AZ",
+            "city_slug": "tolleson-az"
+        },
+        {
+            "city_name": "Youngtown, AZ",
+            "city_slug": "youngtown-az"
+        }
+    ],
+    "MIAMI, FL": [
+        {
+            "city_name": "Aventura, FL",
+            "city_slug": "aventura-fl"
+        },
+        {
+            "city_name": "Bay Harbor Islands, FL",
+            "city_slug": "bay-harbor-islands-fl"
+        },
+        {
+            "city_name": "Boca Raton, FL",
+            "city_slug": "boca-raton-fl"
+        },
+        {
+            "city_name": "Boynton Beach, FL",
+            "city_slug": "boynton-beach-fl"
+        },
+        {
+            "city_name": "Coconut Creek, FL",
+            "city_slug": "coconut-creek-fl"
+        },
+        {
+            "city_name": "Coconut Grove, FL",
+            "city_slug": "coconut-grove-fl"
+        },
+        {
+            "city_name": "Coral Gables, FL",
+            "city_slug": "coral-gables-fl"
+        },
+        {
+            "city_name": "Coral Springs, FL",
+            "city_slug": "coral-springs-fl"
+        },
+        {
+            "city_name": "Cutler Bay, FL",
+            "city_slug": "cutler-bay-fl"
+        },
+        {
+            "city_name": "Davie, FL",
+            "city_slug": "davie-fl"
+        },
+        {
+            "city_name": "Deerfield Beach, FL",
+            "city_slug": "deerfield-beach-fl"
+        },
+        {
+            "city_name": "Doral, FL",
+            "city_slug": "doral-fl"
+        },
+        {
+            "city_name": "Fort Lauderdale, FL",
+            "city_slug": "fort-lauderdale-fl"
+        },
+        {
+            "city_name": "Greenacres, FL",
+            "city_slug": "greenacres-fl"
+        },
+        {
+            "city_name": "Hallandale Beach, FL",
+            "city_slug": "hallandale-beach-fl"
+        },
+        {
+            "city_name": "Hialeah, FL",
+            "city_slug": "hialeah-fl"
+        },
+        {
+            "city_name": "Hialeah Gardens, FL",
+            "city_slug": "hialeah-gardens-fl"
+        },
+        {
+            "city_name": "Hollywood, FL",
+            "city_slug": "hollywood-fl"
+        },
+        {
+            "city_name": "Homestead, FL",
+            "city_slug": "homestead-fl"
+        },
+        {
+            "city_name": "Jensen Beach, FL",
+            "city_slug": "jensen-beach-fl"
+        },
+        {
+            "city_name": "Jupiter, FL",
+            "city_slug": "jupiter-fl"
+        },
+        {
+            "city_name": "Key Biscayne, FL",
+            "city_slug": "key-biscayne-fl"
+        },
+        {
+            "city_name": "Lake Worth, FL",
+            "city_slug": "lake-worth-fl"
+        },
+        {
+            "city_name": "Miami Beach, FL",
+            "city_slug": "miami-beach-fl"
+        },
+        {
+            "city_name": "Miami, FL",
+            "city_slug": "miami-fl"
+        },
+        {
+            "city_name": "Miami Gardens, FL",
+            "city_slug": "miami-gardens-fl"
+        },
+        {
+            "city_name": "Miami Lakes, FL",
+            "city_slug": "miami-lakes-fl"
+        },
+        {
+            "city_name": "Miami Shores, FL",
+            "city_slug": "miami-shores-fl"
+        },
+        {
+            "city_name": "Miramar, FL",
+            "city_slug": "miramar-fl"
+        },
+        {
+            "city_name": "N Miami Beach, FL",
+            "city_slug": "n-miami-beach-fl"
+        },
+        {
+            "city_name": "North Bay Village, FL",
+            "city_slug": "north-bay-village-fl"
+        },
+        {
+            "city_name": "North Miami Beach, FL",
+            "city_slug": "north-miami-beach-fl"
+        },
+        {
+            "city_name": "North Miami, FL",
+            "city_slug": "north-miami-fl"
+        },
+        {
+            "city_name": "Oakland Park, FL",
+            "city_slug": "oakland-park-fl"
+        },
+        {
+            "city_name": "Palmetto Bay, FL",
+            "city_slug": "palmetto-bay-fl"
+        },
+        {
+            "city_name": "Pembroke Pines, FL",
+            "city_slug": "pembroke-pines-fl"
+        },
+        {
+            "city_name": "Pompano Beach, FL",
+            "city_slug": "pompano-beach-fl"
+        },
+        {
+            "city_name": "Port Saint Lucie, FL",
+            "city_slug": "port-saint-lucie-fl"
+        },
+        {
+            "city_name": "Riviera Beach, FL",
+            "city_slug": "riviera-beach-fl"
+        },
+        {
+            "city_name": "Royal Palm Beach, FL",
+            "city_slug": "royal-palm-beach-fl"
+        },
+        {
+            "city_name": "South Miami, FL",
+            "city_slug": "south-miami-fl"
+        },
+        {
+            "city_name": "Sunny Isles Beach, FL",
+            "city_slug": "sunny-isles-beach-fl"
+        },
+        {
+            "city_name": "Sunrise, FL",
+            "city_slug": "sunrise-fl"
+        },
+        {
+            "city_name": "Vero Beach, FL",
+            "city_slug": "vero-beach-fl"
+        },
+        {
+            "city_name": "Wellington, FL",
+            "city_slug": "wellington-fl"
+        },
+        {
+            "city_name": "West Miami, FL",
+            "city_slug": "west-miami-fl"
+        },
+        {
+            "city_name": "West Palm Beach, FL",
+            "city_slug": "west-palm-beach-fl"
+        },
+        {
+            "city_name": "Weston, FL",
+            "city_slug": "weston-fl"
+        }
+    ],
+    "ATLANTA, GA": [
+        {
+            "city_name": "Acworth, GA",
+            "city_slug": "acworth-ga"
+        },
+        {
+            "city_name": "Adairsville, GA",
+            "city_slug": "adairsville-ga"
+        },
+        {
+            "city_name": "Alpharetta, GA",
+            "city_slug": "alpharetta-ga"
+        },
+        {
+            "city_name": "Atlanta, GA",
+            "city_slug": "atlanta-ga"
+        },
+        {
+            "city_name": "Auburn, GA",
+            "city_slug": "auburn-ga"
+        },
+        {
+            "city_name": "Austell, GA",
+            "city_slug": "austell-ga"
+        },
+        {
+            "city_name": "Ball Ground, GA",
+            "city_slug": "ball-ground-ga"
+        },
+        {
+            "city_name": "Barnesville, GA",
+            "city_slug": "barnesville-ga"
+        },
+        {
+            "city_name": "Bethlehem, GA",
+            "city_slug": "bethlehem-ga"
+        },
+        {
+            "city_name": "Braselton, GA",
+            "city_slug": "braselton-ga"
+        },
+        {
+            "city_name": "Bremen, GA",
+            "city_slug": "bremen-ga"
+        },
+        {
+            "city_name": "Brookhaven, GA",
+            "city_slug": "brookhaven-ga"
+        },
+        {
+            "city_name": "Buford, GA",
+            "city_slug": "buford-ga"
+        },
+        {
+            "city_name": "Canton, GA",
+            "city_slug": "canton-ga"
+        },
+        {
+            "city_name": "Carrollton, GA",
+            "city_slug": "carrollton-ga"
+        },
+        {
+            "city_name": "Cartersville, GA",
+            "city_slug": "cartersville-ga"
+        },
+        {
+            "city_name": "Clarkston, GA",
+            "city_slug": "clarkston-ga"
+        },
+        {
+            "city_name": "College Park, GA",
+            "city_slug": "college-park-ga"
+        },
+        {
+            "city_name": "Conley, GA",
+            "city_slug": "conley-ga"
+        },
+        {
+            "city_name": "Conyers, GA",
+            "city_slug": "conyers-ga"
+        },
+        {
+            "city_name": "Covington, GA",
+            "city_slug": "covington-ga"
+        },
+        {
+            "city_name": "Cumming, GA",
+            "city_slug": "cumming-ga"
+        },
+        {
+            "city_name": "Dacula, GA",
+            "city_slug": "dacula-ga"
+        },
+        {
+            "city_name": "Dallas, GA",
+            "city_slug": "dallas-ga"
+        },
+        {
+            "city_name": "Dawsonville, GA",
+            "city_slug": "dawsonville-ga"
+        },
+        {
+            "city_name": "Decatur, GA",
+            "city_slug": "decatur-ga"
+        },
+        {
+            "city_name": "Doraville, GA",
+            "city_slug": "doraville-ga"
+        },
+        {
+            "city_name": "Douglasville, GA",
+            "city_slug": "douglasville-ga"
+        },
+        {
+            "city_name": "Duluth, GA",
+            "city_slug": "duluth-ga"
+        },
+        {
+            "city_name": "East Point, GA",
+            "city_slug": "east-point-ga"
+        },
+        {
+            "city_name": "Ellenwood, GA",
+            "city_slug": "ellenwood-ga"
+        },
+        {
+            "city_name": "Fairburn, GA",
+            "city_slug": "fairburn-ga"
+        },
+        {
+            "city_name": "Fayetteville, GA",
+            "city_slug": "fayetteville-ga"
+        },
+        {
+            "city_name": "Forest Park, GA",
+            "city_slug": "forest-park-ga"
+        },
+        {
+            "city_name": "Gainesville, GA",
+            "city_slug": "gainesville-ga"
+        },
+        {
+            "city_name": "Grayson, GA",
+            "city_slug": "grayson-ga"
+        },
+        {
+            "city_name": "Griffin, GA",
+            "city_slug": "griffin-ga"
+        },
+        {
+            "city_name": "Hampton, GA",
+            "city_slug": "hampton-ga"
+        },
+        {
+            "city_name": "Hiram, GA",
+            "city_slug": "hiram-ga"
+        },
+        {
+            "city_name": "Jackson, GA",
+            "city_slug": "jackson-ga"
+        },
+        {
+            "city_name": "Johns Creek, GA",
+            "city_slug": "johns-creek-ga"
+        },
+        {
+            "city_name": "Jonesboro, GA",
+            "city_slug": "jonesboro-ga"
+        },
+        {
+            "city_name": "Kennesaw, GA",
+            "city_slug": "kennesaw-ga"
+        },
+        {
+            "city_name": "Lawrenceville, GA",
+            "city_slug": "lawrenceville-ga"
+        },
+        {
+            "city_name": "Lilburn, GA",
+            "city_slug": "lilburn-ga"
+        },
+        {
+            "city_name": "Lithia Springs, GA",
+            "city_slug": "lithia-springs-ga"
+        },
+        {
+            "city_name": "Lithonia, GA",
+            "city_slug": "lithonia-ga"
+        },
+        {
+            "city_name": "Locust Grove, GA",
+            "city_slug": "locust-grove-ga"
+        },
+        {
+            "city_name": "Loganville, GA",
+            "city_slug": "loganville-ga"
+        },
+        {
+            "city_name": "Mableton, GA",
+            "city_slug": "mableton-ga"
+        },
+        {
+            "city_name": "Mansfield, GA",
+            "city_slug": "mansfield-ga"
+        },
+        {
+            "city_name": "Marietta, GA",
+            "city_slug": "marietta-ga"
+        },
+        {
+            "city_name": "McDonough, GA",
+            "city_slug": "mcdonough-ga"
+        },
+        {
+            "city_name": "Mcdonough, GA",
+            "city_slug": "mcdonough-ga"
+        },
+        {
+            "city_name": "Milton, GA",
+            "city_slug": "milton-ga"
+        },
+        {
+            "city_name": "Monroe, GA",
+            "city_slug": "monroe-ga"
+        },
+        {
+            "city_name": "Morrow, GA",
+            "city_slug": "morrow-ga"
+        },
+        {
+            "city_name": "Newnan, GA",
+            "city_slug": "newnan-ga"
+        },
+        {
+            "city_name": "Norcross, GA",
+            "city_slug": "norcross-ga"
+        },
+        {
+            "city_name": "Oxford, GA",
+            "city_slug": "oxford-ga"
+        },
+        {
+            "city_name": "Peachtree City, GA",
+            "city_slug": "peachtree-city-ga"
+        },
+        {
+            "city_name": "Porterdale, GA",
+            "city_slug": "porterdale-ga"
+        },
+        {
+            "city_name": "Powder Springs, GA",
+            "city_slug": "powder-springs-ga"
+        },
+        {
+            "city_name": "Rex, GA",
+            "city_slug": "rex-ga"
+        },
+        {
+            "city_name": "Riverdale, GA",
+            "city_slug": "riverdale-ga"
+        },
+        {
+            "city_name": "Rockmart, GA",
+            "city_slug": "rockmart-ga"
+        },
+        {
+            "city_name": "Roswell, GA",
+            "city_slug": "roswell-ga"
+        },
+        {
+            "city_name": "Rydal, GA",
+            "city_slug": "rydal-ga"
+        },
+        {
+            "city_name": "Sandy Springs, GA",
+            "city_slug": "sandy-springs-ga"
+        },
+        {
+            "city_name": "Senoia, GA",
+            "city_slug": "senoia-ga"
+        },
+        {
+            "city_name": "Smyrna, GA",
+            "city_slug": "smyrna-ga"
+        },
+        {
+            "city_name": "Snellville, GA",
+            "city_slug": "snellville-ga"
+        },
+        {
+            "city_name": "South Fulton, GA",
+            "city_slug": "south-fulton-ga"
+        },
+        {
+            "city_name": "Stockbridge, GA",
+            "city_slug": "stockbridge-ga"
+        },
+        {
+            "city_name": "Stone Mountain, GA",
+            "city_slug": "stone-mountain-ga"
+        },
+        {
+            "city_name": "Sugar Hill, GA",
+            "city_slug": "sugar-hill-ga"
+        },
+        {
+            "city_name": "Temple, GA",
+            "city_slug": "temple-ga"
+        },
+        {
+            "city_name": "Union City, GA",
+            "city_slug": "union-city-ga"
+        },
+        {
+            "city_name": "Villa Rica, GA",
+            "city_slug": "villa-rica-ga"
+        },
+        {
+            "city_name": "White, GA",
+            "city_slug": "white-ga"
+        },
+        {
+            "city_name": "Winder, GA",
+            "city_slug": "winder-ga"
+        },
+        {
+            "city_name": "Winston, GA",
+            "city_slug": "winston-ga"
+        },
+        {
+            "city_name": "Woodstock, GA",
+            "city_slug": "woodstock-ga"
+        }
+    ],
+    "CHICAGO, IL": [
+        {
+            "city_name": "Alsip, IL",
+            "city_slug": "alsip-il"
+        },
+        {
+            "city_name": "Bensenville, IL",
+            "city_slug": "bensenville-il"
+        },
+        {
+            "city_name": "Blue Island, IL",
+            "city_slug": "blue-island-il"
+        },
+        {
+            "city_name": "Calumet City, IL",
+            "city_slug": "calumet-city-il"
+        },
+        {
+            "city_name": "Chicago, IL",
+            "city_slug": "chicago-il"
+        },
+        {
+            "city_name": "Elmwood Park, IL",
+            "city_slug": "elmwood-park-il"
+        },
+        {
+            "city_name": "Evanston, IL",
+            "city_slug": "evanston-il"
+        },
+        {
+            "city_name": "Franklin Park, IL",
+            "city_slug": "franklin-park-il"
+        },
+        {
+            "city_name": "Harwood Heights, IL",
+            "city_slug": "harwood-heights-il"
+        },
+        {
+            "city_name": "Oak Lawn, IL",
+            "city_slug": "oak-lawn-il"
+        },
+        {
+            "city_name": "Oak Park, IL",
+            "city_slug": "oak-park-il"
+        },
+        {
+            "city_name": "Park Ridge, IL",
+            "city_slug": "park-ridge-il"
+        },
+        {
+            "city_name": "River Grove, IL",
+            "city_slug": "river-grove-il"
+        }
+    ],
+    "PHILADELPHIA, PA": [
+        {
+            "city_name": "Bala Cynwyd, PA",
+            "city_slug": "bala-cynwyd-pa"
+        },
+        {
+            "city_name": "Bensalem, PA",
+            "city_slug": "bensalem-pa"
+        },
+        {
+            "city_name": "Camden, PA",
+            "city_slug": "camden-pa"
+        },
+        {
+            "city_name": "Cinnaminson, PA",
+            "city_slug": "cinnaminson-pa"
+        },
+        {
+            "city_name": "Darby, PA",
+            "city_slug": "darby-pa"
+        },
+        {
+            "city_name": "Elkins Park, PA",
+            "city_slug": "elkins-park-pa"
+        },
+        {
+            "city_name": "Feasterville, PA",
+            "city_slug": "feasterville-pa"
+        },
+        {
+            "city_name": "Feasterville Trevose, PA",
+            "city_slug": "feasterville-trevose-pa"
+        },
+        {
+            "city_name": "Flourtown, PA",
+            "city_slug": "flourtown-pa"
+        },
+        {
+            "city_name": "Lafayette Hill, PA",
+            "city_slug": "lafayette-hill-pa"
+        },
+        {
+            "city_name": "Melrose Park, PA",
+            "city_slug": "melrose-park-pa"
+        },
+        {
+            "city_name": "Palmyra, PA",
+            "city_slug": "palmyra-pa"
+        },
+        {
+            "city_name": "Philadelphia, PA",
+            "city_slug": "philadelphia-pa"
+        },
+        {
+            "city_name": "Sharon Hill, PA",
+            "city_slug": "sharon-hill-pa"
+        },
+        {
+            "city_name": "Upper Darby, PA",
+            "city_slug": "upper-darby-pa"
+        },
+        {
+            "city_name": "Wyncote, PA",
+            "city_slug": "wyncote-pa"
+        },
+        {
+            "city_name": "Wynnewood, PA",
+            "city_slug": "wynnewood-pa"
+        },
+        {
+            "city_name": "Yeadon, PA",
+            "city_slug": "yeadon-pa"
+        }
+    ],
+    "TAMPA, FL": [
+        {
+            "city_name": "Apollo Beach, FL",
+            "city_slug": "apollo-beach-fl"
+        },
+        {
+            "city_name": "Brandon, FL",
+            "city_slug": "brandon-fl"
+        },
+        {
+            "city_name": "Brooksville, FL",
+            "city_slug": "brooksville-fl"
+        },
+        {
+            "city_name": "Clearwater, FL",
+            "city_slug": "clearwater-fl"
+        },
+        {
+            "city_name": "Dade City, FL",
+            "city_slug": "dade-city-fl"
+        },
+        {
+            "city_name": "Dover, FL",
+            "city_slug": "dover-fl"
+        },
+        {
+            "city_name": "Dunedin, FL",
+            "city_slug": "dunedin-fl"
+        },
+        {
+            "city_name": "Gibsonton, FL",
+            "city_slug": "gibsonton-fl"
+        },
+        {
+            "city_name": "Hudson, FL",
+            "city_slug": "hudson-fl"
+        },
+        {
+            "city_name": "Lakeland, FL",
+            "city_slug": "lakeland-fl"
+        },
+        {
+            "city_name": "Land O Lakes, FL",
+            "city_slug": "land-o-lakes-fl"
+        },
+        {
+            "city_name": "Land O' Lakes, FL",
+            "city_slug": "land-o-lakes-fl"
+        },
+        {
+            "city_name": "Largo, FL",
+            "city_slug": "largo-fl"
+        },
+        {
+            "city_name": "Lithia, FL",
+            "city_slug": "lithia-fl"
+        },
+        {
+            "city_name": "Lutz, FL",
+            "city_slug": "lutz-fl"
+        },
+        {
+            "city_name": "Mulberry, FL",
+            "city_slug": "mulberry-fl"
+        },
+        {
+            "city_name": "New Port Richey, FL",
+            "city_slug": "new-port-richey-fl"
+        },
+        {
+            "city_name": "Palm Harbor, FL",
+            "city_slug": "palm-harbor-fl"
+        },
+        {
+            "city_name": "Pinellas Park, FL",
+            "city_slug": "pinellas-park-fl"
+        },
+        {
+            "city_name": "Plant City, FL",
+            "city_slug": "plant-city-fl"
+        },
+        {
+            "city_name": "Riverview, FL",
+            "city_slug": "riverview-fl"
+        },
+        {
+            "city_name": "Ruskin, FL",
+            "city_slug": "ruskin-fl"
+        },
+        {
+            "city_name": "Saint Petersburg, FL",
+            "city_slug": "saint-petersburg-fl"
+        },
+        {
+            "city_name": "Seffner, FL",
+            "city_slug": "seffner-fl"
+        },
+        {
+            "city_name": "Spring Hill, FL",
+            "city_slug": "spring-hill-fl"
+        },
+        {
+            "city_name": "St Petersburg, FL",
+            "city_slug": "st-petersburg-fl"
+        },
+        {
+            "city_name": "Sun City Center, FL",
+            "city_slug": "sun-city-center-fl"
+        },
+        {
+            "city_name": "Tampa, FL",
+            "city_slug": "tampa-fl"
+        },
+        {
+            "city_name": "Tarpon Springs, FL",
+            "city_slug": "tarpon-springs-fl"
+        },
+        {
+            "city_name": "Temple Terrace, FL",
+            "city_slug": "temple-terrace-fl"
+        },
+        {
+            "city_name": "Trinity, FL",
+            "city_slug": "trinity-fl"
+        },
+        {
+            "city_name": "Valrico, FL",
+            "city_slug": "valrico-fl"
+        },
+        {
+            "city_name": "Wesley Chapel, FL",
+            "city_slug": "wesley-chapel-fl"
+        },
+        {
+            "city_name": "Wimauma, FL",
+            "city_slug": "wimauma-fl"
+        },
+        {
+            "city_name": "Zephyrhills, FL",
+            "city_slug": "zephyrhills-fl"
+        }
+    ]
+}
