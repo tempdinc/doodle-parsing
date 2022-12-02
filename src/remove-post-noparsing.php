@@ -25,11 +25,14 @@ $total_posts = $wp_db->countPostsRZListing($listing_type);
 echo 'Total posts - ' . $total_posts . PHP_EOL;
 $pages = intdiv($total_posts, 100);
 echo 'Total pages - ' . $pages . PHP_EOL;
+$removed_posts = 0;
 for ($i = 0; $i <= $pages; $i++) {
-    $posts = $wp_db->getPostsRZListing($listing_type, $i * 100, 100);
+    $start = $i*100 - $removed_posts;
+    $posts = $wp_db->getPostsRZListing($listing_type, $start, 100);
+    $removed_posts = 0;
     echo 'Page number - ' . $i . PHP_EOL;
     foreach ($posts as $post) {
-        file_put_contents(LOG_DIR . '/fix-post-noparsing.log', ' [' . $post->id . ']  | ', FILE_APPEND);
+        // file_put_contents(LOG_DIR . '/fix-post-noparsing.log', ' [' . $post->id . ']  | ', FILE_APPEND);
         $query = $parsing_db->pdo->prepare("SELECT count(*) FROM `availability` WHERE `post_id` = ? LIMIT 1");
         $query->execute([$post->id]);
         $availability = $query->fetchColumn();
@@ -45,12 +48,13 @@ for ($i = 0; $i <= $pages; $i++) {
                     'post_status' => 'draft'
                 ];
                 // wp_update_post($post_data);
+                $removed_posts++;
                 wp_delete_post($post->id, true);
             } else {
-                echo " Post id: " . $post->id . " EXIST" . PHP_EOL;
+                // echo " Post id: " . $post->id . " EXIST" . PHP_EOL;
             }
         } else {
-            echo " Post id: " . $post->id . " EXIST" . PHP_EOL;
+            // echo " Post id: " . $post->id . " EXIST" . PHP_EOL;
         }
     }
 }

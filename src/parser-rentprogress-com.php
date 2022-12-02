@@ -31,14 +31,14 @@ file_put_contents('parentPid.out', getmypid());
 echo date("Y-m-d H:i:s") . " RentProgress.com - ";
 file_put_contents(LOG_DIR . '/rentprogress-com.log', '[' . date('Y-m-d H:i:s') . '] RentProgress.com - ', FILE_APPEND);
 
-$filter = '';
+$filter = '.moveinready';
 
-if (isset($argv[1]) && $argv[1] === 'moveinready') {
-    $filter = '.moveinready';
+if (isset($argv[1]) && $argv[1] === 'total') {
+    $filter = '';
 }
 
-if (isset($argv[2]) && $argv[2] === 'moveinready') {
-    $filter = '.moveinready';
+if (isset($argv[2]) && $argv[2] === 'total') {
+    $filter = '';
 }
 
 if (isset($argv[1]) && $argv[1] === 'update') { // Giving parser the task to check records relevance

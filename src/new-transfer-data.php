@@ -36,11 +36,15 @@ for ($i = 0; $i <= $pages; $i++) {
         $decoded_premise_services = json_decode($on_premise_features);
         foreach ($decoded_premise_services as $key => $value) {
             foreach ($value as $data) {
-                array_push($apartment_amenities, $data);
+                $search_key = array_search($data, $apartment_amenities);
+                if ($search_key === false) {
+                    array_push($apartment_amenities, $data);
+                }
             }
         }
     }
 }
+echo 'apartment_amenities - done' . PHP_EOL;
 $apartment_amenities = array_unique($apartment_amenities, SORT_STRING);
 sort($apartment_amenities);
 
@@ -65,7 +69,10 @@ for ($i = 0; $i <= $pages; $i++) {
         // var_dump($row);
         foreach ($decoded_premise_services as $key => $value) {
             foreach ($value as $data) {
-                array_push($community_amenities, $data);
+                $search_key = array_search($data, $community_amenities);
+                if ($search_key === false) {
+                    array_push($community_amenities, $data);
+                }
             }
         }
     }
@@ -93,7 +100,7 @@ echo " \033[31mAdded amenities: " . $amenities_counter . "\033[0m";
 
 file_put_contents(LOG_DIR . '/new-transfer-data.log', ' Added amenities: ' . $amenities_counter, FILE_APPEND);
 // Transfer amenities END
-echo 'done2';
+
 // Getting all amenities
 $apartment_amenities_list = [];
 $wp_db = new MySQL('wp', 'local');
@@ -368,7 +375,6 @@ foreach ($citiesDB as $states) {
 
             $region = strtoupper($city) . ', ' . strtoupper($code);
             $region_slug = str_replace(' ', '-', preg_replace('/[^ a-z\d]/ui', '', strtolower($region)));
-            echo $region_slug . ' | ';
             $rz_regions_key = array_search($region_slug, array_column($rz_regions, 'slug'));
             $term_id = $rz_regions[$rz_regions_key]['term_id'];
             $term_name = $rz_regions[$rz_regions_key]['name'];
@@ -379,7 +385,6 @@ foreach ($citiesDB as $states) {
             $city = str_replace(' ', '-', strtolower($city));
             $code = strtolower($code);
             $base_link = 'https://rentprogress.com/bin/progress-residential/property-search.market-' . urlencode($city . '-' . $code) . '.json';
-            // echo $base_link;
             $marketDB = file_get_contents($base_link);
             $marketDB = json_decode($marketDB, true);
             $new_cities = [];
@@ -444,18 +449,23 @@ if ($rz_listing_category == '0') {
 // Start transfer
 echo 'Start transfer properties to WP..' . PHP_EOL;
 
-file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | rz_listing_category WP - ' . $rz_listing_category . PHP_EOL, FILE_APPEND);
+file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | rz_listing_category WP - ' . $rz_listing_category, FILE_APPEND);
 
 // Getting all parsed
 $parsing_db = new MySQL('parsing', 'local');
 $total_properties = $parsing_db->countAllNewRecords();
 echo 'Total properties - ' . $total_properties . PHP_EOL;
+file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | Total properties - ' . $total_properties . PHP_EOL, FILE_APPEND);
 $pages = intdiv($total_properties, 100);
 echo 'Total pages - ' . $pages . PHP_EOL;
 for ($i = 0; $i <= $pages; $i++) {
     $new_properties = $parsing_db->getAllNewRecords(0, 100);
     foreach ($new_properties as $property) {
         echo $property->id . ' | '; // ToDo - check multiple rooms
+
+        // Check availability of current propery
+        $all_availability = $parsing_db->getAvailabilityNowByProperty($property->id);
+        $availability_counter = count($all_availability);
 
         $date = date('Y-m-d H:i:s');
         $gmdate = gmdate('Y-m-d H:i:s');
@@ -508,15 +518,13 @@ for ($i = 0; $i <= $pages; $i++) {
         $unit_description = ($property->building_desc !== NULL && $property->building_desc != '') ? clear_description($property->building_desc) : 'This home is priced to rent and won\'t be around for long. Apply now, while the current residents are preparing to move out.';
 
         // Apartment amenities
-        $apartment_amenities = [];
+        // $apartment_amenities = [];
         $decoded_premise_services = json_decode($property->on_premise_features);
 
         // Image gallery
         $wpImageArray = [];
         $image_urls = $property->image_urls;
-        // echo $availability->av_id;
         $decoded_image_urls = json_decode($image_urls);
-        // var_dump($decoded_image_urls);
         if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
             foreach ($decoded_image_urls as $key => $value) {
                 $re = '`^.*/`m';
@@ -530,7 +538,6 @@ for ($i = 0; $i <= $pages; $i++) {
                 $filename_counter = 1;
                 while ($is_file_exist) {
                     $orig_filename = $orig_filename . $filename_counter;
-                    // echo ' | ' . $orig_filename . PHP_EOL;
                     $filename_path = __DIR__ . '/images/' . $orig_filename . '.' . $orig_fileextension;
                     $is_file_exist = isFileExist($filename_path);
                     $filename_counter++;
@@ -554,13 +561,12 @@ for ($i = 0; $i <= $pages; $i++) {
                 }
             }
         }
-
         // Checking for images of post
         $is_gallery_empty = (count($wpImageArray) == 0) ? true : false;
         $rz_gallery = json_encode($wpImageArray);
         clearImages();
 
-        if(!$is_gallery_empty && $region_slug != '') {
+        if (!$is_gallery_empty && $region_slug != '' && $availability_counter > 0 && isset($all_availability[0]->listing_price)) {
             // Создаем массив данных новой записи
             $post_data = array(
                 'post_title'    => $property_address,
@@ -804,6 +810,8 @@ for ($i = 0; $i <= $pages; $i++) {
                     }
                 }
             }
+        } else {
+            deleteProperty($property->id);
         }
     }
 }
@@ -886,7 +894,6 @@ function moveToWp($image_url, $alt_text)
             'post_status' => 'inherit'
         );
         $attach_id = wp_insert_attachment($attachment, $file);
-        // echo 'attach_id - ' . $attach_id . PHP_EOL;
         require_once(ABSPATH . 'wp-admin/includes/image.php');
         $attach_data = wp_generate_attachment_metadata($attach_id, $file);
         wp_update_attachment_metadata($attach_id, $attach_data);
@@ -921,4 +928,22 @@ function clearPrice($price)
     $price_array = explode('$', trim($price));
     $new_price = end($price_array);
     return preg_replace('/[^0-9]/', '', $new_price);
+}
+
+function deleteProperty($propertyId)
+{
+    echo 'Delete property - ' . $propertyId;
+    $parsing_db = new MySQL('parsing', 'local');
+    try {
+        $query = $parsing_db->pdo->prepare("DELETE FROM `properties` WHERE id = ?");
+        $query->execute([$propertyId]);
+    } catch (\Exception $ex) {
+        return $ex->getMessage();
+    }
+    try {
+        $query = $parsing_db->pdo->prepare("DELETE FROM `availability` WHERE property_id = ?");
+        $query->execute([$propertyId]);
+    } catch (\Exception $ex) {
+        return $ex->getMessage();
+    }
 }
