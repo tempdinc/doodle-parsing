@@ -237,6 +237,44 @@ class MySQL
     }
 
     /**
+     * Getting count of all records WHERE is_deleted = 0 AND post_id IS NOT NULL
+     *
+     * @return int
+     */
+    public function countRecordsWithPosts()
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT count(*) FROM `properties` WHERE (is_deleted = 0 AND post_id IS NOT NULL) OR (is_deleted IS NULL AND post_id IS NOT NULL) LIMIT 1"
+            );
+            $query->execute([]);
+            return $query->fetchColumn();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }       
+
+    /**
+     * Getting all records by is_deleted = 0 AND post_id IS NOT NULL
+     *
+     * @param  int $limit_start
+     * @param  int $limit
+     * @return array
+     */
+    public function getRecordsWithPosts($limit_start, $limit)
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT * FROM `properties` WHERE (is_deleted = 0 AND post_id IS NOT NULL) OR (is_deleted IS NULL AND post_id IS NOT NULL) LIMIT ?,?"
+            );
+            $query->execute([$limit_start, $limit]);
+            return $query->fetchAll();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }    
+
+    /**
      * Getting count of all records WHERE is_deleted = 0 AND post_id IS NULL
      *
      * @return int
@@ -252,7 +290,7 @@ class MySQL
         } catch (\Exception $ex) {
             die($ex->getMessage());
         }
-    }
+    } 
 
     /**
      * Getting all records by is_deleted = 0 AND post_id IS NULL

@@ -446,7 +446,7 @@ for ($i = 0; $i <= $pages; $i++) {
                                     foreach ($value as $data) {
                                         $term_id = array_search($data, $apartment_amenities_list);
                                         if ($term_id) {
-                                            add_post_meta($post_id, 'rz_amenities', $term_id, true) or update_post_meta($post_id, 'rz_amenities', $term_id);
+                                            add_post_meta($post_id, 'rz_amenities', $term_id, false) or update_post_meta($post_id, 'rz_amenities', $term_id);
                                         }
                                     }
                                 }
