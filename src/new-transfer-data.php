@@ -143,8 +143,6 @@ foreach ($rz_full_cities as $rz_full_city) {
         'region_slug'   => $rz_full_city['region_slug']
     ];
 }
-// var_dump($rz_full_regions);
-// exit();
 // NEW REGIONS END
 
 // Checking for existing rz_listing_category multiunit
@@ -231,7 +229,6 @@ for ($i = 0; $i <= $pages; $i++) {
         $unit_description = ($property->building_desc !== NULL && $property->building_desc != '') ? clear_description($property->building_desc) : 'This home is priced to rent and won\'t be around for long. Apply now, while the current residents are preparing to move out.';
 
         // Apartment amenities
-        // $apartment_amenities = [];
         $decoded_premise_services = json_decode($property->on_premise_features);
 
         $is_gallery_empty = true;
@@ -351,7 +348,8 @@ for ($i = 0; $i <= $pages; $i++) {
                         foreach ($value as $data) {
                             $term_id = array_search($data, $apartment_amenities_list);
                             if ($term_id) {
-                                add_post_meta($main_post_insert_result, 'rz_amenities', $term_id, true) or update_post_meta($main_post_insert_result, 'rz_amenities', $term_id);
+                                // add_post_meta($main_post_insert_result, 'rz_amenities', $term_id, true) or update_post_meta($main_post_insert_result, 'rz_amenities', $term_id);
+                                add_post_meta($main_post_insert_result, 'rz_amenities', $term_id, false);
                             }
                         }
                     }
@@ -383,16 +381,21 @@ for ($i = 0; $i <= $pages; $i++) {
                             // Checking for range - end(explode
                             $availability_bathroom_cnt = $availability->bathroom_cnt;
                             $exploded_bathroom_cnt = explode('–', $availability_bathroom_cnt);
-                            $bath_count = trim(preg_replace("/[a-zA-Z]/", "", end($exploded_bathroom_cnt))); // rz_bathrooms
-                            if (intval($bath_count) != 0) $availability_baths[] = $bath_count;
+                            $bathroom_count = trim(preg_replace("/[a-zA-Z]/", "", end($exploded_bathroom_cnt)));
+                            $bath_count = ($bathroom_count == 0 || $bathroom_count == '') ? 0 : $bathroom_count;
+                            $availability_baths[] = $bath_count; // rz_bathrooms
+
                             $availability_bedroom_cnt = $availability->bedroom_cnt;
                             $exploded_bedroom_cnt = explode('–', $availability_bedroom_cnt);
-                            $bed_count = trim(preg_replace("/[a-zA-Z]/", "", end($exploded_bedroom_cnt))); // rz_bed
-                            if (intval($bed_count) != 0) $availability_beds[] = $bed_count;
+                            $bedroom_count = trim(preg_replace("/[a-zA-Z]/", "", end($exploded_bedroom_cnt)));
+                            $bed_count = ($bedroom_count == 0 || $bedroom_count == '') ? 0 : $bedroom_count;
+                            $availability_beds[] = $bed_count;
+
                             $availability_home_size_sq_ft = $availability->home_size_sq_ft;
                             $exploded_home_size_sq_ft = explode('–', $availability_home_size_sq_ft);
-                            $sqft = trim(preg_replace("/\D/", "", end($exploded_home_size_sq_ft))); // rz_sqft
-                            if (intval($sqft) != 0) $availability_sqft[] = $sqft;
+                            $home_size_sq_ft = trim(preg_replace("/\D/", "", end($exploded_home_size_sq_ft)));
+                            $sqft = ($home_size_sq_ft == 0 || $home_size_sq_ft == '') ? 'n/d' : $home_size_sq_ft; // rz_sqft
+                            $availability_sqft[] = $sqft;
 
                             $availability_listing_price = $availability->listing_price;
                             $exploded_listing_price = explode('–', $availability_listing_price);
@@ -463,21 +466,26 @@ for ($i = 0; $i <= $pages; $i++) {
                 }
                 $rz_unit_type = 'multi';
                 $rz_search = 1;
+
                 $max_price = max($availability_prices);
                 $min_price = min($availability_prices);
                 $availability_price = ($max_price == $min_price) ? $max_price : $min_price . '-' . $max_price;
                 $max_price_per_day = max($availability_prices_per_day);
                 $min_price_per_day = min($availability_prices_per_day);
                 $availability_price_per_day = ($max_price_per_day == $min_price_per_day) ? $max_price_per_day : $min_price_per_day . '-' . $max_price_per_day;
+
                 $max_bed = max($availability_beds);
                 $min_bed = min($availability_beds);
                 $availability_bed = ($max_bed == $min_bed) ? $max_bed : $min_bed . '-' . $max_bed;
+
                 $max_bath = max($availability_baths);
                 $min_bath = min($availability_baths);
                 $availability_bath = ($max_bath == $min_bath) ? $max_bath : $min_bath . '-' . $max_bath;
+
                 $max_sqft = max($availability_sqft);
                 $min_sqft = min($availability_sqft);
                 $availability_sqft = ($max_sqft == $min_sqft) ? $max_sqft : $min_sqft . '-' . $max_sqft;
+
                 $new_property_meta = [
                     'post_content' => $unit_description,
                     'rz_apartment_uri' => $property->link,
@@ -506,19 +514,23 @@ for ($i = 0; $i <= $pages; $i++) {
                 // file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL, FILE_APPEND);
 
                 if ($main_post_insert_result && $main_post_insert_result != 0) {
-
                     $new_property_meta = [];
-
                     // Checking for range - end(explode
                     $all_availability_bathroom_cnt = $all_availability[0]->bathroom_cnt;
                     $exploded_availability_bathroom_cnt = explode('–', $all_availability_bathroom_cnt);
-                    $bath_count = trim(preg_replace("/[a-zA-Z]/", "", end($exploded_availability_bathroom_cnt))); // rz_bathrooms
+                    $bathroom_count = trim(preg_replace("/[a-zA-Z]/", "", end($exploded_availability_bathroom_cnt)));
+                    $bath_count = ($bathroom_count == 0 || $bathroom_count == '') ? 0 : $bathroom_count; // rz_bathrooms
+
                     $all_availability_bedroom_cnt = $all_availability[0]->bedroom_cnt;
                     $exploded_availability_bedroom_cnt = explode('–', $all_availability_bedroom_cnt);
-                    $bed_count = trim(preg_replace("/[a-zA-Z]/", "", end($exploded_availability_bedroom_cnt))); // rz_bed
+                    $bedroom_count = trim(preg_replace("/[a-zA-Z]/", "", end($exploded_availability_bedroom_cnt)));
+                    $bed_count = ($bedroom_count == 0 || $bedroom_count == '') ? 0 : $bedroom_count; // rz_bed
+
                     $all_availability_home_size_sq_ft = $all_availability[0]->home_size_sq_ft;
                     $exploded_availability_home_size_sq_ft = explode('–', $all_availability_home_size_sq_ft);
-                    $sqft = trim(preg_replace("/\D/", "", end($exploded_availability_home_size_sq_ft))); // rz_sqft
+                    $home_size_sq_ft = trim(preg_replace("/\D/", "", end($exploded_availability_home_size_sq_ft)));
+                    $sqft = ($home_size_sq_ft == 0 || $home_size_sq_ft == '') ? 'n/d' : $home_size_sq_ft; // rz_sqft
+
                     $all_availability_listing_price = $all_availability[0]->listing_price;
                     $exploded_availability_listing_price = explode('–', $all_availability_listing_price);
                     $listing_price = clearPrice(end($exploded_availability_listing_price));
