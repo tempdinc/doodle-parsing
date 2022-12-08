@@ -207,8 +207,8 @@ $unit_source = 'quote';
 $is_gallery_empty = true;
 
 $wpImageArray = [];
-$image_urls = $property->image_urls;
-$decoded_image_urls = json_decode($image_urls);
+// $image_urls = $property->image_urls;
+$decoded_image_urls = json_decode($quote_images);
 file_put_contents(LOG_DIR . '/quote-add.log', ' | type of decoded_image_urls - ' . $decoded_image_urls . PHP_EOL, FILE_APPEND);
 if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
    foreach ($decoded_image_urls as $key => $value) {
