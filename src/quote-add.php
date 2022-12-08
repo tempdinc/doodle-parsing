@@ -108,7 +108,8 @@ error_reporting(E_ALL);
 use App\Classes\MySQL;
 
 require_once 'bootstrap.php';
-require_once '../../wp-load.php';
+//require_once($_SERVER['DOCUMENT_ROOT'] . '/wp-load.php');
+require_once(realpath('../../wp-load.php'));
 
 // Clear log files
 $f = fopen(LOG_DIR . '/quote-add.log', 'w');
@@ -202,57 +203,31 @@ $availability_address_lc = replace_string($quote_address);
 
 $unit_source = 'quote';
 
+// Image gallery
+$is_gallery_empty = true;
+
 $wpImageArray = [];
-$decoded_image_urls = json_decode(json_decode('"' . $quote_images . '"', true));
+$image_urls = $property->image_urls;
+$decoded_image_urls = json_decode($image_urls);
 file_put_contents(LOG_DIR . '/quote-add.log', ' | type of decoded_image_urls - ' . $decoded_image_urls . PHP_EOL, FILE_APPEND);
 if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
    foreach ($decoded_image_urls as $key => $value) {
-      // $value = json_decode($value);
-      file_put_contents(LOG_DIR . '/quote-add.log', ' | value - ' . $value->name . ' | ' . str_replace(' ', '_', strtolower($value->name)) . ' | ' . $value->url . ' | ' . $value->extension . PHP_EOL, FILE_APPEND);
-      $re = '`^.*/`m';
-      $subst = '';
-      // IMAGE NAME CHECKING
-      $orig_filename = $value->name;
-      // echo ' | orig_full_filename - ' . $orig_full_filename;
-      $orig_fileextension = $value->extension;
-      // echo ' | orig_fileextension - ' . $orig_fileextension; 
-      $orig_filename = str_replace(' ', '_', strtolower($orig_filename));
-      // echo ' | ' . $orig_filename;
-      $filename_path = __DIR__ . '/images' . '/' . $orig_filename . '.' . $orig_fileextension;
-      $is_file_exist = file_exists($filename_path);
-      $filename_counter = 1;
-      while ($is_file_exist) {
-         $orig_filename = $orig_filename . $filename_counter;
-         // echo ' | ' . $orig_filename . PHP_EOL;
-         $filename_path = __DIR__ . '/images' . '/' . $orig_filename . '.' . $orig_fileextension;
-         $is_file_exist = isFileExist($filename_path);
-         $filename_counter++;
-      }
-      $file_get = file_get_contents($value->url);
-      if ($file_get !== false) {
-         file_put_contents($filename_path, $file_get);
-         /* IMAGE NAME CHECKING END */
-         if ($unit_source == 'rentprogress.com') {
-            cropImage($filename_path, 100, 82);
-         }
-         $moveToWP = moveToWp($filename_path, $availability_address);
-         if ($moveToWP) {
-            array_push($wpImageArray, $moveToWP);
-            file_put_contents(LOG_DIR . '/quote-add.log', ' | WP Image ID - ' . $moveToWP, FILE_APPEND);
-         } else {
-            file_put_contents(LOG_DIR . '/quote-add.log', ' | Error transferring WP - ' . $filename_path, FILE_APPEND);
-         }
+      $moveToWP = moveToWp($value, $property_address, $unit_source);
+      if ($moveToWP) {
+         $wpImageId = (object)array('id' => (string)$moveToWP);
+         array_push($wpImageArray, $wpImageId);
       } else {
-         file_put_contents(LOG_DIR . '/quote-add.log', ' | Error transferring WP - ' . $filename_path, FILE_APPEND);
+         file_put_contents(LOG_DIR . '/quote-add.log', ' | Error image transferring WP - ' . $filename_path . PHP_EOL, FILE_APPEND);
       }
    }
-   file_put_contents(LOG_DIR . '/quote-add.log', ' | WP Image ID - END' . PHP_EOL, FILE_APPEND);
 }
+file_put_contents(LOG_DIR . '/quote-add.log', ' | WP Image ID - END' . PHP_EOL, FILE_APPEND);
+
 // exit();
 // Checking for images of post
 $is_gallery_empty = (count($wpImageArray) == 0) ? true : false;
 $rz_gallery = json_encode($wpImageArray);
-clearImages();
+file_put_contents(LOG_DIR . '/quote-add.log', ' | $rz_gallery - ' . $rz_gallery . PHP_EOL, FILE_APPEND);
 
 // Создаем массив данных новой записи
 $post_data = array(
@@ -270,32 +245,32 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
    wp_set_post_terms($main_post_insert_result, [$rz_region_id], 'rz_regions');
 
    $new_property_meta = [
-      'post_content' => $quote_description,
-      'rz_apartment_uri' => $quote_link,
-      'rz_booking_type' => 'Request booking',
-      'rz_city' => $quote_city,
-      'rz_listing_type' => '25769',
-      'rz_location' => '',
-      'rz_location' => '',
-      'rz_location' => $np_rz_location__address,
-      'rz_location__address' => $np_rz_location__address,
-      'rz_location__lat' => '',
-      'rz_location__lng' => '',
-      'rz_post_address1' => $np_rz_location__address_line1,
-      'rz_post_address2' => $np_rz_location__address_line2,
-      'rz_priority' => '0',
-      'rz_priority_custom' => '0',
-      'rz_priority_selection' => 'normal',
-      'rz_reservation_length_max' => '0',
-      'rz_reservation_length_min' => '0',
-      'rz_state' => $quote_state,
-      'rz_status' => 'Now',
-      'rz_street_line_1' => $np_rz_location__address_line1,
-      'rz_street_line_2' => $np_rz_location__address_line2,
-      'rz_zip' => $quote_zip,
-      'rz_gallery' => $rz_gallery,
-      'rz_ranking' => $rz_ranking,
-      'rz_listing_region' => $region_slug
+      'post_content'                => $quote_description,
+      'rz_apartment_uri'            => $quote_link,
+      'rz_booking_type'             => 'Request booking',
+      'rz_city'                     => $quote_city,
+      'rz_listing_type'             => '25769',
+      'rz_location'                 => '',
+      'rz_location'                 => '',
+      'rz_location'                 => $np_rz_location__address,
+      'rz_location__address'        => $np_rz_location__address,
+      'rz_location__lat'            => '',
+      'rz_location__lng'            => '',
+      'rz_post_address1'            => $np_rz_location__address_line1,
+      'rz_post_address2'            => $np_rz_location__address_line2,
+      'rz_priority'                 => '0',
+      'rz_priority_custom'          => '0',
+      'rz_priority_selection'       => 'normal',
+      'rz_reservation_length_max'   => '0',
+      'rz_reservation_length_min'   => '0',
+      'rz_state'                    => $quote_state,
+      'rz_status'                   => 'Now',
+      'rz_street_line_1'            => $np_rz_location__address_line1,
+      'rz_street_line_2'            => $np_rz_location__address_line2,
+      'rz_zip'                      => $quote_zip,
+      'rz_gallery'                  => $rz_gallery,
+      'rz_ranking'                  => $rz_ranking,
+      'rz_listing_region'           => $region_slug
    ];
    foreach ($new_property_meta as $key => $value) {
       add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
@@ -306,7 +281,7 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
          foreach ($value as $data) {
             $term_id = array_search($data, $apartment_amenities_list);
             if ($term_id) {
-               add_post_meta($main_post_insert_result, 'rz_amenities', $term_id, true) or update_post_meta($main_post_insert_result, 'rz_amenities', $term_id);
+               add_post_meta($main_post_insert_result, 'rz_amenities', $term_id, false);
             }
          }
       }
@@ -426,30 +401,41 @@ function cropImage($image, $crop_width, $crop_height)
    imagedestroy($im);
 }
 
-function moveToWp($image_url, $alt_text)
+function moveToWp($image_url, $alt_text, $unit_source)
 {
-   // $image_url = 'adress img';
+   $re = '`^.*/`m';
+   $subst = '';
+   /* IMAGE NAME CHECKING */
+   $orig_full_filename = preg_replace($re, $subst, parse_url($image_url, PHP_URL_PATH));
+   $orig_fileextension = getExtension($orig_full_filename);
+   $orig_filename = substr(str_replace($orig_fileextension, '', $orig_full_filename), 0, -1);
+
+   $upload_dir = wp_upload_dir();
+   $filename_path = $upload_dir['path'] . $orig_filename . '.' . $orig_fileextension;
+   $is_file_exist = file_exists($filename_path);
+   $filename_counter = 1;
+   while ($is_file_exist) {
+      $orig_filename = $orig_filename . $filename_counter;
+      $filename_path = $upload_dir['path'] . $orig_filename . '.' . $orig_fileextension;
+      $is_file_exist = isFileExist($filename_path);
+      $filename_counter++;
+   }
    try {
-      $upload_dir = wp_upload_dir();
       $image_data = file_get_contents($image_url);
-      $filename = basename($image_url);
-      if (wp_mkdir_p($upload_dir['path'])) {
-         $file = $upload_dir['path'] . '/' . $filename;
-      } else {
-         $file = $upload_dir['basedir'] . '/' . $filename;
+      file_put_contents($filename_path, $image_data);
+      if ($unit_source == 'rentprogress.com') {
+         cropImage($filename_path, 100, 82);
       }
-      file_put_contents($file, $image_data);
-      $wp_filetype = wp_check_filetype($filename, null);
+      $wp_filetype = wp_check_filetype($filename_path, null);
       $attachment = array(
          'post_mime_type' => $wp_filetype['type'],
-         'post_title' => sanitize_file_name($filename),
+         'post_title' => sanitize_file_name($alt_text),
          'post_content' => '',
          'post_status' => 'inherit'
       );
-      $attach_id = wp_insert_attachment($attachment, $file);
-      // echo 'attach_id - ' . $attach_id . PHP_EOL;
+      $attach_id = wp_insert_attachment($attachment, $filename_path);
       require_once(ABSPATH . 'wp-admin/includes/image.php');
-      $attach_data = wp_generate_attachment_metadata($attach_id, $file);
+      $attach_data = wp_generate_attachment_metadata($attach_id, $filename_path);
       wp_update_attachment_metadata($attach_id, $attach_data);
       update_post_meta($attach_id, '_wp_attachment_image_alt', $alt_text);
       return $attach_id;

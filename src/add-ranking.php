@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 use App\Classes\MySQL;
 
 require_once __DIR__ . '/bootstrap.php';
-// require_once '../../wp-load.php';
+// require_once(realpath('../../wp-load.php'));
 
 $rz_listing_type = '380';
 $rz_ranking = '4';

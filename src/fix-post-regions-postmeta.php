@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 use App\Classes\MySQL;
 
 require_once __DIR__ . '/bootstrap.php';
-require_once '../../wp-load.php';
+require_once(realpath('../../wp-load.php'));
 
 // Clear log files
 $f = fopen(LOG_DIR . '/fix-post-regions.log', 'w');
@@ -138,19 +138,19 @@ for ($i = 0; $i <= $pages; $i++) {
             }
         }
         $rz_listing_type = $wp_db->getAllMetaByPostByMetakey($post->id, 'rz_listing_type');
-        if($rz_listing_type == '380' || $rz_listing_type == 380) {
+        if ($rz_listing_type == '380' || $rz_listing_type == 380) {
             $postmeta_response = update_post_meta($post->id, 'rz_ranking', '4');
             if (!$postmeta_response) {
                 $postmeta_response = add_post_meta($post->id, 'rz_ranking', '4', true);
-            }            
+            }
             $postmeta_response = update_post_meta($post->id, 'rz_search', '1');
             if (!$postmeta_response) {
                 $postmeta_response = add_post_meta($post->id, 'rz_search', '1', true);
-            }          
+            }
             $postmeta_response = update_post_meta($post->id, 'rz_unit_type', 'single');
             if (!$postmeta_response) {
                 $postmeta_response = add_post_meta($post->id, 'rz_unit_type', 'single', true);
-            }                  
+            }
         }
         echo PHP_EOL;
         file_put_contents(LOG_DIR . '/fix-post-regions.log', PHP_EOL, FILE_APPEND);

@@ -8,7 +8,7 @@ use App\Classes\MySQL;
 // use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 require_once __DIR__ . '/bootstrap.php';
-require_once '../../wp-load.php';
+require_once(realpath('../../wp-load.php'));
 
 // Start transfer
 echo date("Y-m-d H:i:s") . " Start transfer parsed data";

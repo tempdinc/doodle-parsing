@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 use App\Classes\MySQL;
 
 require_once __DIR__ . '/bootstrap.php';
-require_once '../../wp-load.php';
+require_once(realpath('../../wp-load.php'));
 // Clear log files
 $f = fopen(LOG_DIR . '/fix-duplicate-posts.log', 'w');
 fclose($f);
@@ -23,7 +23,7 @@ echo 'Total posts - ' . $total_posts . PHP_EOL;
 $pages = intdiv($total_posts, 100);
 echo 'Total pages - ' . $pages . PHP_EOL;
 for ($i = 0; $i <= $pages; $i++) {
-    $posts = $wp_db->getPostsRZListing($listing_type,$i * 100, 100);
+    $posts = $wp_db->getPostsRZListing($listing_type, $i * 100, 100);
     echo 'Total posts - ' . count($posts) . PHP_EOL;
     foreach ($posts as $post) {
         file_put_contents(LOG_DIR . '/fix-duplicate-posts.log', ' [' . $post->id . ']  | ', FILE_APPEND);

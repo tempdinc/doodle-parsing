@@ -17,7 +17,7 @@ use App\Classes\MySQL;
 
 var_dump(memory_get_usage());
 require_once __DIR__ . '/bootstrap.php';
-require_once '../../wp-load.php';
+require_once(realpath('../../wp-load.php'));
 var_dump(memory_get_usage());
 // Clear log files
 $f = fopen(LOG_DIR . '/new-transfer-data.log', 'w');

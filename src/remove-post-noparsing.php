@@ -9,7 +9,7 @@ error_reporting(E_ALL);
 use App\Classes\MySQL;
 
 require_once __DIR__ . '/bootstrap.php';
-require_once '../../wp-load.php';
+require_once(realpath('../../wp-load.php'));
 // Clear log files
 $f = fopen(LOG_DIR . '/fix-post-noparsing.log', 'w');
 fclose($f);
@@ -27,7 +27,7 @@ $pages = intdiv($total_posts, 100);
 echo 'Total pages - ' . $pages . PHP_EOL;
 $removed_posts = 0;
 for ($i = 0; $i <= $pages; $i++) {
-    $start = $i*100 - $removed_posts;
+    $start = $i * 100 - $removed_posts;
     $posts = $wp_db->getPostsRZListing($listing_type, $start, 100);
     $removed_posts = 0;
     echo 'Page number - ' . $i . PHP_EOL;
