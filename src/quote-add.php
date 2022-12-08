@@ -212,13 +212,34 @@ $decoded_image_urls = json_decode(json_decode('"' . $quote_images . '"', true));
 file_put_contents(LOG_DIR . '/quote-add.log', ' | type of decoded_image_urls - ' . $decoded_image_urls . PHP_EOL, FILE_APPEND);
 if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
    foreach ($decoded_image_urls as $key => $value) {
-      $moveToWP = moveToWp($value->url, $property_address, $unit_source);
-      if ($moveToWP) {
-         $wpImageId = (object)array('id' => (string)$moveToWP);
-         array_push($wpImageArray, $wpImageId);
-      } else {
-         file_put_contents(LOG_DIR . '/quote-add.log', ' | Error image transferring WP - ' . $filename_path . PHP_EOL, FILE_APPEND);
+      // $value = json_decode($value);
+      // file_put_contents(LOG_DIR . '/quote-add.log', ' | value - ' . $value->name . ' | ' . str_replace(' ', '_', strtolower($value->name)) . ' | ' . $value->url . ' | ' . $value->extension . PHP_EOL, FILE_APPEND);
+      echo ' | value - ' . $value->name . ' | ' . str_replace(' ', '_', strtolower($value->name)) . ' | ' . $value->url . ' | ' . $value->extension . PHP_EOL;
+      $re = '`^.*/`m';
+      $subst = '';
+      // IMAGE NAME CHECKING
+      $orig_filename = $value->name;
+      // echo ' | orig_full_filename - ' . $orig_full_filename;
+      $orig_fileextension = $value->extension;
+      // echo ' | orig_fileextension - ' . $orig_fileextension; 
+      $orig_filename = str_replace(' ', '_', strtolower($orig_filename));
+      // echo ' | ' . $orig_filename;
+      $filename_path = __DIR__ . '/images' . '/' . $orig_filename . '.' . $orig_fileextension;
+      $is_file_exist = file_exists($filename_path);
+
+      $file_get = file_get_contents($value->url);
+      if ($file_get !== false) {
+         file_put_contents($filename_path, $file_get);
+         $moveToWP = moveToWp($filename_path, $property_address, $unit_source);
+         if ($moveToWP) {
+            $wpImageId = (object)array('id' => (string)$moveToWP);
+            array_push($wpImageArray, $wpImageId);
+         } else {
+            file_put_contents(LOG_DIR . '/quote-add.log', ' | Error image transferring WP - ' . $filename_path . PHP_EOL, FILE_APPEND);
+         }
       }
+   }
+   foreach ($decoded_image_urls as $key => $value) {
    }
 }
 file_put_contents(LOG_DIR . '/quote-add.log', ' | WP Image ID - END' . PHP_EOL, FILE_APPEND);
