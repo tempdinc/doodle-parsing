@@ -27,6 +27,7 @@ if (isset($_POST['quote_id']) && isset($_POST['quote_title']) && isset($_POST['q
    $quote_beds = ((isset($_POST['quote_beds'])) ? $_POST['quote_beds'] : '');
    $quote_sqft = ((isset($_POST['quote_sqft'])) ? $_POST['quote_sqft'] : '');
    $quote_link = ((isset($_POST['quote_link'])) ? $_POST['quote_link'] : '');
+   $unit_link = ((isset($_POST['unit_link'])) ? $_POST['unit_link'] : '');
    $quote_images = ((isset($_POST['quote_images'])) ? $_POST['quote_images'] : '');
 
    $property_address = sanitize_text_field($quote_address); // Used for post title
@@ -46,11 +47,14 @@ if (isset($_POST['quote_id']) && isset($_POST['quote_title']) && isset($_POST['q
          $rz_region_id
       )
    );
+
    file_put_contents(LOG_DIR . '/quote-add.log', $quote_id . ' > ' . $quote_title . ' > ' . $quote_description . PHP_EOL, FILE_APPEND);
    file_put_contents(LOG_DIR . '/quote-add.log', $quote_address . ' > ' . $quote_street . ' > ' . $quote_city . ' > ' . $quote_state . PHP_EOL, FILE_APPEND);
    file_put_contents(LOG_DIR . '/quote-add.log', $quote_zip . ' > ' . $quote_baths . ' > ' . $quote_beds . ' > ' . $quote_sqft . ' > ' . $quote_images . PHP_EOL, FILE_APPEND);
+   file_put_contents(LOG_DIR . '/quote-add.log', $quote_link . ' > ' . $unit_link . PHP_EOL, FILE_APPEND);
 } else {
    $response = ['status_code' => 400, 'message' => 'These fields are required: "quote_id","quote_title" and "quote_address"!'];
+
    file_put_contents(LOG_DIR . '/quote-add.log', ' > ' . json_encode($response) . PHP_EOL, FILE_APPEND);
    echo json_encode($response);
    exit();
