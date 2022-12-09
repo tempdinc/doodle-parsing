@@ -26,6 +26,7 @@ if (isset($_POST['quote_id']) && isset($_POST['quote_title']) && isset($_POST['q
    $quote_baths = ((isset($_POST['quote_baths'])) ? $_POST['quote_baths'] : '');
    $quote_beds = ((isset($_POST['quote_beds'])) ? $_POST['quote_beds'] : '');
    $quote_sqft = ((isset($_POST['quote_sqft'])) ? $_POST['quote_sqft'] : '');
+   $quote_price = ((isset($_POST['quote_price'])) ? $_POST['quote_price'] : '');
    $quote_link = ((isset($_POST['quote_link'])) ? $_POST['quote_link'] : '');
    $unit_link = ((isset($_POST['unit_link'])) ? $_POST['unit_link'] : '');
    $quote_images = ((isset($_POST['quote_images'])) ? $_POST['quote_images'] : '');
@@ -223,7 +224,7 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
    $quote_sqft = round(floatval($quote_sqft));
    $sqft = trim(preg_replace("/\D/", "", $quote_sqft)); // rz_sqft
 
-   $listing_price = clearPrice(100);
+   $listing_price = clearPrice(intval($quote_price));
 
    $new_property_meta = [
       'post_content'       => $unit_description,
