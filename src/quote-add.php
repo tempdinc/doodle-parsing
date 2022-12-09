@@ -14,6 +14,38 @@ fclose($f);
 
 file_put_contents(LOG_DIR . '/quote-add.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ' . PHP_EOL, FILE_APPEND);
 
+// NEW REGIONS START
+$terms = get_terms([
+   'taxonomy' => 'rz_regions',
+   'hide_empty' => false,
+]);
+
+$rz_regions = [];
+foreach ($terms as $term) {
+   $rz_regions[] = [
+      'term_id'   => $term->term_id,
+      'name'      => $term->name,
+      'slug'      => $term->slug
+   ];
+}
+$rz_full_cities = file_get_contents(__DIR__ . '/new-cities.json');
+$rz_full_cities = json_decode($rz_full_cities, true);
+$rz_full_regions = [];
+foreach ($rz_full_cities as $rz_full_city) {
+   $rz_regions_key = array_search($rz_full_city['region_slug'], array_column($rz_regions, 'slug'));
+   $term_id = $rz_regions[$rz_regions_key]['term_id'];
+   $term_name = $rz_regions[$rz_regions_key]['name'];
+   $term_slug = $rz_regions[$rz_regions_key]['slug'];
+   $rz_full_regions[] = [
+      'term_id'       => $term_id,
+      'city_name'     => $rz_full_city['city_name'],
+      'city_slug'     => $rz_full_city['city_slug'],
+      'region_name'   => $rz_full_city['region_name'],
+      'region_slug'   => $rz_full_city['region_slug']
+   ];
+}
+// NEW REGIONS END
+
 if (isset($_POST['quote_id']) && isset($_POST['quote_title']) && isset($_POST['quote_address'])) {
    $quote_id = $_POST['quote_id'];
    $quote_title = ((isset($_POST['quote_title'])) ? $_POST['quote_title'] : '');
