@@ -61,6 +61,20 @@ if (isset($_POST['quote_id']) && isset($_POST['quote_title']) && isset($_POST['q
    exit();
 }
 
+// SELECT * FROM `wp_postmeta` WHERE `meta_key` = 'rz_apartment_uri' AND `meta_value` = 'https://airtable.com/appRKFaWwZ0mHgpsu/tblWtoGcqzN7OiCFg/viw6bNebo0yzVxh3G/rec4Zn9AZ8Qkcs1Yg'
+$wp_db = new MySQL('wp', 'local');
+$query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_postmeta` WHERE `meta_key` = 'rz_apartment_uri' AND `meta_value` = ? LIMIT 1");
+$query->execute([$quote_link]);
+$total_posts = $query->fetchColumn();
+
+$is_post_exist = false;
+if ($total_posts > 0) {
+   $is_post_exist = true;
+   $query = $wp_db->pdo->prepare("SELECT post_id FROM `wp_postmeta` WHERE `meta_key` = 'rz_apartment_uri' AND `meta_value` = ? LIMIT 1");
+   $query->execute([$quote_link]);
+   $existing_post_id = $query->fetchColumn();
+}
+
 $terms = get_terms([
    'taxonomy' => 'rz_regions',
    'hide_empty' => false,
@@ -154,8 +168,13 @@ $post_data = array(
    'post_author'   => 62,
    'post_type'     => 'rz_listing'
 );
-// Вставляем запись в базу данных
-$main_post_insert_result = wp_insert_post($post_data);
+if (!$is_post_exist) {
+   // Вставляем запись в базу данных
+   $main_post_insert_result = wp_insert_post($post_data);
+} else {
+   $post_data['ID'] = $existing_post_id;
+   $main_post_insert_result = wp_update_post($post_data);
+}
 if ($main_post_insert_result && $main_post_insert_result != 0) {
    wp_set_post_terms($main_post_insert_result, [$rz_region_id], 'rz_regions');
 
