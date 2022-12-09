@@ -106,7 +106,7 @@ if ($total_posts > 0) {
    $query->execute([$quote_link]);
    $existing_post_id = $query->fetchColumn();
 }
-
+/*
 $terms = get_terms([
    'taxonomy' => 'rz_regions',
    'hide_empty' => false,
@@ -142,7 +142,7 @@ foreach ($regionsDB as $regionDB) {
       }
    }
 }
-
+*/
 $apartment_amenities = [];
 $community_amenities = [];
 
