@@ -201,55 +201,62 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
 }
 
 // Add post if it has images
-if (!$is_gallery_empty) {
-   $rz_unit_type = 'single';
-   $rz_search = 1;
-   $rz_multi_units = [];
+$rz_unit_type = 'single';
+$rz_search = 1;
+$rz_multi_units = [];
 
-   if ($main_post_insert_result && $main_post_insert_result != 0) {
+if ($main_post_insert_result && $main_post_insert_result != 0) {
 
-      $new_property_meta = [];
+   $new_property_meta = [];
 
-      $quote_baths = floatval($quote_baths);
-      if ($quote_baths == intval($quote_baths)) {
-         $quote_baths = round($quote_baths);
-      } else {
-         $quote_baths = round($quote_baths, 1);
-      }
-      $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $quote_baths)); // rz_bathrooms
+   $quote_baths = floatval($quote_baths);
+   if ($quote_baths == intval($quote_baths)) {
+      $quote_baths = round($quote_baths);
+   } else {
+      $quote_baths = round($quote_baths, 1);
+   }
+   $bath_count = trim(preg_replace("/[a-zA-Z]/", "", $quote_baths)); // rz_bathrooms
 
-      $quote_beds = round(floatval($quote_beds));
-      $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $quote_beds)); // rz_bed
+   $quote_beds = round(floatval($quote_beds));
+   $bed_count = trim(preg_replace("/[a-zA-Z]/", "", $quote_beds)); // rz_bed
 
-      $quote_sqft = round(floatval($quote_sqft));
-      $sqft = trim(preg_replace("/\D/", "", $quote_sqft)); // rz_sqft
+   $quote_sqft = round(floatval($quote_sqft));
+   $sqft = trim(preg_replace("/\D/", "", $quote_sqft)); // rz_sqft
 
-      $listing_price = clearPrice(100);
+   $listing_price = clearPrice(100);
 
-      $new_property_meta = [
-         'post_content' => $unit_description,
-         'rz_apartment_uri' => $property->link,
-         'rz_bathrooms' => $bath_count,
-         'rz_bed' => $bed_count,
-         'rz_bedroom' => $bed_count,
-         'rz_price' => $listing_price,
-         'rz_sqft' => $sqft,
-         'rz_unit_type' => $rz_unit_type,
-         'rz_search' => $rz_search,
-         'rz_multi_units' => $rz_multi_units
-      ];
-      foreach ($new_property_meta as $key => $value) {
-         add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
-      }
-      if ($listing_price != 0) {
-         $price_per_day = get_custom_price($main_post_insert_result);
-         if (!add_post_meta($main_post_insert_result, 'price_per_day', $price_per_day, true)) {
-            update_post_meta($main_post_insert_result, 'price_per_day', $price_per_day);
-         }
+   $new_property_meta = [
+      'post_content'       => $unit_description,
+      'rz_apartment_uri'   => $unit_link,
+      'rz_bathrooms'       => $bath_count,
+      'rz_bed'             => $bed_count,
+      'rz_bedroom'         => $bed_count,
+      'rz_price'           => $listing_price,
+      'rz_sqft'            => $sqft,
+      'rz_unit_type'       => $rz_unit_type,
+      'rz_search'          => $rz_search,
+      'rz_multi_units'     => $rz_multi_units
+   ];
+   foreach ($new_property_meta as $key => $value) {
+      add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
+   }
+   if ($listing_price != 0) {
+      $price_per_day = get_custom_price($main_post_insert_result);
+      if (!add_post_meta($main_post_insert_result, 'price_per_day', $price_per_day, true)) {
+         update_post_meta($main_post_insert_result, 'price_per_day', $price_per_day);
       }
    }
+   $response = ['status_code' => 200, 'booking_page_link' => get_permalink($main_post_insert_result)];
+
+   file_put_contents(LOG_DIR . '/quote-add.log', ' > ' . json_encode($response) . PHP_EOL, FILE_APPEND);
+   echo json_encode($response);
+   exit();
 } else {
-   file_put_contents(LOG_DIR . '/quote-add.log', ' | No images for post | ' . PHP_EOL, FILE_APPEND);
+   $response = ['status_code' => 400, 'message' => 'These fields are required: "quote_id","quote_title" and "quote_address"!'];
+
+   file_put_contents(LOG_DIR . '/quote-add.log', ' > ' . json_encode($response) . PHP_EOL, FILE_APPEND);
+   echo json_encode($response);
+   exit();
 }
 
 file_put_contents(LOG_DIR . '/quote-add.log', ' >>> [' . date('Y-m-d H:i:s') . '] - End..' . PHP_EOL, FILE_APPEND);
