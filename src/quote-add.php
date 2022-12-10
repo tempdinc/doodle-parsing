@@ -107,6 +107,9 @@ if (isset($_POST['quote_id']) && isset($_POST['quote_title']) && isset($_POST['q
 
 // SELECT * FROM `wp_postmeta` WHERE `meta_key` = 'rz_apartment_uri' AND `meta_value` = 'https://airtable.com/appRKFaWwZ0mHgpsu/tblWtoGcqzN7OiCFg/viw6bNebo0yzVxh3G/rec4Zn9AZ8Qkcs1Yg'
 $wp_db = new MySQL('wp', 'local');
+$_query = "SELECT count(*) FROM `wp_postmeta` WHERE meta_key = 'rz_apartment_uri' AND meta_value = '$quote_link' LIMIT 1";
+file_put_contents(LOG_DIR . '/quote-add.log', ' query - ' . $_query . PHP_EOL, FILE_APPEND);
+
 $query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_postmeta` WHERE meta_key = 'rz_apartment_uri' AND meta_value = '$quote_link' LIMIT 1");
 $query->execute();
 $total_posts = $query->fetchColumn();
