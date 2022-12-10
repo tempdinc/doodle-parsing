@@ -33,16 +33,18 @@ $rz_full_cities = json_decode($rz_full_cities, true);
 $rz_full_regions = [];
 foreach ($rz_full_cities as $rz_full_city) {
    $rz_regions_key = array_search($rz_full_city['region_slug'], array_column($rz_regions, 'slug'));
-   $term_id = $rz_regions[$rz_regions_key]['term_id'];
-   $term_name = $rz_regions[$rz_regions_key]['name'];
-   $term_slug = $rz_regions[$rz_regions_key]['slug'];
-   $rz_full_regions[] = [
-      'term_id'       => $term_id,
-      'city_name'     => $rz_full_city['city_name'],
-      'city_slug'     => $rz_full_city['city_slug'],
-      'region_name'   => $rz_full_city['region_name'],
-      'region_slug'   => $rz_full_city['region_slug']
-   ];
+   if ($rz_regions_key !== false) {
+      $term_id = $rz_regions[$rz_regions_key]['term_id'];
+      // $term_name = $rz_regions[$rz_regions_key]['name'];
+      // $term_slug = $rz_regions[$rz_regions_key]['slug'];
+      $rz_full_regions[] = [
+         'term_id'       => $term_id,
+         'city_name'     => $rz_full_city['city_name'],
+         'city_slug'     => $rz_full_city['city_slug'],
+         'region_name'   => $rz_full_city['region_name'],
+         'region_slug'   => $rz_full_city['region_slug']
+      ];
+   }
 }
 // NEW REGIONS END
 
@@ -70,11 +72,21 @@ if (isset($_POST['quote_id']) && isset($_POST['quote_title']) && isset($_POST['q
    $np_rz_location__address_line2 = $quote_city . ', ' . $quote_state . ' ' . $quote_zip;
 
    // region
-   $city_low = strtolower($quote_city);
-   $state_low = strtolower($quote_state);
-   $region_slug = str_replace(' ', '-', $city_low . ' ' . $state_low);
-   $key = array_search($region_slug, array_column($rz_full_regions, 'slug'));
-   $rz_region_id = $rz_full_regions[$key]['term_id'];
+   // $city_low = strtolower($quote_city);
+   // $state_low = strtolower($quote_state);
+   $city_slug = str_replace(' ', '-', preg_replace('/[^ a-z\d]/ui', '', strtolower($quote_city . ' ' . $quote_state)));
+   // $city_slug = str_replace(' ', '-', $city_low . ' ' . $state_low);
+   $key = array_search($city_slug, array_column($rz_full_regions, 'city_slug'));
+   if ($key !== false) {
+      $rz_region_id = $rz_full_regions[$key]['term_id'];
+   } else {
+      $undefined_region = get_term_by('slug', 'undefined', 'rz_regions');
+      if ($undefined_region !== false) {
+         $rz_region_id = $undefined_region->term_id;
+      } else {
+         $rz_region_id = insertNewTerm('UNDEFINED REGION', 'undefined');
+      }
+   }
    $custom_tax = array(
       'rz_regions' => array(
          $rz_region_id
@@ -302,16 +314,34 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
 
    file_put_contents(LOG_DIR . '/quote-add.log', ' > ' . json_encode($response) . PHP_EOL, FILE_APPEND);
    echo json_encode($response);
-   exit();
 } else {
    $response = ['status_code' => 400, 'message' => 'These fields are required: "quote_id","quote_title" and "quote_address"!'];
 
    file_put_contents(LOG_DIR . '/quote-add.log', ' > ' . json_encode($response) . PHP_EOL, FILE_APPEND);
    echo json_encode($response);
-   exit();
 }
 
 file_put_contents(LOG_DIR . '/quote-add.log', ' >>> [' . date('Y-m-d H:i:s') . '] - End..' . PHP_EOL, FILE_APPEND);
+
+function insertNewTerm($region_name, $region_slug)
+{
+   $insert_res = wp_insert_term(
+      $region_name,  // новый термин
+      'rz_regions', // таксономия
+      array(
+         'description' => '',
+         'slug'        => $region_slug,
+         'parent'      => 0
+      )
+   );
+
+   if (is_wp_error($insert_res)) {
+      echo $insert_res->get_error_message();
+      return false;
+   } else {
+      return $insert_res['term_id'];
+   }
+}
 
 // Stop signals handler
 function signalHandler($signal)
