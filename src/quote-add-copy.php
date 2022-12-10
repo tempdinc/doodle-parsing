@@ -1,7 +1,31 @@
 <?php
 $test = '[{\"url\":\"https://drive.google.com/uc?id=1_3TKcpF6ykoeE_NCNvi-DkzLcIpBnxIJ&export=download\",\"name\":\"Unit Property Image QTE-2022-10-13\",\"extension\":\"jpg\"},{\"url\":\"https://drive.google.com/uc?id=1brQn8mpZ6OKNscB6mrX0pJkETA8xRLWa&export=download\",\"name\":\"Additional Unit Image QTE1-2022-10-13\",\"extension\":\"jpg\"},{\"url\":\"https://drive.google.com/uc?id=11OFm-jZ0uSAZ3sthSI_hfFyVChgjdWPN&export=download\",\"name\":\"Additional Unit Image QTE2-2022-10-13\",\"extension\":\"jpg\"}]';
 $decoded_image_urls = json_decode(json_decode('"' . $test . '"', true));
-var_dump($decoded_image_urls);
+// var_dump($decoded_image_urls);
+$quote_link = "https://airtable.com/appRKFaWwZ0mHgpsu/tblZ4hGs0Mo4LYkbs/viwlklpaU9ld8DduV/recwLpXXHlo74Pn3h";
+
+use App\Classes\MySQL;
+
+require_once 'bootstrap.php';
+
+$wp_db = new MySQL('wp', 'local');
+$query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_postmeta` WHERE meta_key = 'rz_apartment_uri' AND meta_value = ? LIMIT 1");
+$query->execute([$quote_link]);
+$total_posts = $query->fetchColumn();
+
+var_dump($total_posts);
+
+$is_post_exist = false;
+if ($total_posts > 0) {
+   $is_post_exist = true;
+   $query = $wp_db->pdo->prepare("SELECT post_id FROM `wp_postmeta` WHERE `meta_key` = 'rz_apartment_uri' AND `meta_value` = ? LIMIT 1");
+   $query->execute([$quote_link]);
+   $existing_post_id = $query->fetchColumn();
+}
+
+var_dump($is_post_exist);
+exit();
+
 foreach ($decoded_image_urls as $key => $value) {
    // $value = json_decode($value);
    // file_put_contents(LOG_DIR . '/quote-add.log', ' | value - ' . $value->name . ' | ' . str_replace(' ', '_', strtolower($value->name)) . ' | ' . $value->url . ' | ' . $value->extension . PHP_EOL, FILE_APPEND);
