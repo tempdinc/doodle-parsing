@@ -110,6 +110,7 @@ $wp_db = new MySQL('wp', 'local');
 $query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_postmeta` WHERE meta_key = 'rz_apartment_uri' AND meta_value = ? LIMIT 1");
 $query->execute([$quote_link]);
 $total_posts = $query->fetchColumn();
+file_put_contents(LOG_DIR . '/quote-add.log', ' total_posts - ' . $total_posts . PHP_EOL, FILE_APPEND);
 
 $is_post_exist = false;
 if ($total_posts > 0) {
