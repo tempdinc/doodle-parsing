@@ -93,7 +93,7 @@ if (isset($_POST['quote_id']) && isset($_POST['quote_title']) && isset($_POST['q
       )
    );
 
-   file_put_contents(LOG_DIR . '/quote-add.log', $quote_id . ' | ' . $quote_title . ' | ' . $quote_description . ' | ' . $quote_address . ' | ' . $quote_street . ' | ' . $quote_city . ' | ' . $quote_state . ' | ' . $quote_zip . ' | ' . $quote_baths . ' | ' . $quote_beds . ' | ' . $quote_sqft . PHP_EOL, FILE_APPEND);
+   file_put_contents(LOG_DIR . '/quote-add.log', $quote_id . ' | ' . $quote_title . ' | ' . $quote_description . ' | ' . $quote_address . ' | ' . $quote_street . ' | ' . $quote_city . ' | ' . $quote_state . ' | ' . $quote_zip . ' | ' . $quote_baths . ' | ' . $quote_beds . ' | ' . $quote_sqft . ' | ' . $quote_price . PHP_EOL, FILE_APPEND);
    file_put_contents(LOG_DIR . '/quote-add.log', $quote_images . PHP_EOL, FILE_APPEND);
    file_put_contents(LOG_DIR . '/quote-add.log', $quote_link . ' | ' . $unit_link . PHP_EOL, FILE_APPEND);
 } else {
@@ -280,6 +280,7 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
 
    file_put_contents(LOG_DIR . '/quote-add.log', ' > ' . json_encode($response) . PHP_EOL, FILE_APPEND);
    echo json_encode($response);
+   addToParsing($main_post_insert_result, $quote_link, 'HOMI', $quote_address, 'Home', $quote_street, $quote_city, $quote_state, $quote_zip, $quote_description, $quote_images, $bed_count, $bath_count, $quote_price, $sqft);
 } else {
    $response = ['status_code' => 400, 'message' => 'These fields are required: "quote_id","quote_title" and "quote_address"!'];
 
@@ -288,6 +289,20 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
 }
 
 file_put_contents(LOG_DIR . '/quote-add.log', '[' . date('Y-m-d H:i:s') . '] End............................................................' . PHP_EOL, FILE_APPEND);
+
+function addToParsing($post_id, $link, $source, $address, $type, $addr_line1, $city, $state_cd, $zip5_cd, $property_info, $image_urls, $bed_cnt, $bath_cnt, $listing_price, $sqft)
+{
+   $parsing_db = new MySQL('parsing', 'local');
+   $query = $parsing_db->pdo->prepare("INSERT INTO `properties` (post_id, link, source, address, type, addr_line1, city, state_cd, zip5_cd, property_info, image_urls) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+   $query->execute([$post_id, $link, $source, $address, $type, $addr_line1, $city, $state_cd, $zip5_cd, $property_info, $image_urls]);
+   $property_id = $parsing_db->pdo->lastInsertId();
+   file_put_contents(LOG_DIR . '/quote-add.log', ' > property_id ' . $property_id . PHP_EOL, FILE_APPEND);
+   $query = $parsing_db->pdo->prepare("INSERT INTO `availability` (post_id, property_id, bedroom_cnt, bathroom_cnt, listing_price, home_size_sq_ft) VALUES (?,?,?,?,?,?)");
+   $query->execute([$post_id, $property_id, $bed_cnt, $bath_cnt, $listing_price, $sqft]);
+   $availability_id = $parsing_db->pdo->lastInsertId();
+   file_put_contents(LOG_DIR . '/quote-add.log', ' > availability_id ' . $availability_id . PHP_EOL, FILE_APPEND);
+   return true;
+}
 
 function insertNewTerm($region_name, $region_slug)
 {
