@@ -93,27 +93,23 @@ if (isset($_POST['quote_id']) && isset($_POST['quote_title']) && isset($_POST['q
       )
    );
 
-   file_put_contents(LOG_DIR . '/quote-add.log', $quote_id . ' > ' . $quote_title . ' > ' . $quote_description . PHP_EOL, FILE_APPEND);
-   file_put_contents(LOG_DIR . '/quote-add.log', $quote_address . ' > ' . $quote_street . ' > ' . $quote_city . ' > ' . $quote_state . PHP_EOL, FILE_APPEND);
-   file_put_contents(LOG_DIR . '/quote-add.log', $quote_zip . ' > ' . $quote_baths . ' > ' . $quote_beds . ' > ' . $quote_sqft . ' > ' . $quote_images . PHP_EOL, FILE_APPEND);
-   file_put_contents(LOG_DIR . '/quote-add.log', $quote_link . ' > ' . $unit_link . PHP_EOL, FILE_APPEND);
+   file_put_contents(LOG_DIR . '/quote-add.log', $quote_id . ' | ' . $quote_title . ' | ' . $quote_description . PHP_EOL, FILE_APPEND);
+   file_put_contents(LOG_DIR . '/quote-add.log', $quote_address . ' | ' . $quote_street . ' | ' . $quote_city . ' | ' . $quote_state . ' | ' . $quote_zip . PHP_EOL, FILE_APPEND);
+   file_put_contents(LOG_DIR . '/quote-add.log', $quote_baths . ' | ' . $quote_beds . ' | ' . $quote_sqft . PHP_EOL, FILE_APPEND);
+   file_put_contents(LOG_DIR . '/quote-add.log', $quote_images . PHP_EOL, FILE_APPEND);
+   file_put_contents(LOG_DIR . '/quote-add.log', $quote_link . ' | ' . $unit_link . PHP_EOL, FILE_APPEND);
 } else {
-   $response = ['status_code' => 400, 'message' => 'These fields are required: "quote_id","quote_title" and "quote_address"!'];
+   $response = ['status_code' => 400, 'message' => 'These fields are required: "quote_id", "quote_title" and "quote_address".'];
 
-   file_put_contents(LOG_DIR . '/quote-add.log', ' > ' . json_encode($response) . PHP_EOL, FILE_APPEND);
+   file_put_contents(LOG_DIR . '/quote-add.log', ' ERROR > ' . json_encode($response) . PHP_EOL, FILE_APPEND);
    echo json_encode($response);
    exit();
 }
 
-// SELECT * FROM `wp_postmeta` WHERE `meta_key` = 'rz_apartment_uri' AND `meta_value` = 'https://airtable.com/appRKFaWwZ0mHgpsu/tblWtoGcqzN7OiCFg/viw6bNebo0yzVxh3G/rec4Zn9AZ8Qkcs1Yg'
 $wp_db = new MySQL('wp', 'local');
-$_query = "SELECT count(*) FROM `wp_postmeta` WHERE meta_key = 'rz_apartment_uri' AND meta_value = '$quote_link' LIMIT 1";
-file_put_contents(LOG_DIR . '/quote-add.log', ' query - ' . $_query . PHP_EOL, FILE_APPEND);
-
 $query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_postmeta` WHERE meta_key = 'rz_apartment_uri' AND meta_value = '$quote_link' LIMIT 1");
 $query->execute();
 $total_posts = $query->fetchColumn();
-file_put_contents(LOG_DIR . '/quote-add.log', ' total_posts - ' . $total_posts . PHP_EOL, FILE_APPEND);
 
 $is_post_exist = false;
 if ($total_posts > 0) {
@@ -121,44 +117,11 @@ if ($total_posts > 0) {
    $query = $wp_db->pdo->prepare("SELECT post_id FROM `wp_postmeta` WHERE meta_key = 'rz_apartment_uri' AND meta_value = ? LIMIT 1");
    $query->execute([$quote_link]);
    $existing_post_id = $query->fetchColumn();
-}
-/*
-$terms = get_terms([
-   'taxonomy' => 'rz_regions',
-   'hide_empty' => false,
-]);
-
-$rz_regions = [];
-foreach ($terms as $term) {
-   $rz_regions[] = [
-      'term_id' => $term->term_id,
-      'name' => $term->name,
-      'slug' => $term->slug
-   ];
+   file_put_contents(LOG_DIR . '/quote-add.log', 'Update existing post > ' . $existing_post_id . PHP_EOL, FILE_APPEND);
+} else {
+   file_put_contents(LOG_DIR . '/quote-add.log', 'New post will be created! ' . PHP_EOL, FILE_APPEND);
 }
 
-$regionsDB = file_get_contents(__DIR__ . '/regions.json');
-$regionsDB = json_decode($regionsDB, true);
-
-$rz_full_regions = [];
-foreach ($regionsDB as $regionDB) {
-   foreach ($regionDB as $region_key => $region_cities) {
-      $rz_regions_key = array_search($region_key, array_column($rz_regions, 'name'));
-      $term_id = $rz_regions[$rz_regions_key]['term_id'];
-      $term_name = $rz_regions[$rz_regions_key]['name'];
-      $term_slug = $rz_regions[$rz_regions_key]['slug'];
-      foreach ($region_cities as $region_city) {
-         $region_city_up = strtoupper($region_city);
-         $rz_full_regions[] = [
-            'term_id' => $term_id,
-            'name' => $region_city_up,
-            'slug' => $term_slug
-         ];
-         // file_put_contents(LOG_DIR . '/quote-add.log', ' >>> [' . $term_id . '] - ' . $term_name . ' | ' . $region_city_up . ' | ' . $term_slug . PHP_EOL, FILE_APPEND);
-      }
-   }
-}
-*/
 $apartment_amenities = [];
 $community_amenities = [];
 
@@ -171,10 +134,9 @@ $unit_source = 'quote';
 $is_gallery_empty = true;
 $wpImageArray = [];
 $decoded_image_urls = json_decode(json_decode('"' . $quote_images . '"', true));
-file_put_contents(LOG_DIR . '/quote-add.log', ' | type of decoded_image_urls - ' . $decoded_image_urls . PHP_EOL, FILE_APPEND);
 if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
    foreach ($decoded_image_urls as $key => $value) {
-      file_put_contents(LOG_DIR . '/quote-add.log', ' | value - ' . $value->name . ' | ' . str_replace(' ', '_', strtolower($value->name)) . ' | ' . $value->url . ' | ' . $value->extension . PHP_EOL, FILE_APPEND);
+      // file_put_contents(LOG_DIR . '/quote-add.log', ' | value - ' . $value->name . ' | ' . str_replace(' ', '_', strtolower($value->name)) . ' | ' . $value->url . ' | ' . $value->extension . PHP_EOL, FILE_APPEND);
       $re = '`^.*/`m';
       $subst = '';
       // IMAGE NAME CHECKING
@@ -196,10 +158,7 @@ if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
          }
       }
    }
-   foreach ($decoded_image_urls as $key => $value) {
-   }
 }
-file_put_contents(LOG_DIR . '/quote-add.log', ' | WP Image ID - END' . PHP_EOL, FILE_APPEND);
 
 // Checking for images of post
 $is_gallery_empty = (count($wpImageArray) == 0) ? true : false;
