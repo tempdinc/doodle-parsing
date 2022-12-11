@@ -4,6 +4,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 require_once __DIR__ . '/bootstrap.php';
+require_once(realpath('../../wp-load.php'));
 
 echo date("Y-m-d H:i:s") . "Parse regions - ";
 file_put_contents(LOG_DIR . '/parse-regions.log', '[' . date('Y-m-d H:i:s') . '] Parse regions - ', FILE_APPEND);
@@ -11,6 +12,26 @@ file_put_contents(LOG_DIR . '/parse-regions.log', '[' . date('Y-m-d H:i:s') . ']
 // NEW FULL REGIONS
 $f = fopen(LOG_DIR . '/new-regions.json', 'w');
 fclose($f);
+
+// Checking TERMS rz_regions for existing regions from cities.json
+$citiesDB = file_get_contents(__DIR__ . '/cities.json');
+$citiesDB = json_decode($citiesDB, true);
+$counter = 0;
+foreach ($citiesDB as $states) {
+    foreach ($states as $code => $citiesArray) {
+        foreach ($citiesArray as $city) {
+            $region = strtoupper($city) . ', ' . strtoupper($code);
+            $region_slug = str_replace(' ', '-', preg_replace('/[^ a-z\d]/ui', '', strtolower($region)));
+            echo ' | region_slug - ' . $region_slug;
+            $region_term = get_term_by('slug', $region_slug, 'rz_regions');
+            var_dump($region_slug);
+            if ($region_term === false) {
+                $rz_region_id = insertNewTerm($region, $region_slug);
+            }
+        }
+    }
+}
+exit();
 
 $old_regions = [];
 
@@ -49,7 +70,6 @@ foreach ($full_regions as $full_region => $full_cities) {
 }
 file_put_contents('old-regions.json', json_encode($old_regions));
 // unset($old_regions);
-
 // exit();
 
 $citiesDB = file_get_contents(__DIR__ . '/cities.json');
@@ -127,3 +147,22 @@ file_put_contents('new-cities.json', json_encode($rz_full_regions));
 
 file_put_contents(LOG_DIR . '/parse-regions.log', ' total added cities - ' . $counter . PHP_EOL . ' END >>> ' . date('Y-m-d H:i:s'), FILE_APPEND);
 // NEW FULL REGIONS END
+function insertNewTerm($region_name, $region_slug)
+{
+    $insert_res = wp_insert_term(
+        $region_name,  // новый термин
+        'rz_regions', // таксономия
+        array(
+            'description' => '',
+            'slug'        => $region_slug,
+            'parent'      => 0
+        )
+    );
+
+    if (is_wp_error($insert_res)) {
+        echo $insert_res->get_error_message();
+        return false;
+    } else {
+        return $insert_res['term_id'];
+    }
+}
