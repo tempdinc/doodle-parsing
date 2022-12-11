@@ -228,7 +228,7 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
 
    $new_property_meta = [
       'post_content'                => $quote_description,
-      'rz_apartment_uri'            => $unit_link,
+      'rz_apartment_uri'            => $quote_link,
       'rz_booking_type'             => 'Request booking',
       'rz_city'                     => $quote_city,
       'rz_listing_type'             => '25769',
@@ -295,7 +295,7 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
 
    $new_property_meta = [
       'post_content'       => $unit_description,
-      'rz_apartment_uri'   => $unit_link,
+      'rz_apartment_uri'   => $quote_link,
       'rz_bathrooms'       => $bath_count,
       'rz_bed'             => $bed_count,
       'rz_bedroom'         => $bed_count,
