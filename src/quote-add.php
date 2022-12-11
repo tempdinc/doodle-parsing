@@ -212,7 +212,7 @@ $post_data = array(
    'post_name'     => $quote_address,
    'post_content'  => $quote_description,
    'post_excerpt'  => $quote_description,
-   'post_status'   => 'draft',
+   'post_status'   => 'publish',
    'post_author'   => 62,
    'post_type'     => 'rz_listing'
 );
