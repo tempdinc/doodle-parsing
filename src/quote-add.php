@@ -250,6 +250,8 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
 
    $listing_price = clearPrice(intval($quote_price));
 
+   file_put_contents(LOG_DIR . '/quote-add.log', ' | listing_price - ' . $listing_price . PHP_EOL, FILE_APPEND);
+
    $new_property_meta = [
       'post_content'       => $unit_description,
       'rz_apartment_uri'   => $quote_link,
@@ -267,6 +269,7 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
    }
    if ($listing_price != 0) {
       $price_per_day = get_custom_price($main_post_insert_result);
+      file_put_contents(LOG_DIR . '/quote-add.log', ' | price_per_day - ' . $price_per_day . PHP_EOL, FILE_APPEND);
       if (!add_post_meta($main_post_insert_result, 'price_per_day', $price_per_day, true)) {
          update_post_meta($main_post_insert_result, 'price_per_day', $price_per_day);
       }
