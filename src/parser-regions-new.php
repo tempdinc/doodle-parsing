@@ -31,7 +31,7 @@ foreach ($citiesDB as $states) {
         }
     }
 }
-exit();
+// exit();
 
 $old_regions = [];
 
