@@ -208,12 +208,20 @@ for ($i = 0; $i <= $pages; $i++) {
         if ($key !== false) {
             $rz_region_id = $rz_full_regions[$key]['term_id'];
             $region_slug = $rz_full_regions[$key]['region_slug'];
-            $custom_tax = array(
-                'rz_regions' => array(
-                    $rz_region_id
-                )
-            );
+        } else {
+            $undefined_region = get_term_by('slug', 'undefined', 'rz_regions');
+            if ($undefined_region !== false) {
+                $rz_region_id = $undefined_region->term_id;
+            } else {
+                $rz_region_id = insertNewTerm('UNDEFINED REGION', 'undefined');
+            }
+            $region_slug = 'undefined';
         }
+        $custom_tax = array(
+            'rz_regions' => array(
+                $rz_region_id
+            )
+        );
         // Adding ranking
         $unit_source = $property->source;
         $rz_ranking = '0';
@@ -570,6 +578,26 @@ for ($i = 0; $i <= $pages; $i++) {
     }
 }
 echo 'End.............................................' . PHP_EOL;
+
+function insertNewTerm($region_name, $region_slug)
+{
+    $insert_res = wp_insert_term(
+        $region_name,  // новый термин
+        'rz_regions', // таксономия
+        array(
+            'description' => '',
+            'slug'        => $region_slug,
+            'parent'      => 0
+        )
+    );
+
+    if (is_wp_error($insert_res)) {
+        echo $insert_res->get_error_message();
+        return false;
+    } else {
+        return $insert_res['term_id'];
+    }
+}
 
 // Stop signals handler
 function signalHandler($signal)
