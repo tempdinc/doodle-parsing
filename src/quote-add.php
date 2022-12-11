@@ -12,7 +12,7 @@ require_once(realpath('../../wp-load.php'));
 $f = fopen(LOG_DIR . '/quote-add.log', 'w');
 fclose($f);
 
-file_put_contents(LOG_DIR . '/quote-add.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ' . PHP_EOL, FILE_APPEND);
+file_put_contents(LOG_DIR . '/quote-add.log', '[' . date('Y-m-d H:i:s') . '] Start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ' . PHP_EOL, FILE_APPEND);
 
 // NEW REGIONS START
 $terms = get_terms([
@@ -93,9 +93,7 @@ if (isset($_POST['quote_id']) && isset($_POST['quote_title']) && isset($_POST['q
       )
    );
 
-   file_put_contents(LOG_DIR . '/quote-add.log', $quote_id . ' | ' . $quote_title . ' | ' . $quote_description . PHP_EOL, FILE_APPEND);
-   file_put_contents(LOG_DIR . '/quote-add.log', $quote_address . ' | ' . $quote_street . ' | ' . $quote_city . ' | ' . $quote_state . ' | ' . $quote_zip . PHP_EOL, FILE_APPEND);
-   file_put_contents(LOG_DIR . '/quote-add.log', $quote_baths . ' | ' . $quote_beds . ' | ' . $quote_sqft . PHP_EOL, FILE_APPEND);
+   file_put_contents(LOG_DIR . '/quote-add.log', $quote_id . ' | ' . $quote_title . ' | ' . $quote_description . ' | ' . $quote_address . ' | ' . $quote_street . ' | ' . $quote_city . ' | ' . $quote_state . ' | ' . $quote_zip . ' | ' . $quote_baths . ' | ' . $quote_beds . ' | ' . $quote_sqft . PHP_EOL, FILE_APPEND);
    file_put_contents(LOG_DIR . '/quote-add.log', $quote_images . PHP_EOL, FILE_APPEND);
    file_put_contents(LOG_DIR . '/quote-add.log', $quote_link . ' | ' . $unit_link . PHP_EOL, FILE_APPEND);
 } else {
@@ -284,7 +282,7 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
    echo json_encode($response);
 }
 
-file_put_contents(LOG_DIR . '/quote-add.log', ' >>> [' . date('Y-m-d H:i:s') . '] - End..' . PHP_EOL, FILE_APPEND);
+file_put_contents(LOG_DIR . '/quote-add.log', '[' . date('Y-m-d H:i:s') . '] End............................................................' . PHP_EOL, FILE_APPEND);
 
 function insertNewTerm($region_name, $region_slug)
 {
