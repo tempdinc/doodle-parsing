@@ -248,6 +248,8 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
    $quote_sqft = round(floatval($quote_sqft));
    $sqft = trim(preg_replace("/\D/", "", $quote_sqft)); // rz_sqft
 
+   file_put_contents(LOG_DIR . '/quote-add.log', ' | quote_price - ' . $quote_price . PHP_EOL, FILE_APPEND);
+
    $listing_price = clearPrice(intval((int)$quote_price));
 
    file_put_contents(LOG_DIR . '/quote-add.log', ' | listing_price - ' . $listing_price . PHP_EOL, FILE_APPEND);
