@@ -301,7 +301,7 @@ function addToParsing($post_id, $link, $address, $addr_line_1, $city, $state, $z
 
    // Checking for existing record
    $query = $parsing_db->pdo->prepare("SELECT count(*) FROM `properties` WHERE post_id = ? LIMIT 1");
-   $query->execute();
+   $query->execute([$post_id]);
    $total_posts = $query->fetchColumn();
 
    if ($total_posts > 0) {
