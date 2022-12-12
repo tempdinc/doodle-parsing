@@ -334,41 +334,46 @@ function addToParsing($post_id, $link, $address, $addr_line_1, $city, $state, $z
       `expences`,
       `last_update`
    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-   $query->execute([
-      $post_id,
-      $link,
-      $source,
-      $address,
-      $type,
-      $addr_line_1,
-      $addr_line_2,
-      $city,
-      $state,
-      $zip_code,
-      $building_desc,
-      $property_info,
-      $image_urls,
-      $pet_policy,
-      $community_amenities,
-      $apartment_amenities,
-      $listing_comments,
-      $virtual_tour_urls,
-      $nearby_schools,
-      $nearby_colleges,
-      $nearby_rail,
-      $nearby_transit,
-      $nearby_shopping,
-      $nearby_parks,
-      $nearby_airports,
-      $neighborhood_comments,
-      $listing_last_updated,
-      $parking,
-      $building_features,
-      $builiding_office_hours,
-      $expences,
-      $last_update
-   ]);
-   $property_id = $parsing_db->pdo->lastInsertId();
+   try {
+      $query->execute([
+         $post_id,
+         $link,
+         $source,
+         $address,
+         $type,
+         $addr_line_1,
+         $addr_line_2,
+         $city,
+         $state,
+         $zip_code,
+         $building_desc,
+         $property_info,
+         $image_urls,
+         $pet_policy,
+         $community_amenities,
+         $apartment_amenities,
+         $listing_comments,
+         $virtual_tour_urls,
+         $nearby_schools,
+         $nearby_colleges,
+         $nearby_rail,
+         $nearby_transit,
+         $nearby_shopping,
+         $nearby_parks,
+         $nearby_airports,
+         $neighborhood_comments,
+         $listing_last_updated,
+         $parking,
+         $building_features,
+         $builiding_office_hours,
+         $expences,
+         $last_update
+      ]);
+      $property_id = $parsing_db->pdo->lastInsertId();
+   } catch (Exception $e) {
+      file_put_contents(LOG_DIR . '/quote-add.log', ' > MoveToWP error - ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
+      return false;
+   }
    file_put_contents(LOG_DIR . '/quote-add.log', ' > property_id ' . $property_id . PHP_EOL, FILE_APPEND);
 
    $query = $parsing_db->pdo->prepare("INSERT INTO `availability` (
@@ -381,17 +386,22 @@ function addToParsing($post_id, $link, $address, $addr_line_1, $city, $state, $z
       `status`,
       `image_urls`
    ) VALUES (?,?,?,?,?,?,?,?)");
-   $query->execute([
-      $post_id,
-      $property_id,
-      $bed_cnt,
-      $bath_cnt,
-      $listing_price,
-      $sqft,
-      $status,
-      $image_urls
-   ]);
-   $availability_id = $parsing_db->pdo->lastInsertId();
+   try {
+      $query->execute([
+         $post_id,
+         $property_id,
+         $bed_cnt,
+         $bath_cnt,
+         $listing_price,
+         $sqft,
+         $status,
+         $image_urls
+      ]);
+      $availability_id = $parsing_db->pdo->lastInsertId();
+   } catch (Exception $e) {
+      file_put_contents(LOG_DIR . '/quote-add.log', ' > MoveToWP error - ' . $e->getMessage() . PHP_EOL, FILE_APPEND);
+      return false;
+   }
    file_put_contents(LOG_DIR . '/quote-add.log', ' > availability_id ' . $availability_id . PHP_EOL, FILE_APPEND);
 
    return true;
