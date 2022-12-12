@@ -282,7 +282,8 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
    $response = ['status_code' => 200, 'booking_page_link' => get_permalink($main_post_insert_result)];
 
    file_put_contents(LOG_DIR . '/quote-add.log', ' > ' . json_encode($response) . PHP_EOL, FILE_APPEND);
-   // echo json_encode($response);
+   echo json_encode($response);
+
    file_put_contents(LOG_DIR . '/quote-add.log', ' > main_post_insert_result ' . $main_post_insert_result . ' > quote_link ' . $quote_link . ' > quote_address ' . $quote_address . ' > quote_street ' . $quote_street . ' > quote_city ' . $quote_city . ' > quote_state ' . $quote_state . ' > quote_zip ' . $quote_zip . ' > quote_description ' . $quote_description . ' > decoded_image_urls ' . $decoded_image_urls . ' > bed_count ' . $bed_count . ' > bath_count ' . $bath_count . ' > quote_price ' . $quote_price . ' > sqft ' . $sqft . PHP_EOL, FILE_APPEND);
    addToParsing($main_post_insert_result, $quote_link, $quote_address, $quote_street, $quote_city, $quote_state, $quote_zip, $quote_description, $decoded_image_urls, $bed_count, $bath_count, $quote_price, $sqft);
 } else {
