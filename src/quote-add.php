@@ -290,15 +290,102 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
 
 file_put_contents(LOG_DIR . '/quote-add.log', '[' . date('Y-m-d H:i:s') . '] End............................................................' . PHP_EOL, FILE_APPEND);
 
-function addToParsing($post_id, $link, $source, $address, $type, $addr_line1, $city, $state_cd, $zip5_cd, $property_info, $image_urls, $bed_cnt, $bath_cnt, $listing_price, $sqft)
+function addToParsing($post_id, $link, $source, $address, $type, $addr_line_1, $city, $state, $zip_code, $property_info, $image_urls, $bed_cnt, $bath_cnt, $listing_price, $sqft, $addr_line_2 = '', $pet_policy = '', $community_amenities = '', $apartment_amenities = '', $listing_comments = '', $virtual_tour_urls = '', $nearby_schools = '', $nearby_colleges  = '', $nearby_rail = '', $nearby_transit = '', $nearby_shopping = '', $nearby_parks = '', $nearby_airports = '', $neighborhood_comments = '', $listing_last_updated = '', $parking = '', $building_features = '', $builiding_office_hours = '', $expences = '', $status = '')
 {
+   $building_desc = $property_info;
+   $last_update = date('Y-m-d H:i:s');
    $parsing_db = new MySQL('parsing', 'local');
-   $query = $parsing_db->pdo->prepare("INSERT INTO `properties` (post_id, link, source, address, type, addr_line1, city, state_cd, zip5_cd, property_info, image_urls) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
-   $query->execute([$post_id, $link, $source, $address, $type, $addr_line1, $city, $state_cd, $zip5_cd, $property_info, $image_urls]);
+   $query = $parsing_db->pdo->prepare("INSERT INTO `properties` (
+      `post_id`,
+      `link`,
+      `source`,
+      `address`,
+      `type`,
+      `addr_line_1`,
+      `addr_line_2`,
+      `city`,
+      `state_cd`,
+      `zip5_cd`,
+      `building_desc`,
+      `property_info`,
+      `image_urls`,
+      `pet_policy`,
+      `on_premise_services`,
+      `on_premise_features`,
+      `listing_comments`,
+      `virtual_tour_urls`,
+      `nearby_school`,
+      `nearby_colleges`,
+      `nearby_rail`,
+      `nearby_transit`,
+      `nearby_shopping`,
+      `nearby_parks`,
+      `nearby_airports`,
+      `neighborhood_comments`,
+      `listing_last_updated`,
+      `parking`,
+      `building_features`,
+      `builiding_office_hours`,
+      `expences`,
+      `last_update`
+   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+   $query->execute([
+      $post_id,
+      $link,
+      $source,
+      $address,
+      $type,
+      $addr_line_1,
+      $addr_line_2,
+      $city,
+      $state,
+      $zip_code,
+      $building_desc,
+      $property_info,
+      $image_urls,
+      $pet_policy,
+      $community_amenities,
+      $apartment_amenities,
+      $listing_comments,
+      $virtual_tour_urls,
+      $nearby_schools,
+      $nearby_colleges,
+      $nearby_rail,
+      $nearby_transit,
+      $nearby_shopping,
+      $nearby_parks,
+      $nearby_airports,
+      $neighborhood_comments,
+      $listing_last_updated,
+      $parking,
+      $building_features,
+      $builiding_office_hours,
+      $expences,
+      $last_update
+   ]);
    $property_id = $parsing_db->pdo->lastInsertId();
    file_put_contents(LOG_DIR . '/quote-add.log', ' > property_id ' . $property_id . PHP_EOL, FILE_APPEND);
-   $query = $parsing_db->pdo->prepare("INSERT INTO `availability` (post_id, property_id, bedroom_cnt, bathroom_cnt, listing_price, home_size_sq_ft) VALUES (?,?,?,?,?,?)");
-   $query->execute([$post_id, $property_id, $bed_cnt, $bath_cnt, $listing_price, $sqft]);
+
+   $query = $parsing_db->pdo->prepare("INSERT INTO `availability` (
+      `post_id`,
+      `property_id`,
+      `bedroom_cnt`, 
+      `bathroom_cnt`, 
+      `listing_price`, 
+      `home_size_sq_ft`,
+      `status`,
+      `image_urls`
+   ) VALUES (?,?,?,?,?,?,?)");
+   $query->execute([
+      $post_id,
+      $property_id,
+      $bed_cnt,
+      $bath_cnt,
+      $listing_price,
+      $sqft,
+      $status,
+      $image_urls
+   ]);
    $availability_id = $parsing_db->pdo->lastInsertId();
    file_put_contents(LOG_DIR . '/quote-add.log', ' > availability_id ' . $availability_id . PHP_EOL, FILE_APPEND);
    return true;
