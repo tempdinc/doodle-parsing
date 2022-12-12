@@ -268,6 +268,7 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
       'rz_sqft'            => $sqft,
       'rz_unit_type'       => $rz_unit_type,
       'rz_search'          => $rz_search,
+      'rz_ranking'         => $rz_ranking,
       'rz_multi_units'     => $rz_multi_units
    ];
    foreach ($new_property_meta as $key => $value) {
