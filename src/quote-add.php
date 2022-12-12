@@ -379,7 +379,7 @@ function addToParsing($post_id, $link, $address, $addr_line_1, $city, $state, $z
       `home_size_sq_ft`,
       `status`,
       `image_urls`
-   ) VALUES (?,?,?,?,?,?,?)");
+   ) VALUES (?,?,?,?,?,?,?,?)");
    $query->execute([
       $post_id,
       $property_id,
@@ -392,6 +392,7 @@ function addToParsing($post_id, $link, $address, $addr_line_1, $city, $state, $z
    ]);
    $availability_id = $parsing_db->pdo->lastInsertId();
    file_put_contents(LOG_DIR . '/quote-add.log', ' > availability_id ' . $availability_id . PHP_EOL, FILE_APPEND);
+
    return true;
 }
 

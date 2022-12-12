@@ -207,7 +207,7 @@ $query = $parsing_db->pdo->prepare("INSERT INTO `availability` (
    `home_size_sq_ft`,
    `status`,
    `image_urls`
-) VALUES (?,?,?,?,?,?,?)");
+) VALUES (?,?,?,?,?,?,?,?)");
 $query->execute([
    $post_id,
    $property_id,
