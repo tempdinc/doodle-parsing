@@ -131,9 +131,10 @@ $unit_source = 'quote';
 // Image gallery
 $is_gallery_empty = true;
 $wpImageArray = [];
-$decoded_image_urls = json_decode(json_decode('"' . $quote_images . '"', true));
-if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
-   foreach ($decoded_image_urls as $key => $value) {
+$decoded_images = json_decode(json_decode('"' . $quote_images . '"', true));
+$image_urls = [];
+if (is_array($decoded_images) && count($decoded_images) > 0) {
+   foreach ($decoded_images as $key => $value) {
       // file_put_contents(LOG_DIR . '/quote-add.log', ' | value - ' . $value->name . ' | ' . str_replace(' ', '_', strtolower($value->name)) . ' | ' . $value->url . ' | ' . $value->extension . PHP_EOL, FILE_APPEND);
       $re = '`^.*/`m';
       $subst = '';
@@ -155,8 +156,10 @@ if (is_array($decoded_image_urls) && count($decoded_image_urls) > 0) {
             file_put_contents(LOG_DIR . '/quote-add.log', ' | Error image transferring WP - ' . $filename_path . PHP_EOL, FILE_APPEND);
          }
       }
+      $image_urls[] = $value->url;
    }
 }
+$decoded_image_urls = json_encode($image_urls);
 
 // Checking for images of post
 $is_gallery_empty = (count($wpImageArray) == 0) ? true : false;
@@ -280,7 +283,7 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
 
    file_put_contents(LOG_DIR . '/quote-add.log', ' > ' . json_encode($response) . PHP_EOL, FILE_APPEND);
    echo json_encode($response);
-   addToParsing($main_post_insert_result, $quote_link, 'HOMI', $quote_address, 'Home', $quote_street, $quote_city, $quote_state, $quote_zip, $quote_description, $quote_images, $bed_count, $bath_count, $quote_price, $sqft);
+   addToParsing($main_post_insert_result, $quote_link, $quote_address, $quote_street, $quote_city, $quote_state, $quote_zip, $quote_description, $decoded_image_urls, $bed_count, $bath_count, $quote_price, $sqft);
 } else {
    $response = ['status_code' => 400, 'message' => 'These fields are required: "quote_id","quote_title" and "quote_address"!'];
 
@@ -290,7 +293,7 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
 
 file_put_contents(LOG_DIR . '/quote-add.log', '[' . date('Y-m-d H:i:s') . '] End............................................................' . PHP_EOL, FILE_APPEND);
 
-function addToParsing($post_id, $link, $source, $address, $type, $addr_line_1, $city, $state, $zip_code, $property_info, $image_urls, $bed_cnt, $bath_cnt, $listing_price, $sqft, $addr_line_2 = '', $pet_policy = '', $community_amenities = '', $apartment_amenities = '', $listing_comments = '', $virtual_tour_urls = '', $nearby_schools = '', $nearby_colleges  = '', $nearby_rail = '', $nearby_transit = '', $nearby_shopping = '', $nearby_parks = '', $nearby_airports = '', $neighborhood_comments = '', $listing_last_updated = '', $parking = '', $building_features = '', $builiding_office_hours = '', $expences = '', $status = '')
+function addToParsing($post_id, $link, $address, $addr_line_1, $city, $state, $zip_code, $property_info, $image_urls, $bed_cnt, $bath_cnt, $listing_price, $sqft, $source = 'HOMI', $type = 'Home', $addr_line_2 = '', $pet_policy = '', $community_amenities = '', $apartment_amenities = '', $listing_comments = '', $virtual_tour_urls = '', $nearby_schools = '', $nearby_colleges  = '', $nearby_rail = '', $nearby_transit = '', $nearby_shopping = '', $nearby_parks = '', $nearby_airports = '', $neighborhood_comments = '', $listing_last_updated = '', $parking = '', $building_features = '', $builiding_office_hours = '', $expences = '', $status = 'Now')
 {
    $building_desc = $property_info;
    $last_update = date('Y-m-d H:i:s');
