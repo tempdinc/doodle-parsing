@@ -126,7 +126,7 @@ $community_amenities = [];
 $availability_address = $quote_address;
 $availability_address_lc = replace_string($quote_address);
 
-$unit_source = 'quote';
+$unit_source = 'HOMI';
 
 // Image gallery
 $is_gallery_empty = true;
@@ -231,6 +231,7 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
 // Add post if it has images
 $rz_unit_type = 'single';
 $rz_search = 1;
+$rz_ranking = '6';
 $rz_multi_units = [];
 
 if ($main_post_insert_result && $main_post_insert_result != 0) {

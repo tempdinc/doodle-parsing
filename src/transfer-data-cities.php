@@ -364,10 +364,10 @@ foreach ($required_cities as $required_city) {
             $rz_ranking = '0';
             switch ($unit_source) {
                 case 'rentprogress.com':
-                    $rz_ranking = '2';
+                    $rz_ranking = '3';
                     break;
                 case 'apartments.com':
-                    $rz_ranking = '1';
+                    $rz_ranking = '2';
                     break;
             }
 
