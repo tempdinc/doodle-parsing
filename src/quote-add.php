@@ -214,9 +214,10 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
       'rz_listing_region'           => $region_slug
    ];
    foreach ($new_property_meta as $key => $value) {
+      delete_post_meta($main_post_insert_result, $key);
       add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
    }
-
+   delete_post_meta($main_post_insert_result, 'rz_amenities');
    if (!empty($decoded_premise_services)) {
       foreach ($decoded_premise_services as $key => $value) {
          foreach ($value as $data) {
@@ -270,13 +271,17 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
       'rz_multi_units'     => $rz_multi_units
    ];
    foreach ($new_property_meta as $key => $value) {
-      add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
+      delete_post_meta($main_post_insert_result, $key);
+      if (!update_post_meta($main_post_insert_result, $key, $value)) {
+         add_post_meta($main_post_insert_result, $key, $value, true);
+      }
    }
    if ($listing_price != 0) {
       $price_per_day = get_custom_price($main_post_insert_result);
       file_put_contents(LOG_DIR . '/quote-add.log', ' | price_per_day - ' . $price_per_day . PHP_EOL, FILE_APPEND);
-      if (!add_post_meta($main_post_insert_result, 'price_per_day', $price_per_day, true)) {
-         update_post_meta($main_post_insert_result, 'price_per_day', $price_per_day);
+      delete_post_meta($main_post_insert_result, 'price_per_day');
+      if (!update_post_meta($main_post_insert_result, 'price_per_day', $price_per_day)) {
+         add_post_meta($main_post_insert_result, 'price_per_day', $price_per_day, true);
       }
    }
    $response = ['status_code' => 200, 'booking_page_link' => get_permalink($main_post_insert_result)];
