@@ -298,7 +298,7 @@ function addToParsing($post_id, $link, $address, $addr_line_1, $city, $state, $z
 {
    file_put_contents(LOG_DIR . '/quote-add.log', ' > post_id ' . $post_id . ' > link ' . $link . ' > address ' . $address . ' > addr_line_1 ' . $addr_line_1 . ' > city ' . $city . ' > state ' . $state . ' > zip_code ' . $zip_code . ' > property_info ' . $property_info . ' > image_urls ' . $image_urls . ' > bed_cnt ' . $bed_cnt . ' > bath_cnt ' . $bath_cnt . ' > listing_price ' . $listing_price . ' > sqft ' . $sqft . ' > source ' . $source . ' > type ' . $type . ' > addr_line_2 ' . $addr_line_2 . ' > pet_policy ' . $pet_policy . ' > community_amenities ' . $community_amenities . ' > apartment_amenities ' . $apartment_amenities . ' > listing_comments ' . $listing_comments . ' > virtual_tour_urls ' . $virtual_tour_urls . ' > nearby_schools ' . $nearby_schools . ' > nearby_colleges ' . $nearby_colleges . ' > nearby_rail ' . $nearby_rail . ' > nearby_transit ' . $nearby_transit . ' > nearby_shopping ' . $nearby_shopping . ' > nearby_parks ' . $nearby_parks . ' > nearby_airports ' . $nearby_airports . ' > neighborhood_comments ' . $neighborhood_comments . ' > listing_last_updated ' . $listing_last_updated . ' > parking ' . $parking . ' > building_features ' . $building_features . ' > builiding_office_hours ' . $builiding_office_hours . ' > expences ' . $expences . ' > status ' . $status . PHP_EOL, FILE_APPEND);
    $building_desc = $property_info;
-   $last_update = date('Y-m-d H:i:s');
+   $listing_last_updated = $last_update = date('Y-m-d H:i:s');
    $parsing_db = new MySQL('parsing', 'local');
    $query = $parsing_db->pdo->prepare("INSERT INTO `properties` (
       `post_id`,
