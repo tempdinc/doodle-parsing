@@ -87,6 +87,8 @@ if (isset($_POST['quote_id']) && isset($_POST['quote_title']) && isset($_POST['q
          $rz_region_id = insertNewTerm('UNDEFINED REGION', 'undefined');
       }
    }
+   $term_region = get_term_by('term_id', $rz_region_id, 'rz_regions');
+   $region_slug = $term_region->slug;
    $custom_tax = array(
       'rz_regions' => array(
          $rz_region_id
