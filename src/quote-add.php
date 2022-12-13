@@ -280,14 +280,17 @@ if ($main_post_insert_result && $main_post_insert_result != 0) {
    }
    if ($listing_price != 0) {
       $price_per_day = get_custom_price($main_post_insert_result);
-      file_put_contents(LOG_DIR . '/quote-add.log', ' | price_per_day - ' . $price_per_day . PHP_EOL, FILE_APPEND);
+      file_put_contents(LOG_DIR . '/quote-add.log', ' | price_per_day - ' . $price_per_day, FILE_APPEND);
       delete_post_meta($main_post_insert_result, 'price_per_day');
       $price_per_day_update_result = update_post_meta($main_post_insert_result, 'price_per_day', $price_per_day);
-      file_put_contents(LOG_DIR . '/quote-add.log', print_r(' | price_per_day_update_result - ' . $price_per_day_update_result . PHP_EOL), FILE_APPEND);
+      file_put_contents(LOG_DIR . '/quote-add.log', ' | price_per_day_update_result - ', FILE_APPEND);
+      file_put_contents(LOG_DIR . '/quote-add.log', print_r($price_per_day_update_result, true), FILE_APPEND);
       if (!$price_per_day_update_result) {
          $price_per_day_add_result = add_post_meta($main_post_insert_result, 'price_per_day', $price_per_day, true);
-         file_put_contents(LOG_DIR . '/quote-add.log', print_r(' | price_per_day_add_result - ' . $price_per_day_add_result . PHP_EOL), FILE_APPEND);
+         file_put_contents(LOG_DIR . '/quote-add.log', ' | price_per_day_add_result - ', FILE_APPEND);
+         file_put_contents(LOG_DIR . '/quote-add.log', print_r($price_per_day_add_result, true), FILE_APPEND);
       }
+      file_put_contents(LOG_DIR . '/quote-add.log', PHP_EOL, FILE_APPEND);
    }
    $response = ['status_code' => 200, 'booking_page_link' => get_permalink($main_post_insert_result)];
 
