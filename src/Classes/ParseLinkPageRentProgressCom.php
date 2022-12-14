@@ -99,7 +99,7 @@ class ParseLinkPageRentProgressCom
                     'amenities' => $amenities
                 ]);
                 */
-                if($title == 'Community') {
+                if ($title == 'Community') {
                     array_push($listCommunityAmenities, $title . ': ' . implode(', ', $amenities));
                 } else {
                     array_push($listAmenities, $title . ': ' . implode(', ', $amenities));
@@ -114,7 +114,7 @@ class ParseLinkPageRentProgressCom
         $homeStatus = isset($content->find('div.basic-carousel')[0]->find('div.move-in-description')[0]) ?
             $this->clearText($content->find('div.basic-carousel')[0]->find('div.move-in-description')[0]->text()) : '';
         //Working with the db
-        $db = new MySQL('parsing','local');
+        $db = new MySQL('parsing', 'local');
 
         $data = [
             'address' => $fullAddress,
@@ -128,6 +128,7 @@ class ParseLinkPageRentProgressCom
             'on_premise_features' => $amenitiesList,
             'link' => $this->task['link'],
             'source' => $source,
+            'image_urls' => json_encode($images),
             'longitude' => $this->task['location']['lng'],
             'latitude' => $this->task['location']['lat']
         ];
@@ -193,7 +194,7 @@ class ParseLinkPageRentProgressCom
             $title = isset($group->find('h3.amenities-title')[0]) ?
                 $this->clearText($group->find('h3.amenities-title')[0]->text()) : '';
             $amenities = $group->find('li');
-            if($title != 'Community') {
+            if ($title != 'Community') {
                 foreach ($amenities as $amenity) {
                     $amenitiesList[$title][] = $this->clearText($amenity->text());
                 }
@@ -201,7 +202,7 @@ class ParseLinkPageRentProgressCom
         }
 
         return json_encode($amenitiesList, JSON_PRETTY_PRINT);
-    }    
+    }
     /**
      * Parsing community amenities block
      *
@@ -215,7 +216,7 @@ class ParseLinkPageRentProgressCom
             $title = isset($group->find('h3.amenities-title')[0]) ?
                 $this->clearText($group->find('h3.amenities-title')[0]->text()) : '';
             $amenities = $group->find('li');
-            if($title == 'Community') {
+            if ($title == 'Community') {
                 foreach ($amenities as $amenity) {
                     $amenitiesList[$title][] = $this->clearText($amenity->text());
                 }
@@ -223,5 +224,5 @@ class ParseLinkPageRentProgressCom
         }
 
         return json_encode($amenitiesList, JSON_PRETTY_PRINT);
-    }      
+    }
 }
