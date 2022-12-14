@@ -572,6 +572,8 @@ for ($i = 0; $i <= $pages; $i++) {
                 }
             }
         } else {
+            // (!$is_gallery_empty && $region_slug != '' && $availability_counter > 0 && isset($all_availability[0]->listing_price))
+            file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | is_gallery_empty: ' . $is_gallery_empty . ' | region_slug: ' . $region_slug . ' | availability_counter: ' . $availability_counter, FILE_APPEND);
             deleteProperty($property->id);
         }
         // exit();
@@ -755,7 +757,7 @@ function clearPrice($price)
 
 function deleteProperty($propertyId)
 {
-    file_put_contents(LOG_DIR . '/new-transfer-data.log', ' Delete property: ' . $propertyId, FILE_APPEND);
+    file_put_contents(LOG_DIR . '/new-transfer-data.log', ' Delete property: ' . $propertyId . PHP_EOL, FILE_APPEND);
     $parsing_db = new MySQL('parsing', 'local');
     try {
         $query = $parsing_db->pdo->prepare("DELETE FROM `properties` WHERE id = ?");
