@@ -22,6 +22,7 @@ echo 'Total posts - ' . $total_rz_listing . PHP_EOL;
 $listing_type = '25769';
 $counter_wrong_posts = 0;
 $counter_clear_posts = 0;
+$counter_clear_post_content_meta = 0;
 $removed_posts_counter = 0;
 for ($i = 0; $i <= $pages + 1; $i++) {
     echo ' | page #' . $i . PHP_EOL;
@@ -52,8 +53,10 @@ for ($i = 0; $i <= $pages + 1; $i++) {
             // Обновляем данные в БД
             wp_update_post(wp_slash($my_post));
             delete_post_meta($post->id, 'post_content');
-            // file_put_contents(LOG_DIR . '/fix-post-description.log', ' | Content & excerpt updated post ID - ' . $post->id, FILE_APPEND);
             $counter_clear_posts++;
+        } else {
+            delete_post_meta($post->id, 'post_content');
+            $counter_clear_post_content_meta++;
         }
         /*
         exit();
