@@ -234,13 +234,17 @@ for ($i = 0; $i <= $pages; $i++) {
                 break;
         }
 
+        if ($property->building_desc !== NULL && $property->building_desc != '') {
+            $good_description = check_description($property->building_desc);
+        }
+
         $unit_description = ($property->building_desc !== NULL && $property->building_desc != '') ? clear_description($property->building_desc) : 'This home is priced to rent and won\'t be around for long. Apply now, while the current residents are preparing to move out.';
 
         // Apartment amenities
         $decoded_premise_services = json_decode($property->on_premise_features);
 
         $is_gallery_empty = true;
-        if ($availability_counter > 0 && isset($all_availability[0]->listing_price)) {
+        if ($good_description && $availability_counter > 0 && isset($all_availability[0]->listing_price)) {
             // Image gallery
             $wpImageArray = [];
             $image_urls = $property->image_urls;
@@ -296,7 +300,7 @@ for ($i = 0; $i <= $pages; $i++) {
             // clearImages();
         }
 
-        if (!$is_gallery_empty && $region_slug != '' && $availability_counter > 0 && isset($all_availability[0]->listing_price)) {
+        if ($good_description && !$is_gallery_empty && $region_slug != '' && $availability_counter > 0 && isset($all_availability[0]->listing_price)) {
             $tax_input = array(
                 'rz_regions' => array($rz_region_id)
             );
@@ -307,6 +311,7 @@ for ($i = 0; $i <= $pages; $i++) {
                 'post_content'  => $property_description,
                 'post_excerpt'  => $property_description,
                 'post_status'   => 'publish',
+                'comment_status' => 'closed',
                 'post_author'   => 62,
                 'post_type'     => 'rz_listing',
                 // 'tax_input'     => $tax_input
@@ -320,7 +325,6 @@ for ($i = 0; $i <= $pages; $i++) {
                 wp_set_post_terms($main_post_insert_result, [$rz_region_id], 'rz_regions');
 
                 $new_property_meta = [
-                    'post_content' => $unit_description,
                     'rz_apartment_uri' => $property->link,
                     'rz_booking_type' => 'Request booking',
                     'rz_city' => $property->city,
@@ -333,8 +337,7 @@ for ($i = 0; $i <= $pages; $i++) {
                     'rz_location__lng' => $property->longitude,
                     'rz_post_address1' => $np_rz_location__address_line1,
                     'rz_post_address2' => $np_rz_location__address_line2,
-                    'rz_priority' => '0',
-                    'rz_priority_custom' => '0',
+                    'rz_priority' => $rz_ranking,
                     'rz_priority_selection' => 'normal',
                     'rz_reservation_length_max' => '0',
                     'rz_reservation_length_min' => '0',
@@ -411,7 +414,6 @@ for ($i = 0; $i <= $pages; $i++) {
                             if (intval($listing_price) != 0) $availability_prices[] = $listing_price;
 
                             $new_property_meta = [
-                                'post_content' => $unit_description,
                                 'rz_apartment_uri' => $property->link,
                                 'rz_bathrooms' => $bath_count,
                                 'rz_bed' => $bed_count,
@@ -428,8 +430,7 @@ for ($i = 0; $i <= $pages; $i++) {
                                 'rz_post_address1' => $np_rz_location__address_line1,
                                 'rz_post_address2' => $np_rz_location__address_line2,
                                 'rz_price' => $listing_price,
-                                'rz_priority' => '0',
-                                'rz_priority_custom' => '0',
+                                'rz_priority' => $rz_ranking,
                                 'rz_priority_selection' => 'normal',
                                 'rz_reservation_length_max' => '0',
                                 'rz_reservation_length_min' => '0',
@@ -571,9 +572,12 @@ for ($i = 0; $i <= $pages; $i++) {
                     $query->execute([$main_post_insert_result, $property->id]);
                 }
             }
+        } elseif ($good_description) {
+            file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | good_description: ' . $good_description . ' | is_gallery_empty: ' . $is_gallery_empty . ' | region_slug: ' . $region_slug . ' | availability_counter: ' . $availability_counter, FILE_APPEND);
+            wrongProperty($property->id);
         } else {
             // (!$is_gallery_empty && $region_slug != '' && $availability_counter > 0 && isset($all_availability[0]->listing_price))
-            file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | is_gallery_empty: ' . $is_gallery_empty . ' | region_slug: ' . $region_slug . ' | availability_counter: ' . $availability_counter, FILE_APPEND);
+            file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | good_description: ' . $good_description . ' | is_gallery_empty: ' . $is_gallery_empty . ' | region_slug: ' . $region_slug . ' | availability_counter: ' . $availability_counter, FILE_APPEND);
             deleteProperty($property->id);
         }
         // exit();
@@ -615,10 +619,23 @@ function replace_string($string)
     return mb_strtolower(str_replace($vowels, '-', $string));
 }
 
+function check_description($string)
+{
+    $search_strings = array('Blueground', 'American Homes 4 Rent');
+
+    foreach ($search_strings as $search_string) {
+        if (stripos($string, $search_string)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 function clear_description($string)
 {
     $string = str_replace('.com', '-com', $string);
-    $search_strings = array('rentprogress', 'zillow', 'apartments-com', 'hotpads', 'contact', 'phone', '@', 'Progress', 'call', 'Application Coordinator', 'Managed By', 'Website', 'Email', 'email', 'Leasing Specialists', 'credit', 'click');
+    $search_strings = array('rentprogress', 'Progress Residential', 'Blueground', 'American Homes 4 Rent', 'zillow', 'apartments-com', 'hotpads', 'contact', 'phone', '@', 'Progress', 'call', 'Application Coordinator', 'Managed By', 'Website', 'Email', 'email', 'Leasing Specialists', 'credit', 'click');
     $array_strings = explode('.', $string);
     foreach ($array_strings as $key => $value) {
         foreach ($search_strings as $search_string) {
@@ -753,6 +770,24 @@ function clearPrice($price)
     $price_array = explode('$', trim($price));
     $new_price = end($price_array);
     return preg_replace('/[^0-9]/', '', $new_price);
+}
+
+function wrongProperty($propertyId)
+{
+    file_put_contents(LOG_DIR . '/new-transfer-data.log', ' Wrong property: ' . $propertyId . PHP_EOL, FILE_APPEND);
+    $parsing_db = new MySQL('parsing', 'local');
+    try {
+        $query = $parsing_db->pdo->prepare("UPDATE `properties` SET post_id = ? WHERE id = ?");
+        $query->execute([0, $propertyId]);
+    } catch (\Exception $ex) {
+        return $ex->getMessage();
+    }
+    try {
+        $query = $parsing_db->pdo->prepare("UPDATE `availability` SET post_id = ? WHERE property_id = ?");
+        $query->execute([0, $propertyId]);
+    } catch (\Exception $ex) {
+        return $ex->getMessage();
+    }
 }
 
 function deleteProperty($propertyId)

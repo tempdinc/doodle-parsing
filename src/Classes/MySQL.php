@@ -252,7 +252,7 @@ class MySQL
         } catch (\Exception $ex) {
             die($ex->getMessage());
         }
-    }       
+    }
 
     /**
      * Getting all records by is_deleted = 0 AND post_id IS NOT NULL
@@ -272,7 +272,7 @@ class MySQL
         } catch (\Exception $ex) {
             die($ex->getMessage());
         }
-    }    
+    }
 
     /**
      * Getting count of all records WHERE is_deleted = 0 AND post_id IS NULL
@@ -290,7 +290,7 @@ class MySQL
         } catch (\Exception $ex) {
             die($ex->getMessage());
         }
-    } 
+    }
 
     /**
      * Getting all records by is_deleted = 0 AND post_id IS NULL
@@ -500,6 +500,27 @@ class MySQL
             die($ex->getMessage());
         }
     }
+
+    /**
+     * Getting id & post_content FROM wp_posts WHERE wp.post_type = 'rz_listing' BY LIMIT ?,?
+     *
+     * @param  int $limit_start
+     * @param  int $limit
+     * @return array
+     */
+    public function getAllPostsContentRZListing($listing_type, $limit_start, $limit)
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT wp.id, wp.post_content FROM `wp_posts` wp LEFT JOIN `wp_postmeta` wppm ON wp.id = wppm.post_id  WHERE wp.post_type = 'rz_listing' AND  wppm.meta_value = ? ORDER BY wp.id DESC LIMIT ?,?"
+            );
+            $query->execute([$listing_type, $limit_start, $limit]);
+            return $query->fetchAll();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }
+
     /**
      * Getting all meta value from wp_postmeta by post_id & meta_key
      *
