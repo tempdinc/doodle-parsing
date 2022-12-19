@@ -118,39 +118,33 @@ for ($i = 0; $i <= $pages; $i++) {
     foreach ($new_properties as $property) {
         // Check availability of current propery
         $all_availability = $parsing_db->getAllAvailabilityWithPostByProperty($property->id);
+        // file_put_contents(LOG_DIR . '/fix-post-amenities.log', print_r($all_availability, true) . PHP_EOL, FILE_APPEND);
         $availability_counter = count($all_availability);
 
         // Apartment amenities
         $decoded_premise_services = json_decode($property->on_premise_features);
 
         if (!empty($decoded_premise_services)) {
+            $all_terms = [];
             foreach ($decoded_premise_services as $key => $value) {
                 foreach ($value as $data) {
                     $amenity_slug = str_replace('--', '-', str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($data)))));
                     $term_id = array_search($amenity_slug, $apartment_amenities_list);
                     if ($term_id !== false) {
                         $term_id = intval($term_id);
-                        wp_set_post_terms($property->post_id, $term_id, 'rz_amenities');
-                        // add_post_meta($property->post_id, 'rz_amenities', $term_id, false);
+                        $all_terms[] = $term_id;
                     }
                 }
             }
+            wp_set_post_terms($property->post_id, $all_terms, 'rz_amenities');
+            file_put_contents(LOG_DIR . '/fix-post-amenities.log', ' | Property Post ID - ' . $property->post_id, FILE_APPEND);
         }
 
-        if ($availability_counter > 0) {
+        if ($availability_counter > 1) {
             foreach ($all_availability as $availability) {
                 if (!empty($decoded_premise_services)) {
-                    foreach ($decoded_premise_services as $key => $value) {
-                        foreach ($value as $data) {
-                            $amenity_slug = str_replace('--', '-', str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($data)))));
-                            $term_id = array_search($amenity_slug, $apartment_amenities_list);
-                            if ($term_id !== false) {
-                                $term_id = intval($term_id);
-                                wp_set_post_terms($property->post_id, $term_id, 'rz_amenities');
-                                // add_post_meta($property->post_id, 'rz_amenities', $term_id, false);
-                            }
-                        }
-                    }
+                    wp_set_post_terms($availability->post_id, $all_terms, 'rz_amenities');
+                    file_put_contents(LOG_DIR . '/fix-post-amenities.log', ' | A Post ID - ' . $availability->post_id, FILE_APPEND);
                 }
             }
         }
