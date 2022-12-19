@@ -114,7 +114,8 @@ echo 'Total properties - ' . $total_properties . PHP_EOL;
 file_put_contents(LOG_DIR . '/fix-post-amenities.log', ' | Total properties - ' . $total_properties . PHP_EOL, FILE_APPEND);
 $pages = intdiv($total_properties, 100);
 for ($i = 0; $i <= $pages; $i++) {
-    $new_properties = $parsing_db->getRecordsWithPosts(0, 100);
+    $start = 100 * $i;
+    $new_properties = $parsing_db->getRecordsWithPosts($start, 100);
     foreach ($new_properties as $property) {
         // Check availability of current propery
         $all_availability = $parsing_db->getAllAvailabilityWithPostByProperty($property->id);
