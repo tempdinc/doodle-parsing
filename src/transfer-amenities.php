@@ -36,7 +36,7 @@ $apartment_amenities = array_unique($apartment_amenities, SORT_STRING);
 sort($apartment_amenities);
 $full_apartment_amenities = [];
 foreach ($apartment_amenities as $apartment_amenity) {
-    $amenity_slug = str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($apartment_amenity))));
+    $amenity_slug = str_replace('--', '-', str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($apartment_amenity)))));
     $full_apartment_amenities[] = [
         'amenity_name' => $apartment_amenity,
         'amenity_slug' => $amenity_slug
@@ -52,14 +52,14 @@ file_put_contents(LOG_DIR . '/transfer-amenities.log', print_r($terms, true));
 
 if ($terms) {
     foreach ($terms as $term) {
-        $amenity_slug = str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($term->name))));
+        $amenity_slug = str_replace('--', '-', str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($term->name)))));
         file_put_contents(LOG_DIR . '/transfer-amenities.log', $term->name . ' | ' . $term->slug . PHP_EOL, FILE_APPEND);
         wp_update_term($term->term_id, 'rz_amenities', [
             'slug' => $amenity_slug
         ]);
     }
 }
-
+/*
 wp_delete_term(361, 'rz_amenities');
 wp_delete_term(299, 'rz_amenities');
 wp_delete_term(358, 'rz_amenities');
@@ -73,7 +73,7 @@ wp_delete_term(325, 'rz_amenities');
 wp_delete_term(338, 'rz_amenities');
 wp_delete_term(326, 'rz_amenities');
 wp_delete_term(352, 'rz_amenities');
-
+*/
 $terms = get_terms([
     'taxonomy' => 'rz_amenities',
     'hide_empty' => false,
@@ -124,23 +124,38 @@ foreach($community_amenities as $amenity) {
 $writer = new Xlsx($spreadsheet);
 $writer->save('export_community_amenities.xlsx');
 */
-if ($add_to_wp) {
+$wp_db = new MySQL('wp', 'local');
+// Getting all amenities
+$apartment_amenities_list = [];
+$apartment_amenities_rows = $wp_db->listRzAmenities();
+foreach ($apartment_amenities_rows as $apartment_amenity_row) {
+    $amenity_slug = str_replace('--', '-', str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($apartment_amenity_row->name)))));
+    $apartment_amenities_list[$apartment_amenity_row->term_id] = $amenity_slug;
+}
+var_dump($apartment_amenities_list);
+foreach ($full_apartment_amenities as $full_apartment_amenity) {
+    $term_id = array_search(strtolower($full_apartment_amenity['amenity_slug']), $apartment_amenities_list);
+    if ($term_id !== false) {
+        // add_post_meta($property->post_id, 'rz_amenities', $term_id, false);
+        $amenity_id = $term_id;
+    } else {
+        $amenity_id = insertNewTerm($full_apartment_amenity['amenity_name'], $full_apartment_amenity['amenity_slug']);
+    }
+    echo $full_apartment_amenity['amenity_slug'] . ' > ';
+    echo $amenity_id . ' | ';
+}
 
-    //Query our MySQL table
-    $wp_db = new MySQL('wp', 'local');
+if ($add_to_wp) {
 
     foreach ($apartment_amenities as $amenity) {
         $query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_terms` WHERE `name` = ? LIMIT 1");
         $query->execute([$amenity]);
         $isDuplicate = $query->fetchColumn();
-        // $amenity_slug = str_replace(' ', '_', trim(mb_strtolower($amenity)));
         if (!$isDuplicate) {
-            // echo $amenity . PHP_EOL;
-            $amenity_slug = str_replace(' ', '_', preg_replace("/[^0-9a-z]/", "_", trim(mb_strtolower($amenity))));
+            $amenity_slug = str_replace('--', '-', str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($amenity)))));
             if (mb_substr($amenity_slug, -1) == '_') {
                 $amenity_slug = mb_substr($amenity_slug, 0, -1);
             }
-            // echo $amenity_slug . PHP_EOL;
             $slugDuplicate = checkSlug($amenity_slug);
             while ($slugDuplicate) {
                 $amenity_slug = $amenity_slug . '1';

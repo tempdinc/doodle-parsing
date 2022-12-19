@@ -3,120 +3,106 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-//Fork settings
-/*
-pcntl_async_signals(true);
-
-pcntl_signal(SIGTERM, 'signalHandler'); // Termination ('kill' was called)
-pcntl_signal(SIGHUP, 'signalHandler'); // Terminal log-out
-pcntl_signal(SIGINT, 'signalHandler'); // Interrupted (Ctrl-C is pressed)
-*/
-// Saving parent pid
-file_put_contents('parentPid.out', getmypid());
-
 use App\Classes\MySQL;
 
-var_dump(memory_get_usage());
 require_once __DIR__ . '/bootstrap.php';
-var_dump(memory_get_usage());
-
 // Clear log files
-$f = fopen(LOG_DIR . '/fix-amenities.log', 'w');
-fclose($f);
-$f = fopen(LOG_DIR . '/fix-post-regions.log', 'w');
+$f = fopen(LOG_DIR . '/fix-post-amenities.log', 'w');
 fclose($f);
 
-echo date("Y-m-d H:i:s") . " Start - ";
+$add_to_wp = false;
+
 //Query our MySQL table
 $parsing_db = new MySQL('parsing', 'local');
-var_dump(memory_get_usage());
-// Apartment amenities
+
+// Apartment
+$query = $parsing_db->pdo->prepare("SELECT `on_premise_features` FROM `properties` WHERE `on_premise_features` != ''");
+$query->execute();
+$rows = $query->fetchAll();
 $apartment_amenities = [];
-$total_rows = $parsing_db->count('properties', [['field' => "on_premise_features", 'compare' => "!=", 'value' => "''"]]);
-$pages = intdiv($total_rows, 100);
-echo 'Apartment amenities total pages - ' . $pages . PHP_EOL;
-for ($i = 0; $i <= $pages; $i++) {
-    $start = $i * 100;
-    try {
-        $query = $parsing_db->pdo->prepare("SELECT `on_premise_features` FROM `properties` WHERE `on_premise_features` != '' LIMIT $start,100");
-        $query->execute();
-        $rows = $query->fetchAll();
-    } catch (\Exception $ex) {
-        die($ex->getMessage());
-    }
-    foreach ($rows as $row) {
-        $on_premise_features = $row->on_premise_features;
-        $decoded_premise_services = json_decode($on_premise_features);
-        foreach ($decoded_premise_services as $key => $value) {
-            foreach ($value as $data) {
-                $search_key = array_search($data, $apartment_amenities);
-                if ($search_key === false) {
-                    array_push($apartment_amenities, $data);
-                }
-            }
+foreach ($rows as $row) {
+    $on_premise_features = $row->on_premise_features;
+    $decoded_premise_services = json_decode($on_premise_features);
+    // var_dump($row);
+    foreach ($decoded_premise_services as $key => $value) {
+        foreach ($value as $data) {
+            array_push($apartment_amenities, $data);
         }
     }
 }
 $apartment_amenities = array_unique($apartment_amenities, SORT_STRING);
 sort($apartment_amenities);
-// Community amenities
-$community_amenities = [];
-$total_rows = $parsing_db->count('properties', [['field' => "on_premise_services", 'compare' => "!=", 'value' => "''"]]);
-$pages = intdiv($total_rows, 100);
-for ($i = 0; $i <= $pages; $i++) {
-    $start = $i * 100;
-    try {
-        $query = $parsing_db->pdo->prepare("SELECT `on_premise_services` FROM `properties` WHERE `on_premise_services` != '' LIMIT $start,100");
-        $query->execute();
-        $rows = $query->fetchAll();
-    } catch (\Exception $ex) {
-        die($ex->getMessage());
+$full_apartment_amenities = [];
+foreach ($apartment_amenities as $apartment_amenity) {
+    $amenity_slug = str_replace('--', '-', str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($apartment_amenity)))));
+    $full_apartment_amenities[] = [
+        'amenity_name' => $apartment_amenity,
+        'amenity_slug' => $amenity_slug
+    ];
+}
+// file_put_contents(LOG_DIR . '/fix-post-amenities.log', print_r($full_apartment_amenities), FILE_APPEND);
+require_once(realpath('../../wp-load.php'));
+$terms = get_terms([
+    'taxonomy' => 'rz_amenities',
+    'hide_empty' => false,
+]);
+file_put_contents(LOG_DIR . '/fix-post-amenities.log', print_r($terms, true));
+
+if ($terms) {
+    foreach ($terms as $term) {
+        $amenity_slug = str_replace('--', '-', str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($term->name)))));
+        file_put_contents(LOG_DIR . '/fix-post-amenities.log', $term->name . ' | ' . $term->slug . PHP_EOL, FILE_APPEND);
+        wp_update_term($term->term_id, 'rz_amenities', [
+            'slug' => $amenity_slug
+        ]);
     }
-    foreach ($rows as $row) {
-        $on_premise_services = $row->on_premise_services;
-        $decoded_premise_services = json_decode($on_premise_services);
-        // var_dump($row);
-        foreach ($decoded_premise_services as $key => $value) {
-            foreach ($value as $data) {
-                $search_key = array_search($data, $community_amenities);
-                if ($search_key === false) {
-                    array_push($community_amenities, $data);
-                }
-            }
+}
+
+$terms = get_terms([
+    'taxonomy' => 'rz_amenities',
+    'hide_empty' => false,
+]);
+file_put_contents(LOG_DIR . '/fix-post-amenities.log', print_r($terms, true));
+
+// Community
+/*
+$query = $parsing_db->pdo->prepare("SELECT `on_premise_services` FROM `properties` WHERE `on_premise_services` != ''");
+$query->execute();
+$rows = $query->fetchAll();
+$community_amenities = [];
+foreach ($rows as $row) {
+    $on_premise_services = $row->on_premise_services;
+    $decoded_premise_services = json_decode($on_premise_services);
+    // var_dump($row);
+    foreach ($decoded_premise_services as $key => $value) {
+        foreach ($value as $data) {
+            array_push($community_amenities, $data);
         }
-        unset($decoded_premise_services);
     }
 }
 $community_amenities = array_unique($community_amenities, SORT_STRING);
 $community_amenities = array_diff($community_amenities, $apartment_amenities);
 sort($community_amenities);
-var_dump(memory_get_usage());
-require_once(realpath('../../wp-load.php'));
-
-$amenities_counter = 0;
-//Query our MySQL table
-$wp_db = new MySQL('wp', 'local');
-/*
-foreach ($apartment_amenities as $amenity) {
-    $insert_res = wp_insert_term($amenity, 'rz_amenities', array(
-        'parent'      => 0,
-    ));
-    if (is_wp_error($insert_res)) {
-        $response = $insert_res->get_error_message();
-    } else {
-        $response = $insert_res['term_id'];
-        $amenities_counter++;
-    }
-}
-echo " \033[31mAdded amenities: " . $amenities_counter . "\033[0m" . PHP_EOL;
-file_put_contents(LOG_DIR . '/fix-amenities.log', ' Added amenities: ' . $amenities_counter, FILE_APPEND);
-// Transfer amenities END
 */
+
+$wp_db = new MySQL('wp', 'local');
 // Getting all amenities
 $apartment_amenities_list = [];
 $apartment_amenities_rows = $wp_db->listRzAmenities();
 foreach ($apartment_amenities_rows as $apartment_amenity_row) {
-    $apartment_amenities_list[$apartment_amenity_row->term_id] = $apartment_amenity_row->name;
+    $amenity_slug = str_replace('--', '-', str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($apartment_amenity_row->name)))));
+    $apartment_amenities_list[$apartment_amenity_row->term_id] = $amenity_slug;
+}
+
+foreach ($full_apartment_amenities as $full_apartment_amenity) {
+    $term_id = array_search(strtolower($full_apartment_amenity['amenity_slug']), $apartment_amenities_list);
+    if ($term_id !== false) {
+        $amenity_id = $term_id;
+    } else {
+        $amenity_id = insertNewTerm($full_apartment_amenity['amenity_name'], $full_apartment_amenity['amenity_slug']);
+    }
+    echo $full_apartment_amenity['amenity_slug'] . ' > ';
+    echo $amenity_id . ' | ';
 }
 
 // Start fixing amenities
@@ -125,7 +111,7 @@ echo 'Start fixing amenities WP..' . PHP_EOL;
 $parsing_db = new MySQL('parsing', 'local');
 $total_properties = $parsing_db->countRecordsWithPosts();
 echo 'Total properties - ' . $total_properties . PHP_EOL;
-file_put_contents(LOG_DIR . '/fix-amenities.log', ' | Total properties - ' . $total_properties . PHP_EOL, FILE_APPEND);
+file_put_contents(LOG_DIR . '/fix-post-amenities.log', ' | Total properties - ' . $total_properties . PHP_EOL, FILE_APPEND);
 $pages = intdiv($total_properties, 100);
 for ($i = 0; $i <= $pages; $i++) {
     $new_properties = $parsing_db->getRecordsWithPosts(0, 100);
@@ -140,9 +126,12 @@ for ($i = 0; $i <= $pages; $i++) {
         if (!empty($decoded_premise_services)) {
             foreach ($decoded_premise_services as $key => $value) {
                 foreach ($value as $data) {
-                    $term_id = array_search($data, $apartment_amenities_list);
-                    if ($term_id) {
-                        add_post_meta($property->post_id, 'rz_amenities', $term_id, false);
+                    $amenity_slug = str_replace('--', '-', str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($data)))));
+                    $term_id = array_search($amenity_slug, $apartment_amenities_list);
+                    if ($term_id !== false) {
+                        $term_id = intval($term_id);
+                        wp_set_post_terms($property->post_id, $term_id, 'rz_amenities');
+                        // add_post_meta($property->post_id, 'rz_amenities', $term_id, false);
                     }
                 }
             }
@@ -153,9 +142,12 @@ for ($i = 0; $i <= $pages; $i++) {
                 if (!empty($decoded_premise_services)) {
                     foreach ($decoded_premise_services as $key => $value) {
                         foreach ($value as $data) {
-                            $term_id = array_search($data, $apartment_amenities_list);
-                            if ($term_id) {
-                                add_post_meta($availability->post_id, 'rz_amenities', $term_id, false);
+                            $amenity_slug = str_replace('--', '-', str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($data)))));
+                            $term_id = array_search($amenity_slug, $apartment_amenities_list);
+                            if ($term_id !== false) {
+                                $term_id = intval($term_id);
+                                wp_set_post_terms($property->post_id, $term_id, 'rz_amenities');
+                                // add_post_meta($property->post_id, 'rz_amenities', $term_id, false);
                             }
                         }
                     }
@@ -165,3 +157,22 @@ for ($i = 0; $i <= $pages; $i++) {
     }
 }
 echo date("Y-m-d H:i:s") . " End............................................." . PHP_EOL;
+function insertNewTerm($amenity_name, $amenity_slug)
+{
+    $insert_res = wp_insert_term(
+        $amenity_name,  // новый термин
+        'rz_amenities', // таксономия
+        array(
+            'description' => '',
+            'slug'        => $amenity_slug,
+            'parent'      => 0
+        )
+    );
+
+    if (is_wp_error($insert_res)) {
+        echo $insert_res->get_error_message();
+        return false;
+    } else {
+        return $insert_res['term_id'];
+    }
+}
