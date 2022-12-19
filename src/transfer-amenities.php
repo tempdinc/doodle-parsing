@@ -60,6 +60,20 @@ if ($terms) {
     }
 }
 
+wp_delete_term(361, 'rz_amenities');
+wp_delete_term(299, 'rz_amenities');
+wp_delete_term(358, 'rz_amenities');
+wp_delete_term(315, 'rz_amenities');
+wp_delete_term(345, 'rz_amenities');
+wp_delete_term(360, 'rz_amenities');
+wp_delete_term(319, 'rz_amenities');
+wp_delete_term(305, 'rz_amenities');
+wp_delete_term(340, 'rz_amenities');
+wp_delete_term(325, 'rz_amenities');
+wp_delete_term(338, 'rz_amenities');
+wp_delete_term(326, 'rz_amenities');
+wp_delete_term(352, 'rz_amenities');
+
 $terms = get_terms([
     'taxonomy' => 'rz_amenities',
     'hide_empty' => false,
