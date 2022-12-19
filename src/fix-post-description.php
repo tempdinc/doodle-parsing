@@ -58,27 +58,10 @@ for ($i = 0; $i <= $pages + 1; $i++) {
             delete_post_meta($post->id, 'post_content');
             $counter_clear_post_content_meta++;
         }
-        /*
-        exit();
-        $city_meta = $wp_db->getAllMetaByPostByMetakey($post->id, 'post_content');
-        if (is_array($city_meta)) {
-            $city_meta = $city_meta[0];
-        } else {
-            $city_meta = $city_meta;
-        }
-        $state_meta = $wp_db->getAllMetaByPostByMetakey($post->id, 'rz_state');
-        if (is_array($state_meta)) {
-            $state_meta = $state_meta[0];
-        } else {
-            $state_meta = $state_meta;
-        }
-        file_put_contents(LOG_DIR . '/fix-post-description.log',  ' | ' . round(memory_get_usage() / 1048576, 2) . '' . ' MB', FILE_APPEND);
-        file_put_contents(LOG_DIR . '/fix-post-description.log', PHP_EOL, FILE_APPEND);
-        */
     }
 }
 echo " >>> " . date("Y-m-d H:i:s") . " - End.." . PHP_EOL;
-file_put_contents(LOG_DIR . '/fix-post-description.log', '[' . date('Y-m-d H:i:s') . ']  END >>> Total wrong posts: ' . $counter_wrong_posts . ' | Total clear posts: ' . $counter_clear_posts . PHP_EOL, FILE_APPEND);
+file_put_contents(LOG_DIR . '/fix-post-description.log', '[' . date('Y-m-d H:i:s') . ']  END >>> Total wrong posts: ' . $counter_wrong_posts . ' | Total clear posts: ' . $counter_clear_posts . ' | Total clear post_content meta: ' . $counter_clear_post_content_meta . PHP_EOL, FILE_APPEND);
 
 function check_description($string)
 {

@@ -442,7 +442,7 @@ class MySQL
     }
 
     /**
-     * Getting id FROM wp_posts LEFT JOIN meta_value FROM wp_postmeta WHERE wp.post_type = 'rz_listing' AND wt.meta_key = 'rz_listing_type' BY meta_value
+     * Getting id FROM wp_posts LEFT JOIN meta_value FROM wp_postmeta WHERE wp.post_type = 'rz_listing' AND wppm.meta_key = 'rz_listing_type' BY meta_value
      *
      * @param  string $listing_type
      * @return int
@@ -451,7 +451,7 @@ class MySQL
     {
         try {
             $query = $this->pdo->prepare(
-                "SELECT count(*) FROM `wp_posts` wp LEFT JOIN `wp_postmeta` wt ON wp.id = wt.post_id WHERE wp.post_type = 'rz_listing' AND wt.meta_key = 'rz_listing_type' AND wt.meta_value = ? LIMIT 1"
+                "SELECT count(*) FROM `wp_posts` wp LEFT JOIN `wp_postmeta` wppm ON wp.id = wppm.post_id WHERE wp.post_type = 'rz_listing' AND wppm.meta_key = 'rz_listing_type' AND wppm.meta_value = ? LIMIT 1"
             );
             $query->execute([$listing_type]);
             return $query->fetchColumn();
@@ -461,7 +461,7 @@ class MySQL
     }
 
     /**
-     * Getting id FROM wp_posts LEFT JOIN meta_value FROM wp_postmeta WHERE wp.post_type = 'rz_listing' AND wt.meta_key = 'rz_listing_type' BY meta_value LIMIT ?,?
+     * Getting id FROM wp_posts LEFT JOIN meta_value FROM wp_postmeta WHERE wp.post_type = 'rz_listing' AND wppm.meta_key = 'rz_listing_type' BY meta_value LIMIT ?,?
      *
      * @param  string $listing_type
      * @param  int $limit_start
@@ -472,7 +472,7 @@ class MySQL
     {
         try {
             $query = $this->pdo->prepare(
-                "SELECT wp.id, wt.meta_value FROM `wp_posts` wp LEFT JOIN `wp_postmeta` wt ON wp.id = wt.post_id WHERE wp.post_type = 'rz_listing' AND wt.meta_key = 'rz_listing_type' AND wt.meta_value = ? LIMIT ?,?"
+                "SELECT wp.id, wppm.meta_value FROM `wp_posts` wp LEFT JOIN `wp_postmeta` wppm ON wp.id = wppm.post_id WHERE wp.post_type = 'rz_listing' AND wppm.meta_key = 'rz_listing_type' AND wppm.meta_value = ? ORDER BY wp.id ASC LIMIT ?,?"
             );
             $query->execute([$listing_type, $limit_start, $limit]);
             return $query->fetchAll();
@@ -535,7 +535,7 @@ class MySQL
                 "SELECT wp.meta_value FROM `wp_postmeta` wp WHERE wp.post_id = ? AND wp.meta_key = ?"
             );
             $query->execute([$post_id, $meta_key]);
-            return $query->fetchColumn();
+            return $query->fetchAll(PDO::FETCH_COLUMN, 0);
         } catch (\Exception $ex) {
             die($ex->getMessage());
         }

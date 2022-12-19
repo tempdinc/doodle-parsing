@@ -59,22 +59,24 @@ $total_rz_listing = $query->fetchColumn();
 $pages = intdiv($total_rz_listing, 500);
 file_put_contents(LOG_DIR . '/fix-post-regions.log', ' Total posts - ' . $total_rz_listing . PHP_EOL, FILE_APPEND);
 echo 'Total posts - ' . $total_rz_listing . PHP_EOL;
+echo 'Total pages - ' . $pages . PHP_EOL;
 for ($i = 0; $i <= $pages; $i++) {
     echo ' | page #' . $i . PHP_EOL;
+    $start = $i * 500;
     unset($posts);
-    $posts = $wp_db->getAllPostsRZListing($i * 500, 500);
+    $posts = $wp_db->getAllPostsRZListing($start, 500);
     foreach ($posts as $post) {
         $city_meta = $wp_db->getAllMetaByPostByMetakey($post->id, 'rz_city');
-        if (is_array($city_meta)) {
+        if (is_array($city_meta) && !empty($city_meta)) {
             $city_meta = $city_meta[0];
         } else {
-            $city_meta = $city_meta;
+            $city_meta = 'city undefined';
         }
         $state_meta = $wp_db->getAllMetaByPostByMetakey($post->id, 'rz_state');
-        if (is_array($state_meta)) {
+        if (is_array($state_meta) && !empty($state_meta)) {
             $state_meta = $state_meta[0];
         } else {
-            $state_meta = $state_meta;
+            $state_meta = 'state undefined';
         }
         $city_slug = str_replace(' ', '-', preg_replace('/[^ a-z\d]/ui', '', strtolower($city_meta . ' ' . $state_meta)));
         unset($city_meta);
@@ -102,29 +104,12 @@ for ($i = 0; $i <= $pages; $i++) {
         }
         // $postmeta_response = addPostMeta($post->id, 'rz_listing_region', $rz_full_regions[$key]['slug'], true);
         if ($postmeta_response !== false) {
-            file_put_contents(LOG_DIR . '/fix-post-regions.log', ' [' . $post->id . '] | ' . $city_slug . ' | ' . $region_slug . ' - OK!', FILE_APPEND);
+            // file_put_contents(LOG_DIR . '/fix-post-regions.log', ' [' . $post->id . '] | ' . $city_slug . ' | ' . $region_slug . ' - OK!', FILE_APPEND);
         } else {
-            file_put_contents(LOG_DIR . '/fix-post-regions.log', ' [' . $post->id . '] | ' . $city_slug . ' | ' . $region_slug . ' - NOT OK!', FILE_APPEND);
+            // file_put_contents(LOG_DIR . '/fix-post-regions.log', ' [' . $post->id . '] | ' . $city_slug . ' | ' . $region_slug . ' - NOT OK!', FILE_APPEND);
         }
-        /*
-        $rz_listing_type = $wp_db->getAllMetaByPostByMetakey($post->id, 'rz_listing_type');
-        if ($rz_listing_type == '380' || $rz_listing_type == 380) {
-            $postmeta_response = update_post_meta($post->id, 'rz_ranking', '4');
-            if (!$postmeta_response) {
-                $postmeta_response = add_post_meta($post->id, 'rz_ranking', '4', true);
-            }
-            $postmeta_response = update_post_meta($post->id, 'rz_search', '1');
-            if (!$postmeta_response) {
-                $postmeta_response = add_post_meta($post->id, 'rz_search', '1', true);
-            }
-            $postmeta_response = update_post_meta($post->id, 'rz_unit_type', 'single');
-            if (!$postmeta_response) {
-                $postmeta_response = add_post_meta($post->id, 'rz_unit_type', 'single', true);
-            }
-        }
-*/
-        file_put_contents(LOG_DIR . '/fix-post-regions.log',  ' | ' . round(memory_get_usage() / 1048576, 2) . '' . ' MB', FILE_APPEND);
-        file_put_contents(LOG_DIR . '/fix-post-regions.log', PHP_EOL, FILE_APPEND);
+        // file_put_contents(LOG_DIR . '/fix-post-regions.log',  ' | ' . round(memory_get_usage() / 1048576, 2) . '' . ' MB', FILE_APPEND);
+        // file_put_contents(LOG_DIR . '/fix-post-regions.log', PHP_EOL, FILE_APPEND);
     }
 }
 echo " >>> " . date("Y-m-d H:i:s") . " - End.." . PHP_EOL;
