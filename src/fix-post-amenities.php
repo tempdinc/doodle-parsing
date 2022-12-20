@@ -9,7 +9,7 @@ require_once __DIR__ . '/bootstrap.php';
 // Clear log files
 $f = fopen(LOG_DIR . '/fix-post-amenities.log', 'w');
 fclose($f);
-file_put_contents(LOG_DIR . '/ix-post-amenities.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ' . PHP_EOL, FILE_APPEND);
+file_put_contents(LOG_DIR . '/fix-post-amenities.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ' . PHP_EOL, FILE_APPEND);
 $add_to_wp = false;
 
 //Query our MySQL table
@@ -40,18 +40,16 @@ foreach ($apartment_amenities as $apartment_amenity) {
         'amenity_slug' => $amenity_slug
     ];
 }
-// file_put_contents(LOG_DIR . '/fix-post-amenities.log', print_r($full_apartment_amenities), FILE_APPEND);
 require_once(realpath('../../wp-load.php'));
 $terms = get_terms([
     'taxonomy' => 'rz_amenities',
     'hide_empty' => false,
 ]);
-file_put_contents(LOG_DIR . '/fix-post-amenities.log', print_r($terms, true));
 
 if ($terms) {
     foreach ($terms as $term) {
         $amenity_slug = str_replace('--', '-', str_replace('--', '-', str_replace(' ', '-', preg_replace('/[^ a-z 0-9 \-\d]/ui', '', strtolower($term->name)))));
-        file_put_contents(LOG_DIR . '/fix-post-amenities.log', $term->name . ' | ' . $term->slug . PHP_EOL, FILE_APPEND);
+        file_put_contents(LOG_DIR . '/fix-post-amenities.log', ' | ' . $term->name . ' > ' . $term->slug, FILE_APPEND);
         wp_update_term($term->term_id, 'rz_amenities', [
             'slug' => $amenity_slug
         ]);
@@ -62,7 +60,6 @@ $terms = get_terms([
     'taxonomy' => 'rz_amenities',
     'hide_empty' => false,
 ]);
-file_put_contents(LOG_DIR . '/fix-post-amenities.log', print_r($terms, true));
 
 // Community
 /*
@@ -110,17 +107,16 @@ echo 'Start fixing amenities WP..' . PHP_EOL;
 // Getting all parsed
 $parsing_db = new MySQL('parsing', 'local');
 $total_properties = $parsing_db->countRecordsWithPosts();
-echo 'Total properties - ' . $total_properties . PHP_EOL;
-file_put_contents(LOG_DIR . '/fix-post-amenities.log', ' | Total properties - ' . $total_properties . PHP_EOL, FILE_APPEND);
+// echo 'Total properties - ' . $total_properties . PHP_EOL;
 $pages = intdiv($total_properties, 100);
+file_put_contents(LOG_DIR . '/fix-post-amenities.log', PHP_EOL . PHP_EOL . 'Total properties - ' . $total_properties . ' | Total pages - ' . $pages . PHP_EOL, FILE_APPEND);
 for ($i = 0; $i <= $pages; $i++) {
     $start = 100 * $i;
-    file_put_contents(LOG_DIR . '/ix-post-amenities.log', '[' . date('Y-m-d H:i:s') . ']  Page # ' . $i . ' | Start - ' . $start . PHP_EOL, FILE_APPEND);
+    file_put_contents(LOG_DIR . '/fix-post-amenities.log', PHP_EOL . '[' . date('Y-m-d H:i:s') . ']  Page # ' . $i . ' | Start - ' . $start . PHP_EOL, FILE_APPEND);
     $new_properties = $parsing_db->getRecordsWithPosts($start, 100);
     foreach ($new_properties as $property) {
         // Check availability of current propery
         $all_availability = $parsing_db->getAllAvailabilityWithPostByProperty($property->id);
-        // file_put_contents(LOG_DIR . '/fix-post-amenities.log', print_r($all_availability, true) . PHP_EOL, FILE_APPEND);
         $availability_counter = count($all_availability);
 
         // Apartment amenities
@@ -139,21 +135,22 @@ for ($i = 0; $i <= $pages; $i++) {
                 }
             }
             wp_set_post_terms($property->post_id, $all_terms, 'rz_amenities');
-            file_put_contents(LOG_DIR . '/fix-post-amenities.log', ' | Property Post ID - ' . $property->post_id, FILE_APPEND);
+            // file_put_contents(LOG_DIR . '/fix-post-amenities.log', ' | Property Post ID - ' . $property->post_id, FILE_APPEND);
         }
 
         if ($availability_counter > 1) {
             foreach ($all_availability as $availability) {
                 if (!empty($decoded_premise_services)) {
                     wp_set_post_terms($availability->post_id, $all_terms, 'rz_amenities');
-                    file_put_contents(LOG_DIR . '/fix-post-amenities.log', ' | A Post ID - ' . $availability->post_id, FILE_APPEND);
+                    // file_put_contents(LOG_DIR . '/fix-post-amenities.log', ' | A Post ID - ' . $availability->post_id, FILE_APPEND);
                 }
             }
         }
     }
+    file_put_contents(LOG_DIR . '/fix-post-amenities.log', ' | Property Post ID - ' . $property->post_id, FILE_APPEND);
 }
 echo date("Y-m-d H:i:s") . " End............................................." . PHP_EOL;
-file_put_contents(LOG_DIR . '/ix-post-amenities.log', '[' . date('Y-m-d H:i:s') . ']  END >>>> ' . PHP_EOL, FILE_APPEND);
+file_put_contents(LOG_DIR . '/fix-post-amenities.log', '[' . date('Y-m-d H:i:s') . ']  END >>>> ' . PHP_EOL, FILE_APPEND);
 function insertNewTerm($amenity_name, $amenity_slug)
 {
     $insert_res = wp_insert_term(
