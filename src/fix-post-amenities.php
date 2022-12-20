@@ -9,7 +9,7 @@ require_once __DIR__ . '/bootstrap.php';
 // Clear log files
 $f = fopen(LOG_DIR . '/fix-post-amenities.log', 'w');
 fclose($f);
-
+file_put_contents(LOG_DIR . '/ix-post-amenities.log', '[' . date('Y-m-d H:i:s') . ']  Start >>> ' . PHP_EOL, FILE_APPEND);
 $add_to_wp = false;
 
 //Query our MySQL table
@@ -115,6 +115,7 @@ file_put_contents(LOG_DIR . '/fix-post-amenities.log', ' | Total properties - ' 
 $pages = intdiv($total_properties, 100);
 for ($i = 0; $i <= $pages; $i++) {
     $start = 100 * $i;
+    file_put_contents(LOG_DIR . '/ix-post-amenities.log', '[' . date('Y-m-d H:i:s') . ']  Page # ' . $i . ' | Start - ' . $start . PHP_EOL, FILE_APPEND);
     $new_properties = $parsing_db->getRecordsWithPosts($start, 100);
     foreach ($new_properties as $property) {
         // Check availability of current propery
@@ -152,6 +153,7 @@ for ($i = 0; $i <= $pages; $i++) {
     }
 }
 echo date("Y-m-d H:i:s") . " End............................................." . PHP_EOL;
+file_put_contents(LOG_DIR . '/ix-post-amenities.log', '[' . date('Y-m-d H:i:s') . ']  END >>>> ' . PHP_EOL, FILE_APPEND);
 function insertNewTerm($amenity_name, $amenity_slug)
 {
     $insert_res = wp_insert_term(
