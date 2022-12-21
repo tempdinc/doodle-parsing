@@ -369,6 +369,25 @@ class MySQL
     }
 
     /**
+     * Getting record from availability by post_id
+     *
+     * @param  bigint $post_id
+     * @return array
+     */
+    public function getAvailabilityByPostId($post_id)
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT * FROM `availability` WHERE post_id = ?"
+            );
+            $query->execute([$post_id]);
+            return $query->fetchAll();
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }    
+
+    /**
      * Getting all records from availability LEFT JOIN properties with status Move In Ready & is_deleted IS NULL & post_id IS NULL & listing_price IS NOT NULL
      *
      * @return array

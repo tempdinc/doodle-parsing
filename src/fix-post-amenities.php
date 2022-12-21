@@ -110,7 +110,7 @@ $total_properties = $parsing_db->countRecordsWithPosts();
 // echo 'Total properties - ' . $total_properties . PHP_EOL;
 $pages = intdiv($total_properties, 100);
 file_put_contents(LOG_DIR . '/fix-post-amenities.log', PHP_EOL . PHP_EOL . 'Total properties - ' . $total_properties . ' | Total pages - ' . $pages . PHP_EOL, FILE_APPEND);
-for ($i = 0; $i <= $pages; $i++) {
+for ($i = 55; $i <= $pages; $i++) {
     $start = 100 * $i;
     file_put_contents(LOG_DIR . '/fix-post-amenities.log', PHP_EOL . '[' . date('Y-m-d H:i:s') . ']  Page # ' . $i . ' | Start - ' . $start . PHP_EOL, FILE_APPEND);
     $new_properties = $parsing_db->getRecordsWithPosts($start, 100);
