@@ -385,7 +385,7 @@ class MySQL
         } catch (\Exception $ex) {
             die($ex->getMessage());
         }
-    }    
+    }
 
     /**
      * Getting all records from availability LEFT JOIN properties with status Move In Ready & is_deleted IS NULL & post_id IS NULL & listing_price IS NOT NULL
@@ -501,7 +501,7 @@ class MySQL
     }
 
     /**
-     * Getting id FROM wp_posts WHERE wp.post_type = 'rz_listing' BY LIMIT ?,?
+     * Getting id FROM wp_posts WHERE wp.post_type = 'rz_listing' AND wp.post_status = 'publish' BY LIMIT ?,?
      *
      * @param  int $limit_start
      * @param  int $limit
@@ -511,7 +511,7 @@ class MySQL
     {
         try {
             $query = $this->pdo->prepare(
-                "SELECT wp.id FROM `wp_posts` wp WHERE wp.post_type = 'rz_listing' ORDER BY wp.id DESC LIMIT ?,?"
+                "SELECT wp.id FROM `wp_posts` wp WHERE wp.post_type = 'rz_listing' AND wp.post_status = 'publish' ORDER BY wp.id ASC LIMIT ?,?"
             );
             $query->execute([$limit_start, $limit]);
             return $query->fetchAll();
@@ -539,7 +539,24 @@ class MySQL
             die($ex->getMessage());
         }
     }
-
+    /**
+     * Getting all meta value from wp_postmeta by post_id
+     *
+     * @param  string $post_id
+     * @return array
+     */
+    public function getAllMetaByPost($post_id)
+    {
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT wp.meta_key, wp.meta_value FROM `wp_postmeta` wp WHERE wp.post_id = ? ORDER BY meta_key ASC"
+            );
+            $query->execute([$post_id]);
+            return $query->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\Exception $ex) {
+            die($ex->getMessage());
+        }
+    }
     /**
      * Getting all meta value from wp_postmeta by post_id & meta_key
      *

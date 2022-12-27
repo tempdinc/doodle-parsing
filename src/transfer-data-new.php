@@ -18,15 +18,148 @@ use App\Classes\MySQL;
 var_dump(memory_get_usage());
 require_once __DIR__ . '/bootstrap.php';
 require_once(realpath('../../wp-load.php'));
+require_once __DIR__ . '/env-status_availability.php';
 var_dump(memory_get_usage());
+
 // Clear log files
 $f = fopen(LOG_DIR . '/new-transfer-data.log', 'w');
 fclose($f);
 $f = fopen(LOG_DIR . '/fix-post-regions.log', 'w');
 fclose($f);
+$f = fopen(LOG_DIR . '/remove-posts-wrong-data.log', 'w');
+fclose($f);
 //Query our MySQL table
 $parsing_db = new MySQL('parsing', 'local');
 var_dump(memory_get_usage());
+
+// Remove posts wrong data
+$query = $parsing_db->pdo->prepare("SELECT count(*) FROM `availability` WHERE 1=1 LIMIT 1");
+$query->execute();
+$total_availabilities = $query->fetchColumn();
+echo 'Total availabilities - ' . $total_availabilities . PHP_EOL;
+file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', 'Total availabilities - ' . $total_availabilities . PHP_EOL, FILE_APPEND);
+
+$pages = intdiv($total_availabilities, 100);
+for ($i = 0; $i <= $pages; $i++) {
+    $start = $i * 100;
+    $query = $parsing_db->pdo->prepare("SELECT * FROM `availability` WHERE 1=1 ORDER BY id DESC LIMIT $start,100");
+    $query->execute();
+    $rows = $query->fetchAll();
+
+    foreach ($rows as $row) {
+        $bed_cnt = $row->bedroom_cnt;
+        $bath_cnt = $row->bathroom_cnt;
+        $listing_price = $row->listing_price;
+        $sqft = $row->home_size_sq_ft;
+        $bed_cnt = (trim(preg_replace("/[a-zA-Z]/", "", $bed_cnt)) === '' || trim(preg_replace("/[a-zA-Z]/", "", $bed_cnt)) === NULL) ? 0 : trim(preg_replace("/[a-zA-Z]/", "", $bed_cnt));
+        $bath_cnt = trim(preg_replace("/[a-zA-Z]/", "", $bath_cnt));
+        $listing_price = trim(preg_replace("/[a-zA-Z$,]/", "", $listing_price));
+        $sqft = trim(preg_replace("/[a-zA-Z,]/", "", $sqft));
+        $query = $parsing_db->pdo->prepare("UPDATE `availability` SET bedroom_cnt = ?, bathroom_cnt = ?, listing_price = ?, home_size_sq_ft = ? WHERE id = ?");
+        $query->execute([$bed_cnt, $bath_cnt, $listing_price, $sqft, $row->id]);
+        // file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', 'bed_cnt > ' . $bed_cnt . ' | bath_cnt > ' . $bath_cnt . ' | listing_price > ' . $listing_price . ' | sqft > ' . $sqft . PHP_EOL, FILE_APPEND);
+    }
+}
+
+$query = $parsing_db->pdo->prepare("SELECT count(*) FROM `availability` WHERE 1=1 LIMIT 1");
+$query->execute();
+$total_availabilities = $query->fetchColumn();
+echo 'Total availabilities - ' . $total_availabilities . PHP_EOL;
+file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', 'Total availabilities - ' . $total_availabilities . PHP_EOL, FILE_APPEND);
+
+// Remove availability with NOT Available statuses
+$sql_query = "DELETE FROM `availability` WHERE (`post_id` IS NULL AND `status` IS NULL) OR (`post_id` IS NULL AND `status` = '')";
+foreach ($status_availability as $status) {
+    $sql_query .= " OR (`post_id` IS NULL AND `status` != '$status')";
+}
+file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', $sql_query . PHP_EOL, FILE_APPEND);
+$query = $parsing_db->pdo->prepare($sql_query);
+$query->execute();
+$total_availabilities = $query->fetchColumn();
+
+$query = $parsing_db->pdo->prepare("SELECT count(*) FROM `availability` WHERE 1=1 LIMIT 1");
+$query->execute();
+$total_availabilities = $query->fetchColumn();
+echo 'Total availabilities - ' . $total_availabilities . PHP_EOL;
+file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', 'Total availabilities - ' . $total_availabilities . PHP_EOL, FILE_APPEND);
+
+// Remove availability with WRONG listing_price & WRONG home_size_sq_ft
+$sql_query = "DELETE FROM `availability` WHERE (`post_id` IS NULL AND `listing_price` IS NULL) OR (`post_id` IS NULL AND `listing_price` LIKE '%person%') OR (`post_id` IS NULL AND `listing_price` LIKE '%call%') OR (`post_id` IS NULL AND `home_size_sq_ft` IS NULL) OR (`post_id` IS NULL AND `home_size_sq_ft` = '')";
+file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', $sql_query . PHP_EOL, FILE_APPEND);
+$query = $parsing_db->pdo->prepare($sql_query);
+$query->execute();
+$total_availabilities = $query->fetchColumn();
+
+$query = $parsing_db->pdo->prepare("SELECT count(*) FROM `availability` WHERE 1=1 LIMIT 1");
+$query->execute();
+$total_availabilities = $query->fetchColumn();
+echo 'Total availabilities - ' . $total_availabilities . PHP_EOL;
+file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', 'Total availabilities - ' . $total_availabilities . PHP_EOL, FILE_APPEND);
+
+$sql_query = "SELECT count(*) FROM `availability` WHERE `listing_price` IS NULL OR `listing_price` LIKE '%person%' OR `listing_price` LIKE '%call%' OR `home_size_sq_ft` = '' OR `home_size_sq_ft` IS NULL LIMIT 1";
+file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', $sql_query . PHP_EOL, FILE_APPEND);
+$query = $parsing_db->pdo->prepare($sql_query);
+$query->execute();
+$total_availabilities = $query->fetchColumn();
+echo 'Total availabilities - ' . $total_availabilities . PHP_EOL;
+file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', 'Total availabilities - ' . $total_availabilities . PHP_EOL, FILE_APPEND);
+
+$properties_ro_remove = [];
+$posts_to_remove = [];
+
+$pages = intdiv($total_availabilities, 100);
+for ($i = 0; $i <= $pages; $i++) {
+    $start = $i * 100;
+    $query = $parsing_db->pdo->prepare("SELECT property_id, post_id FROM `availability` WHERE `listing_price` IS NULL OR `listing_price` LIKE '%person%' OR `listing_price` LIKE '%call%' OR `home_size_sq_ft` = '' OR `home_size_sq_ft` IS NULL LIMIT $start,100");
+    $query->execute();
+    $rows = $query->fetchAll(PDO::FETCH_ASSOC);
+
+    $properties = array_column($rows, 'property_id');
+    $properties = array_unique($properties);
+    sort($properties);
+    $properties_ro_remove = array_merge($properties, $properties_ro_remove);
+    $posts_id = array_column($rows, 'post_id');
+    $posts_id = array_unique($posts_id);
+    sort($posts_id);
+    $posts_to_remove = array_merge($posts_id, $posts_to_remove);
+}
+$properties_ro_remove = array_unique($properties_ro_remove);
+sort($properties_ro_remove);
+file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', 'properties to remove - ' . count($properties_ro_remove) . PHP_EOL, FILE_APPEND);
+$posts_to_remove = array_unique($posts_to_remove);
+sort($posts_to_remove);
+file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', 'posts to remove - ' . count($posts_to_remove) . PHP_EOL, FILE_APPEND);
+
+foreach ($properties_ro_remove as $property_id) {
+    $query = $parsing_db->pdo->prepare("SELECT `post_id` FROM `properties` WHERE `property_id` = $property_id");
+    $query->execute();
+    $rows = $query->fetchAll(PDO::FETCH_COLUMN, 0);
+    $posts_to_remove = array_merge($rows, $posts_to_remove);
+    $query = $parsing_db->pdo->prepare("SELECT `post_id` FROM `availability` WHERE `property_id` = $property_id");
+    $query->execute();
+    $rows = $query->fetchAll(PDO::FETCH_COLUMN, 0);
+    $posts_to_remove = array_merge($rows, $posts_to_remove);
+    $query = $parsing_db->pdo->prepare("DELETE FROM `availability` WHERE `property_id` = $property_id");
+    $query->execute();
+    $rows = $query->fetchAll();
+    $query = $parsing_db->pdo->prepare("DELETE FROM `properties` WHERE `id` = $property_id");
+    $query->execute();
+    $rows = $query->fetchAll();
+}
+$posts_to_remove = array_unique($posts_to_remove);
+sort($posts_to_remove);
+file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', 'posts to remove - ' . count($posts_to_remove) . PHP_EOL, FILE_APPEND);
+
+foreach ($posts_to_remove as $post_to_remove) {
+    $result = wp_delete_post($post_to_remove, true);
+    if ($result !== false && $result !== NULL) {
+        file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', 'post remove result - ' . $result->ID . ' | ', FILE_APPEND);
+    } else {
+        file_put_contents(LOG_DIR . '/remove-posts-wrong-data.log', 'post remove result - FALSE or NULL | ', FILE_APPEND);
+    }
+}
+echo "Total removed post - " . $posts_to_remove . ' >>> ' . date("Y-m-d H:i:s") . " - End.." . PHP_EOL;
+
 // Apartment amenities
 $apartment_amenities = [];
 $total_rows = $parsing_db->count('properties', [['field' => "on_premise_features", 'compare' => "!=", 'value' => "''"]]);
@@ -327,25 +460,14 @@ for ($i = 0; $i <= $pages; $i++) {
                 $new_property_meta = [
                     'rz_apartment_uri' => $property->link,
                     'rz_booking_type' => 'Request booking',
-                    'rz_city' => $property->city,
                     'rz_listing_type' => '25769',
-                    'rz_location' => $property->longitude,
-                    'rz_location' => $property->latitude,
-                    'rz_location' => $np_rz_location__address,
-                    'rz_location__address' => $np_rz_location__address,
                     'rz_location__lat' => $property->latitude,
                     'rz_location__lng' => $property->longitude,
                     'rz_post_address1' => $np_rz_location__address_line1,
                     'rz_post_address2' => $np_rz_location__address_line2,
                     'rz_priority' => $rz_ranking,
-                    'rz_priority_selection' => 'normal',
-                    'rz_reservation_length_max' => '0',
-                    'rz_reservation_length_min' => '0',
                     'rz_state' => $property->state_cd,
                     'rz_status' => 'Now',
-                    'rz_street_line_1' => $np_rz_location__address_line1,
-                    'rz_street_line_2' => $np_rz_location__address_line2,
-                    'rz_zip' => $property->zip5_cd,
                     'rz_gallery' => $rz_gallery,
                     'rz_ranking' => $rz_ranking,
                     'rz_listing_region' => $region_slug
@@ -374,9 +496,9 @@ for ($i = 0; $i <= $pages; $i++) {
                 $availability_sqft = [];
                 $availability_posts = [];
                 foreach ($all_availability as $availability) {
-                    if ($main_post_insert_result && $main_post_insert_result != 0) {
+                    if ($main_post_insert_result && $main_post_insert_result !== 0) {
                         $unit_post_insert_result = wp_insert_post($post_data);
-                        if ($unit_post_insert_result && $unit_post_insert_result != 0) {
+                        if ($unit_post_insert_result && $unit_post_insert_result !== 0) {
                             $post_id = $unit_post_insert_result;
                             wp_set_post_terms($post_id, [$rz_region_id], 'rz_regions');
 
@@ -384,62 +506,56 @@ for ($i = 0; $i <= $pages; $i++) {
                             $rz_search = 0;
                             $availability_posts[] = $unit_post_insert_result;
 
-                            // echo ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | unit_post_insert_result - ' . $unit_post_insert_result;
-                            // file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | unit_post_insert_result - ' . $unit_post_insert_result . PHP_EOL, FILE_APPEND);
-
                             $new_property_meta = [];
 
-                            // Checking for range - end(explode
                             $availability_bathroom_cnt = $availability->bathroom_cnt;
-                            $exploded_bathroom_cnt = explode('–', $availability_bathroom_cnt);
-                            $bathroom_count = trim(preg_replace("/[a-zA-Z]/", "", end($exploded_bathroom_cnt)));
-                            $bath_count = ($bathroom_count == 0 || $bathroom_count == '') ? 0 : $bathroom_count;
-                            $availability_baths[] = $bath_count; // rz_bathrooms
+                            $bathroom_count = trim(preg_replace("/[a-zA-Z]/", "", $availability_bathroom_cnt));
+                            $bath_count = ($bathroom_count === 0 || $bathroom_count === '') ? 0 : $bathroom_count;
+                            $bath_count = str_replace(['-', '–', '—', '―'], '–', $bath_count);
+                            $bath_counts = explode('–', $bath_count);
+                            foreach ($bath_counts as $bath_cnt) {
+                                $availability_baths[] = intval(trim($bath_cnt)); // rz_bathrooms
+                            }
 
                             $availability_bedroom_cnt = $availability->bedroom_cnt;
-                            $exploded_bedroom_cnt = explode('–', $availability_bedroom_cnt);
-                            $bedroom_count = trim(preg_replace("/[a-zA-Z]/", "", end($exploded_bedroom_cnt)));
-                            $bed_count = ($bedroom_count == 0 || $bedroom_count == '') ? 0 : $bedroom_count;
-                            $availability_beds[] = $bed_count;
+                            $bedroom_count = trim(preg_replace("/[a-zA-Z]/", "", $availability_bedroom_cnt));
+                            $bed_count = ($bedroom_count === 0 || $bedroom_count === '') ? 0 : $bedroom_count;
+                            $bed_count = str_replace(['-', '–', '—', '―'], '–', $bed_count);
+                            $bed_counts = explode('–', $bed_count);
+                            foreach ($bed_counts as $bed_cnt) {
+                                $availability_beds[] = intval(trim($bed_cnt)); // rz_bedrooms
+                            }
 
                             $availability_home_size_sq_ft = $availability->home_size_sq_ft;
-                            $exploded_home_size_sq_ft = explode('–', $availability_home_size_sq_ft);
-                            $home_size_sq_ft = trim(preg_replace("/\D/", "", end($exploded_home_size_sq_ft)));
-                            $sqft = ($home_size_sq_ft == 0 || $home_size_sq_ft == '') ? 'n/d' : $home_size_sq_ft; // rz_sqft
-                            $availability_sqft[] = $sqft;
+                            $sqft = trim(preg_replace("/[a-zA-Z$,]/", "", $availability_home_size_sq_ft));
+                            $sqft = str_replace(['-', '–', '—', '―'], '–', $sqft);
+                            $sqft_counts = explode('–', $sqft);
+                            foreach ($sqft_counts as $sqft_count) {
+                                $availability_sqft[] = intval(trim($sqft_count)); // rz_sqft
+                            }
 
                             $availability_listing_price = $availability->listing_price;
-                            $exploded_listing_price = explode('–', $availability_listing_price);
-                            $listing_price = clearPrice(end($exploded_listing_price));
-                            if (intval($listing_price) != 0) $availability_prices[] = $listing_price;
+                            $availability_listing_price = trim(preg_replace("/[a-zA-Z$,]/", "", $availability_listing_price));
+                            $availability_listing_price = str_replace(['-', '–', '—', '―'], '–', $availability_listing_price);
+                            $listing_prices = explode('–', $availability_listing_price);
+                            foreach ($listing_prices as $listing_price) {
+                                if (intval($listing_price) !== 0) $availability_prices[] = $listing_price;
+                            }
 
                             $new_property_meta = [
                                 'rz_apartment_uri' => $property->link,
                                 'rz_bathrooms' => $bath_count,
-                                'rz_bed' => $bed_count,
                                 'rz_bedroom' => $bed_count,
                                 'rz_booking_type' => 'Request booking',
-                                'rz_city' => $property->city,
                                 'rz_listing_type' => '25769',
-                                'rz_location' => $property->longitude,
-                                'rz_location' => $property->latitude,
-                                'rz_location' => $np_rz_location__address,
-                                'rz_location__address' => $np_rz_location__address,
                                 'rz_location__lat' => $property->latitude,
                                 'rz_location__lng' => $property->longitude,
                                 'rz_post_address1' => $np_rz_location__address_line1,
                                 'rz_post_address2' => $np_rz_location__address_line2,
-                                'rz_price' => $listing_price,
+                                'rz_price' => $availability_listing_price,
                                 'rz_priority' => $rz_ranking,
-                                'rz_priority_selection' => 'normal',
-                                'rz_reservation_length_max' => '0',
-                                'rz_reservation_length_min' => '0',
                                 'rz_sqft' => $sqft,
-                                'rz_state' => $property->state_cd,
                                 'rz_status' => 'Now',
-                                'rz_street_line_1' => $np_rz_location__address_line1,
-                                'rz_street_line_2' => $np_rz_location__address_line2,
-                                'rz_zip' => $property->zip5_cd,
                                 'rz_gallery' => $rz_gallery,
                                 'rz_ranking' => $rz_ranking,
                                 'rz_listing_region' => $region_slug,
@@ -460,11 +576,13 @@ for ($i = 0; $i <= $pages; $i++) {
                                     }
                                 }
                             }
-                            if ($listing_price != 0) {
-                                $price_per_day = get_custom_price($post_id);
-                                if (intval($price_per_day) != 0) $availability_prices_per_day[] = $price_per_day;
-                                if (!add_post_meta($post_id, 'price_per_day', $price_per_day, true)) {
-                                    update_post_meta($post_id, 'price_per_day', $price_per_day);
+                            if (stripos($availability_listing_price, '–') === false) {
+                                if (intval($availability_listing_price) != 0) {
+                                    $price_per_day = get_custom_price($post_id);
+                                    if (intval($price_per_day) != 0) $availability_prices_per_day[] = $price_per_day;
+                                    if (!add_post_meta($post_id, 'price_per_day', $price_per_day, true)) {
+                                        update_post_meta($post_id, 'price_per_day', $price_per_day);
+                                    }
                                 }
                             }
 
@@ -501,7 +619,6 @@ for ($i = 0; $i <= $pages; $i++) {
                     'rz_price' => $availability_price,
                     'price_per_day' => $availability_price_per_day,
                     'rz_bathrooms' => $availability_bath,
-                    'rz_bed' => $availability_bed,
                     'rz_bedroom' => $availability_bed,
                     'rz_sqft' => $availability_sqft,
                     'rz_unit_type' => $rz_unit_type,
@@ -522,33 +639,31 @@ for ($i = 0; $i <= $pages; $i++) {
 
                 // file_put_contents(LOG_DIR . '/new-transfer-data.log', ' | rz_unit_type - ' . $rz_unit_type . ' | property address - ' . $property_address . ' | main_post_insert_result - ' . $main_post_insert_result . ' | property->id - ' . $property->id . PHP_EOL, FILE_APPEND);
 
-                if ($main_post_insert_result && $main_post_insert_result != 0) {
+                if ($main_post_insert_result && $main_post_insert_result !== 0) {
                     $new_property_meta = [];
-                    // Checking for range - end(explode
-                    $all_availability_bathroom_cnt = $all_availability[0]->bathroom_cnt;
-                    $exploded_availability_bathroom_cnt = explode('–', $all_availability_bathroom_cnt);
-                    $bathroom_count = trim(preg_replace("/[a-zA-Z]/", "", end($exploded_availability_bathroom_cnt)));
-                    $bath_count = ($bathroom_count == 0 || $bathroom_count == '') ? 0 : $bathroom_count; // rz_bathrooms
 
-                    $all_availability_bedroom_cnt = $all_availability[0]->bedroom_cnt;
-                    $exploded_availability_bedroom_cnt = explode('–', $all_availability_bedroom_cnt);
-                    $bedroom_count = trim(preg_replace("/[a-zA-Z]/", "", end($exploded_availability_bedroom_cnt)));
-                    $bed_count = ($bedroom_count == 0 || $bedroom_count == '') ? 0 : $bedroom_count; // rz_bed
+                    $availability_bathroom_cnt = $all_availability[0]->bathroom_cnt;
+                    $bathroom_count = trim(preg_replace("/[a-zA-Z]/", "", $availability_bathroom_cnt));
+                    $bath_count = ($bathroom_count === 0 || $bathroom_count === '') ? 0 : $bathroom_count;
+                    $bath_count = str_replace(['-', '–', '—', '―'], '–', $bath_count);
 
-                    $all_availability_home_size_sq_ft = $all_availability[0]->home_size_sq_ft;
-                    $exploded_availability_home_size_sq_ft = explode('–', $all_availability_home_size_sq_ft);
-                    $home_size_sq_ft = trim(preg_replace("/\D/", "", end($exploded_availability_home_size_sq_ft)));
-                    $sqft = ($home_size_sq_ft == 0 || $home_size_sq_ft == '') ? 'n/d' : $home_size_sq_ft; // rz_sqft
+                    $availability_bedroom_cnt = $all_availability[0]->bedroom_cnt;
+                    $bedroom_count = trim(preg_replace("/[a-zA-Z]/", "", $availability_bedroom_cnt));
+                    $bed_count = ($bedroom_count === 0 || $bedroom_count === '') ? 0 : $bedroom_count;
+                    $bed_count = str_replace(['-', '–', '—', '―'], '–', $bed_count);
 
-                    $all_availability_listing_price = $all_availability[0]->listing_price;
-                    $exploded_availability_listing_price = explode('–', $all_availability_listing_price);
-                    $listing_price = clearPrice(end($exploded_availability_listing_price));
+                    $availability_home_size_sq_ft = $all_availability[0]->home_size_sq_ft;
+                    $sqft = trim(preg_replace("/[a-zA-Z$,]/", "", $availability_home_size_sq_ft));
+                    $sqft = str_replace(['-', '–', '—', '―'], '–', $sqft);
+
+                    $availability_listing_price = $all_availability[0]->listing_price;
+                    $listing_price = trim(preg_replace("/[a-zA-Z$,]/", "", $availability_listing_price));
+                    $listing_price = str_replace(['-', '–', '—', '―'], '–', $listing_price);
 
                     $new_property_meta = [
                         'post_content' => $unit_description,
                         'rz_apartment_uri' => $property->link,
                         'rz_bathrooms' => $bath_count,
-                        'rz_bed' => $bed_count,
                         'rz_bedroom' => $bed_count,
                         'rz_price' => $listing_price,
                         'rz_sqft' => $sqft,
@@ -559,7 +674,7 @@ for ($i = 0; $i <= $pages; $i++) {
                     foreach ($new_property_meta as $key => $value) {
                         add_post_meta($main_post_insert_result, $key, $value, true) or update_post_meta($main_post_insert_result, $key, $value);
                     }
-                    if ($listing_price != 0) {
+                    if (intval($listing_price) !== 0) {
                         $price_per_day = get_custom_price($main_post_insert_result);
                         if (!add_post_meta($main_post_insert_result, 'price_per_day', $price_per_day, true)) {
                             update_post_meta($main_post_insert_result, 'price_per_day', $price_per_day);

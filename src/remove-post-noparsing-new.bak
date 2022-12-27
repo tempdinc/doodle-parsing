@@ -66,14 +66,12 @@ echo 'Total pages - ' . $pages . PHP_EOL;
 $total_removed_posts = 0;
 $removed_posts = 0;
 for ($i = 0; $i <= $pages; $i++) {
-    $start = $i * 100 - $removed_posts;
+    $start = $i * 100;
     $posts = $wp_db->getPostsRZListing($listing_type, $start, 100);
-    $removed_posts = 0;
     // echo 'Page number - ' . $i . PHP_EOL;
     foreach ($posts as $post) {
         if (!in_array($post->id, $existing_posts)) {
-            $removed_posts++;
-            wp_delete_post($post->id, true);
+            wp_delete_post($post->id);
             $total_removed_posts++;
         }
     }
