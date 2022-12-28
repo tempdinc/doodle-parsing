@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 use App\Classes\MySQL;
 
 require_once __DIR__ . '/bootstrap.php';
-// require_once(realpath('../../wp-load.php'));
+require_once(realpath('../../wp-load.php'));
 // Clear log files
 $f = fopen(LOG_DIR . '/transfer-postmeta.log', 'w');
 fclose($f);
@@ -22,6 +22,41 @@ $premium_to_vendor = array(1.8, 1.8, 1.7, 1.6, 1.5, 1.4, 1.3, 1.25, 1.2, 1.2, 1.
 
 $wp_db = new MySQL('wp', 'local');
 
+/*
+// NEW REGIONS START
+$terms = get_terms([
+    'taxonomy' => 'rz_regions',
+    'hide_empty' => false,
+]);
+
+$rz_regions = [];
+foreach ($terms as $term) {
+    $rz_regions[] = [
+        'term_id'   => $term->term_id,
+        'name'      => $term->name,
+        'slug'      => $term->slug
+    ];
+}
+$rz_full_cities = file_get_contents(__DIR__ . '/new-cities.json');
+$rz_full_cities = json_decode($rz_full_cities, true);
+$rz_full_regions = [];
+foreach ($rz_full_cities as $rz_full_city) {
+    $rz_regions_key = array_search($rz_full_city['region_slug'], array_column($rz_regions, 'slug'));
+    $term_id = $rz_regions[$rz_regions_key]['term_id'];
+    $term_name = $rz_regions[$rz_regions_key]['name'];
+    $term_slug = $rz_regions[$rz_regions_key]['slug'];
+    $rz_full_regions[] = [
+        'term_id'       => $term_id,
+        'city_name'     => $rz_full_city['city_name'],
+        'city_slug'     => $rz_full_city['city_slug'],
+        'region_name'   => $rz_full_city['region_name'],
+        'region_slug'   => $rz_full_city['region_slug']
+    ];
+}
+// NEW REGIONS END
+var_dump($rz_full_regions);
+exit();
+*/
 
 // Create table wp_units if not exists
 $query = $wp_db->pdo->prepare("SELECT * FROM information_schema.tables WHERE table_schema = 'wp_tempd'  AND table_name = 'wp_units' LIMIT 1;");
@@ -150,6 +185,10 @@ foreach ($post_data as $key => $value) {
     $check_query = $wp_db->pdo->prepare("SELECT count(*) FROM `wp_units` WHERE `post_id` = ? LIMIT 1");
     $check_query->execute([$key]);
     $is_duplicate = $check_query->fetchColumn();
+    $terms = get_the_terms($key, 'rz_regions');
+    $term = array_shift($terms);
+    $term_slug = $term->slug;
+    // exit();
     $rz_search = (isset($value['rz_search']) && $value['rz_search'] !== NULL) ? $value['rz_search'] : 0;
     $rz_ranking = (isset($value['rz_ranking']) && $value['rz_ranking'] !== NULL) ? $value['rz_ranking'] : 0;
     $value['rz_bedroom'] = str_replace(['-', '–', '—', '―'], '–', $value['rz_bedroom']);
@@ -218,7 +257,7 @@ foreach ($post_data as $key => $value) {
                 $value['rz_listing_type'],
                 floatval($value['rz_location__lng']),
                 floatval($value['rz_location__lat']),
-                trim($value['rz_listing_region']),
+                $term_slug,
                 trim($value['rz_unit_type']),
                 trim($value['rz_status']),
                 trim($value['rz_booking_type']),
@@ -248,7 +287,7 @@ foreach ($post_data as $key => $value) {
                 $value['rz_listing_type'],
                 floatval($value['rz_location__lng']),
                 floatval($value['rz_location__lat']),
-                trim($value['rz_listing_region']),
+                $term_slug,
                 trim($value['rz_unit_type']),
                 trim($value['rz_status']),
                 trim($value['rz_booking_type']),
@@ -267,7 +306,7 @@ foreach ($post_data as $key => $value) {
 }
 echo " >>> " . date("Y-m-d H:i:s") . " - End.." . PHP_EOL;
 file_put_contents(LOG_DIR . '/transfer-postmeta.log', '[' . date('Y-m-d H:i:s') . ']  END >>> ' . PHP_EOL, FILE_APPEND);
-
+/*
 function get_prices()
 {
     $prices['Furniture - base'] = array();
@@ -358,7 +397,7 @@ function get_prices()
 
     return $prices;
 }
-
+*/
 function calculate_price_per_night_max($rz_price, $bed_cnt = 1)
 {
     $prices = get_prices();
@@ -447,7 +486,7 @@ function calculate_prices_per_night($rz_price, $premium_to_vendor, $bed_cnt = 1)
     return $prices;
 }
 
-
+/*
 function calculate_price($rz_price, $bed_cnt = 1)
 {
     $prices = get_prices();
@@ -484,3 +523,4 @@ function calculate_price($rz_price, $bed_cnt = 1)
     $rz_price = floor($rz_price);
     return $rz_price;
 }
+*/
