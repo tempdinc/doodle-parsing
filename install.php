@@ -86,7 +86,7 @@ error_reporting(E_ALL);
       echo "Database NOT SELECTED" . PHP_EOL;
    }
 
-   $retval = mysqli_query( $sql, $conn );
+   $retval = mysqli_query( $conn, $sql );
    
    if (mysqli_query($conn, $sql)) {
       echo "Table `properties` created successfully | ";
@@ -113,7 +113,7 @@ error_reporting(E_ALL);
       echo "Database NOT SELECTED" . PHP_EOL;
    }
 
-   $retval = mysqli_query( $sql, $conn );
+   $retval = mysqli_query( $conn, $sql );
    
    if (mysqli_query($conn, $sql)) {
       echo "Table `availability` created successfully" . PHP_EOL;
